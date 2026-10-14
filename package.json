@@ -1,8 +1,15 @@
 {
   "name": "mercadopublico",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "SDK TypeScript para la API de Mercado Público (ChileCompra). En construcción.",
-  "keywords": ["mercadopublico", "chilecompra", "licitaciones", "chile", "sdk", "compras-publicas"],
+  "keywords": [
+    "mercadopublico",
+    "chilecompra",
+    "licitaciones",
+    "chile",
+    "sdk",
+    "compras-publicas"
+  ],
   "homepage": "https://github.com/keroke-ro/mercadopublico#readme",
   "repository": {
     "type": "git",
@@ -10,5 +17,8 @@
   },
   "license": "MIT",
   "author": "KeroKero (https://www.kerokero.cl)",
-  "files": ["README.md", "LICENSE"]
+  "files": [
+    "README.md",
+    "LICENSE"
+  ]
 }
