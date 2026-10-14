@@ -13,6 +13,7 @@ La API de Mercado Público falla seguido y de formas raras: rechaza con 10500 co
 | **Cuota local agotada** | No manda la consulta | Error `cuota_insuficiente`. Antes, eventos `cuota` al 80%, 95% y 100% |
 | **Timeout** (`timeoutMs`, 30 s) o corte de red | Reintenta. Cuenta como caída para el circuito | Eventos `reintento`; al final, error `red` |
 | **5xx** | Reintenta. Cuenta como caída | Error `servidor` |
+| **504** (corte del gateway a ~30 s, típico de una consulta amplia) | Reintenta una sola vez. No cuenta para el circuito, para no bloquear consultas que sí responden | Error `servidor` con `status: 504` y un mensaje que sugiere acotar |
 | **HTML de mantención** | Con status 5xx, igual que un 5xx. Con 200, no reintenta y cuenta como caída | Error `servidor` o `respuesta_invalida` |
 | **v2 con `success: "ERROR"`** (falla interna, vista con HTTP 500) | Igual que un 5xx; el mensaje de la API queda en el error | Error `servidor` |
 | **Error v1 con HTTP 200** (`{Codigo, Mensaje}`) | Lo clasifica por código y mensaje, no por status | `ticket_invalido`, `cuota_agotada` o `parametros` |

@@ -67,7 +67,7 @@ export { CIRCUITO, Circuito, Cuota, PRESUPUESTO_REINTENTOS, RITMO, Transporte, U
 export type * from "./modelo.js";
 export { cadenaPorDefecto, convertirMontos, conversorBancoCentral, conversorEncadenado, conversorMindicador, conversorParidadChileCompra, conversorPorDefecto, type Conversor, type OpcionesConversor, type Paridad } from "./monto.js";
 export { desdeOcds, leerOcds, urlOcds, type OpcionesOcds } from "./ocds.js";
-export { storeArchivo, storeMemoria, type Store } from "./store.js";
+export { cuotaArchivo, storeArchivo, storeMemoria, type CuotaArchivo, type Store } from "./store.js";
 export type { FuenteSync, ListadoSync, OpcionesSync, PlanSync, ResultadoSync } from "./sync.js";
 export * as codigos from "./v1/codigos.js";
 export type { EstadoFiltroLicitacion, EstadoFiltroOC } from "./v1/codigos.js";

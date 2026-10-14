@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // CLI: `npx mercadopublico <comando>`. Salida json, csv o tabla; datos personales ocultos salvo --incluir-personales.
 import { createReadStream, realpathSync } from "node:fs";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -18,9 +18,10 @@ import {
   conversorParidadChileCompra,
   leerOcds,
   ocultarPersonales,
+  cuotaArchivo,
   storeArchivo,
   urlOcds,
-  type EstadoCuota,
+  type CuotaArchivo,
   type Proceso,
 } from "./index.js";
 import { calibrar, decidir, precioSugerido, proximasCompras, rangoDePrecio, type Decision, type DecisionEquipo, type Perfil } from "./radar/index.js";
@@ -170,43 +171,6 @@ function escribir(io: IO, datos: unknown, formato: string) {
   io.stdout.write(formato === "csv" ? csv(filas) : tabla(filas, io.stdout.columns ?? 120));
 }
 
-const archivoCuota = (env: IO["env"]) => join(env.MERCADOPUBLICO_HOME ?? join(homedir(), ".mercadopublico"), "cuota.json");
-
-async function leerCuota(env: IO["env"]): Promise<EstadoCuota | undefined> {
-  try {
-    const c = JSON.parse(await readFile(archivoCuota(env), "utf8")) as EstadoCuota;
-    return typeof c.dia === "string" && Number.isInteger(c.usadas) ? { dia: c.dia, usadas: c.usadas } : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Suma lo gastado por este proceso a lo que haya en el archivo ahora (no lo que había al empezar), así dos CLI o la
- * CLI y scripts/contrato.ts no se pisan la cuenta. Escritura atómica (tmp + rename) para no dejar un JSON a medias.
- * Se llama después de cada consulta (con 1 s entre consultas, el costo no se nota) y al terminar: devuelve la nueva
- * base, así lo ya guardado no se suma dos veces y un `kill -9` pierde a lo más la consulta en vuelo.
- * ponytail: sin lock; dos procesos que terminan en el mismo milisegundo pueden perder lo de uno. Lock con `wx` si importa.
- */
-async function guardarCuota(env: IO["env"], c: Cuota, inicial: EstadoCuota | undefined): Promise<EstadoCuota | undefined> {
-  const ruta = archivoCuota(env);
-  const { dia, usadas } = c.toJSON();
-  const delta = usadas - (inicial?.dia === dia ? inicial.usadas : 0);
-  if (delta <= 0) return inicial;
-  try {
-    await mkdir(dirname(ruta), { recursive: true });
-    const ahora = await leerCuota(env);
-    const base = Math.max(ahora?.dia === dia ? ahora.usadas : 0, inicial?.dia === dia ? inicial.usadas : 0);
-    const tmp = `${ruta}.${process.pid}.tmp`;
-    await writeFile(tmp, JSON.stringify({ dia, usadas: base + delta }));
-    await rename(tmp, ruta);
-    return { dia, usadas };
-  } catch {
-    return inicial; // Sin cuenta persistente no se rompe el comando; se reintenta en el próximo guardado.
-  }
-}
-
-
 async function leerJson<T>(ruta: string, flag: string): Promise<T> {
   try {
     return JSON.parse(await readFile(ruta, "utf8")) as T;
@@ -297,8 +261,7 @@ function informe(r: ReturnType<typeof radar>, ruta: string, max: number): string
 
 export async function main(argv: string[], io: IO): Promise<number> {
   let mp: MercadoPublico | undefined;
-  let guardada: EstadoCuota | undefined;
-  let persistir: () => Promise<unknown> = async () => {};
+  let cuota: CuotaArchivo | undefined;
   try {
     const { values: o, positionals } = parseArgs({ args: argv, options: OPCIONES, allowPositionals: true });
     const [comando, arg, ...sobra] = positionals;
@@ -362,22 +325,17 @@ export async function main(argv: string[], io: IO): Promise<number> {
       return io.stdout.write(informe(r, ruta, entero(o.max, 10, "max"))), 0;
     }
 
-    guardada = await leerCuota(io.env);
-    if (comando === "cuota") return salir(new Cuota(undefined, guardada).toJSON());
+    cuota = await cuotaArchivo(join(io.env.MERCADOPUBLICO_HOME ?? join(homedir(), ".mercadopublico"), "cuota.json"));
+    if (comando === "cuota") return salir(new Cuota(undefined, cuota.estado).toJSON());
 
     const ticket = o.ticket ?? io.env.MP_TICKET;
     if (!ticket) throw new ErrorUso("Falta el ticket: usa --ticket o la variable de entorno MP_TICKET");
     const f = io.fetch;
-    let base = guardada;
-    let guardando: Promise<unknown> = Promise.resolve();
-    persistir = () => (guardando = guardando.then(async () => mp && (base = await guardarCuota(io.env, mp.cuota, base))));
     mp = new MercadoPublico({
       ticket,
       fetch: f,
-      alEvento: (e) => {
-        if (e.tipo === "consulta") void persistir();
-      },
-      cuota: guardada && { ...guardada }, // copia: Cuota la modifica y aquí hace falta la de partida
+      alEvento: cuota.alEvento,
+      cuota: cuota.estado,
       conversor: o["sin-conversion"] ? false : f && conversorEncadenado(conversorMindicador({ fetch: f }), conversorBancoCentral({ fetch: f }), conversorParidadChileCompra({ fetch: f })),
     });
 
@@ -464,7 +422,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
     // Ctrl-C en sync mientras planifica llega como "cancelada": también es 130, igual que durante ejecutar.
     return uso ? 2 : e instanceof MercadoPublicoError && e.tipo === "cancelada" ? 130 : 1;
   } finally {
-    if (mp) await persistir();
+    await cuota?.guardar();
   }
 }
 

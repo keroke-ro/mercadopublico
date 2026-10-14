@@ -161,11 +161,15 @@ function region(p: Proceso, regiones: number[], a: Ajustes): Evaluado {
     : { valor: 0, razon: `El comprador está en la región ${r}, fuera de las que atiendes.` };
 }
 
+/** Licitación con `VisibilidadMonto: 0`: el organismo decidió no publicar el monto estimado. */
+const montoOculto = (p: Proceso) => p.monto === null && (p.raw as { VisibilidadMonto?: unknown } | null)?.VisibilidadMonto === 0;
+const OCULTO = "El organismo no publica el monto estimado; factor neutro.";
+
 function monto(p: Proceso, min: number, max: number, a: Ajustes): Evaluado {
   if (min === 0 && max === Infinity) return { valor: a.neutro, razon: "El perfil no define rango de montos; factor neutro." };
   const x = p.monto?.clp ?? null;
   if (x === null)
-    return { valor: a.neutro, razon: p.monto ? `Monto en ${p.monto.moneda} sin convertir a CLP; factor neutro.` : "Monto desconocido; factor neutro." };
+    return { valor: a.neutro, razon: p.monto ? `Monto en ${p.monto.moneda} sin convertir a CLP; factor neutro.` : montoOculto(p) ? OCULTO : "Monto desconocido; factor neutro." };
   if (x >= min && x <= max) return { valor: 1, razon: `Monto ${clp(x)} dentro de tu rango.` };
   // f = max(0, 1 − |log10(x / borde)| / decadasMonto)
   const borde = x < min ? min : max;
@@ -373,6 +377,9 @@ export function decidir(procesos: Proceso[], perfil: Perfil, opciones: Omit<Opci
         : accion === "descartar"
           ? enContra.slice(0, 2).map((f) => f.razon)
           : [aFavor[0]!.razon, ...(enContra[0] !== aFavor[0] ? [`Ojo: ${enContra[0]!.razon}`] : [])];
+    // Postular o revisar sin saber el monto es una decisión distinta: se dice aunque no esté entre los factores elegidos.
+    if (accion !== "descartar" && o.factores.some((f) => f.nombre === "monto" && f.peso > 0 && f.razon === OCULTO) && !porque.some((x) => x.endsWith(OCULTO)))
+      porque.push(`Ojo: ${OCULTO}`);
     return { ...o, accion, turno: null, porque };
   });
 

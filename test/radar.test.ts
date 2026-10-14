@@ -222,6 +222,18 @@ describe("decidir", () => {
     expect(ds[2]!.turno).toBeNull();
   });
 
+  it("avisa cuando el organismo no publica el monto (VisibilidadMonto 0)", () => {
+    const oculto = { ...proceso({ codigo: "oculto", monto: null }), raw: { VisibilidadMonto: 0 } };
+    const conMonto = { ...perfil, pesos: { rubro: 3, region: 1, diasAlCierre: 1, monto: 1 }, montoMin: 1, montoMax: 10 };
+    const [d] = decidir([oculto], conMonto, { ahora: AHORA });
+    expect(factor(d, "monto").razon).toBe("El organismo no publica el monto estimado; factor neutro.");
+    expect(d!.porque.at(-1)).toBe("Ojo: El organismo no publica el monto estimado; factor neutro.");
+    expect(new Set(d!.porque).size).toBe(d!.porque.length);
+    // Sin peso de monto, o con el monto solo desconocido, no se agrega nada.
+    expect(decidir([oculto], perfil, { ahora: AHORA })[0]!.porque.join()).not.toMatch(/monto/);
+    expect(factor(decidir([proceso({ monto: null })], conMonto, { ahora: AHORA })[0], "monto").razon).toBe("Monto desconocido; factor neutro.");
+  });
+
   it("vetos y palabras excluidas descartan aunque el puntaje sea alto", () => {
     const p = { ...proceso({ codigo: "x", region: 5 }), nombre: "Instalación de equipos" };
     const [v] = decidir([p], { ...perfil, pesos: { rubro: 1 }, vetos: [{ factor: "region", minimo: 1 }] }, { ahora: AHORA });

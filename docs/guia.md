@@ -30,26 +30,21 @@ const mp = new MercadoPublico({ ticket: process.env.MP_TICKET! });
 
 ### La cuota entre ejecuciones
 
-`mp.cuota` cuenta lo que gastó este proceso. Para que la cuenta sobreviva, guárdala y pásala de vuelta. Al guardar, suma lo que gastaste a lo que diga el archivo en ese momento, en vez de sobrescribirlo: así otro proceso con el mismo ticket no pierde su parte.
+`mp.cuota` cuenta lo que gastó este proceso. Para que la cuenta sobreviva, y que no se pierda si el script se cae, usa `cuotaArchivo`. Lee el archivo al abrir y guarda tras cada consulta. Al guardar, suma lo gastado a lo que diga el archivo en ese momento, en vez de sobrescribirlo: así otro proceso con el mismo ticket no pierde su parte. Es lo mismo que usa la CLI.
 
 ```ts
-import { readFile, writeFile } from "node:fs/promises";
-import { MercadoPublico, type EstadoCuota } from "mercadopublico";
+import { MercadoPublico, cuotaArchivo } from "mercadopublico";
 
-const leer = async () => JSON.parse(await readFile("cuota.json", "utf8").catch(() => "null")) as EstadoCuota | null;
-
-const inicial = await leer();
-// Una copia: el cliente actualiza el objeto que le pasas.
-const mp = new MercadoPublico({ ticket: process.env.MP_TICKET!, cuota: inicial ? { ...inicial } : undefined });
-
-// … tus consultas …
-
-const { dia, usadas } = mp.cuota.toJSON();
-const antes = inicial?.dia === dia ? inicial.usadas : 0;
-const ahora = await leer(); // otro proceso pudo sumar mientras tanto
-const base = Math.max(ahora?.dia === dia ? ahora.usadas : 0, antes);
-await writeFile("cuota.json", JSON.stringify({ dia, usadas: base + usadas - antes }));
+const archivo = await cuotaArchivo("cuota.json"); // la de la CLI: ~/.mercadopublico/cuota.json
+const mp = new MercadoPublico({ ticket: process.env.MP_TICKET!, cuota: archivo.estado, alEvento: archivo.alEvento });
+try {
+  // … tus consultas …
+} finally {
+  await archivo.guardar(); // espera la última escritura
+}
 ```
+
+Si ya tienes tu propio `alEvento`, llama a `archivo.alEvento(e)` desde él. Solo funciona en Node, Bun y Deno.
 
 Si `dia` ya no es hoy en Santiago, la cuenta parte de cero sola. La CLI hace lo mismo con `~/.mercadopublico/cuota.json`.
 

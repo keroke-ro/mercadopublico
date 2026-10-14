@@ -23,6 +23,7 @@ test("exportaciones de mercadopublico", () => {
     "conversorParidadChileCompra",
     "conversorPorDefecto",
     "convertirMontos",
+    "cuotaArchivo",
     "desdeOcds",
     "diaSantiago",
     "formatearRut",

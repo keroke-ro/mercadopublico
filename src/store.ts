@@ -1,3 +1,6 @@
+import type { AlEvento } from "./eventos.js";
+import { diaSantiago } from "./fecha.js";
+import type { EstadoCuota } from "./http.js";
 import type { Proceso } from "./modelo.js";
 
 /** Dónde deja `sync` los procesos. Implementa esto para usar otra base (Postgres viene en v1.x). */
@@ -188,4 +191,65 @@ async function leer(fs: Fs, ruta: string): Promise<Datos> {
   const aparte = `${ruta}.corrupto-${new Date().toISOString().replace(/[:.]/g, "-")}`;
   await fs.rename(ruta, aparte);
   throw new Error(`${ruta} está dañado (no es un store válido); se movió a ${aparte} para no perderlo. Revísalo, o vuelve a sincronizar desde cero.`);
+}
+
+export interface CuotaArchivo {
+  /** Lo que decía el archivo al abrirlo; pásalo como `cuota` al cliente. `undefined` si no existía o estaba dañado. */
+  estado: EstadoCuota | undefined;
+  /** Pásalo como `alEvento` (o llámalo desde el tuyo): guarda tras cada consulta, así un crash no pierde la cuenta. */
+  alEvento: AlEvento;
+  /** Espera a que termine la última escritura. Llámalo antes de salir. */
+  guardar(): Promise<void>;
+}
+
+/**
+ * Cuota del día compartida en un archivo JSON `{ dia, usadas }`, como la de la CLI. Tras cada consulta suma lo gastado
+ * a lo que diga el archivo en ese momento (no lo que decía al abrirlo), así dos procesos con el mismo ticket no se
+ * pisan la cuenta. Escritura atómica (tmp + rename). Si no se puede escribir, no falla: reintenta en la siguiente.
+ * ponytail: sin lock; dos procesos que escriben en el mismo milisegundo pueden perder lo de uno. Lock con `wx` si importa.
+ * Solo Node/Bun/Deno: importa node:fs al abrir.
+ *
+ * ```ts
+ * const archivo = await cuotaArchivo("cuota.json");
+ * const mp = new MercadoPublico({ ticket, cuota: archivo.estado, alEvento: archivo.alEvento });
+ * try { … } finally { await archivo.guardar(); }
+ * ```
+ */
+export async function cuotaArchivo(ruta: string): Promise<CuotaArchivo> {
+  const fs = await import("node:fs/promises");
+  const { dirname } = await import("node:path");
+  const leer = async (): Promise<EstadoCuota | undefined> => {
+    try {
+      const c = JSON.parse(await fs.readFile(ruta, "utf8")) as EstadoCuota;
+      return typeof c.dia === "string" && Number.isInteger(c.usadas) ? { dia: c.dia, usadas: c.usadas } : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+  let sinGuardar = 0;
+  let cola = Promise.resolve();
+  const escribir = async () => {
+    const n = sinGuardar;
+    if (n === 0) return;
+    sinGuardar = 0;
+    try {
+      const dia = diaSantiago();
+      const ahora = await leer();
+      await fs.mkdir(dirname(ruta), { recursive: true });
+      const tmp = `${ruta}.${process.pid}.tmp`;
+      await fs.writeFile(tmp, JSON.stringify({ dia, usadas: (ahora?.dia === dia ? ahora.usadas : 0) + n }));
+      await fs.rename(tmp, ruta);
+    } catch {
+      sinGuardar += n; // queda para la próxima
+    }
+  };
+  return {
+    estado: await leer(),
+    alEvento: (e) => {
+      if (e.tipo !== "consulta") return;
+      sinGuardar++;
+      cola = cola.then(escribir);
+    },
+    guardar: () => (cola = cola.then(escribir)),
+  };
 }
