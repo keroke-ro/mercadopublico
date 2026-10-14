@@ -3,6 +3,10 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
+
+// Exhaustivos (un corte en cada consulta y en cada escritura): con la CPU ocupada (CI, Stryker) no alcanzan los 5 s por
+// defecto, y un test que se pasa del tiempo sigue corriendo y ensucia al siguiente.
+vi.setConfig({ testTimeout: 60_000 });
 import { MercadoPublico, storeArchivo, storeMemoria, type Store } from "../src/index.js";
 
 /** Rompe el rename n° `en` del store en archivo: antes (no se escribió) o después (se escribió pero el proceso "muere"). */

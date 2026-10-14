@@ -152,4 +152,4 @@ dist
 node_modules
 .mercadopublico
 reports
-.stryker-tmp
+.stryker-tmp*

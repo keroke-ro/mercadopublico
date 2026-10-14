@@ -2,7 +2,7 @@
 
 ## Setup
 
-Node 20 o superior (22.6+ para los scripts de contrato).
+Node 20 o superior (22.6+ para los scripts que corren con `--experimental-strip-types`).
 
 ```sh
 git clone https://github.com/keroke-ro/mercadopublico.git
@@ -13,7 +13,19 @@ npm run typecheck
 npm run build       # dist/ con tsup (ESM, CJS y tipos)
 ```
 
-Para probar contra la API real necesitas tu propio ticket en `MP_TICKET`. Ver [docs/contrato.md](docs/contrato.md).
+| Script | Qué hace | ¿Llama a la API? |
+|---|---|---|
+| `npm test` | Unitarios, propiedades, corpus con snapshots, caos y superficie pública | No |
+| `npm run test:tipos` | Tests de tipos (`test/**/*.test-d.ts`) | No |
+| `npm run cobertura` | Tests con cobertura; falla bajo los umbrales de `vitest.config.ts` | No |
+| `npm run paquete` | Build, publint, attw y el tarball importado desde Node ESM/CJS, el bin, Bun, Deno y un entorno edge | No |
+| `npm run mutacion` | Stryker sobre http, sync, personales, monto, fecha y util. Lento | No |
+| `npm run contrato` | Compara la forma de la API real con los fixtures | Sí, 13 a 39 |
+| `npm run fixtures:grabar` | Graba los fixtures `.real.json` del contrato | Sí, igual |
+| `npm run smoke` | El paquete construido contra la API real (antes, `npm run build`) | Sí, 30 o menos |
+| `node --experimental-strip-types scripts/muestras.ts` | Agranda el corpus de muestras reales | Sí, 120 o menos en total |
+
+Para lo que llama a la API necesitas tu propio ticket en `MP_TICKET` (o en un `.env`). Qué corre en cada PR y qué una vez por semana o por noche, en [docs/testing.md](docs/testing.md).
 
 ## Cambios
 
@@ -23,7 +35,10 @@ Todo PR que cambie lo que se publica lleva un changeset:
 npx changeset
 ```
 
-Elige el tipo de versión (ver [Versiones](#versiones)) y escribe en una o dos líneas qué cambia para quien usa la librería. El CI corre typecheck, tests y build en Node 20, 22 y 24.
+Elige el tipo de versión (ver [Versiones](#versiones)) y escribe en una o dos líneas qué cambia para quien usa la librería. El CI corre typecheck, tests y build en Node 20, 22 y 24, y además cobertura, tests de tipos y el paquete en Node, Bun y Deno.
+
+- **Superficie pública:** si agregas, quitas o renombras un export de `mercadopublico` o `mercadopublico/radar`, actualiza la lista de `test/paquete/superficie.test.ts` en el mismo PR. Ese test existe para que ningún export cambie sin que alguien lo decida: quitar o renombrar uno rompe compatibilidad (ver [Versiones](#versiones)). Si cambia la forma de un tipo público, ajusta `test/tipos.test-d.ts`.
+- **Snapshots del corpus:** si cambias un parser y cambia lo que sale de una muestra real, regenera con `npx vitest run test/muestras.test.ts -u` y revisa el diff de `test/__snapshots__/muestras` antes de subirlo. Un diff que no esperabas es un bug, no un snapshot viejo.
 
 ## Reglas
 
@@ -31,6 +46,7 @@ Elige el tipo de versión (ver [Versiones](#versiones)) y escribe en una o dos l
 - **Parsers tolerantes.** Un parser nunca lanza por un campo raro: lo que no entiende queda en `null` y en `raw`. La API cambia sin avisar.
 - **Las correcciones a la documentación oficial van en `src/v1/codigos.ts`**, con un comentario que diga qué fuente dice qué, y un test en `test/codigos.test.ts`. En ningún otro lugar.
 - **Nunca hagas commit de datos personales ni de tickets.** Los fixtures grabados se revisan a mano antes de subirlos (ver [docs/contrato.md](docs/contrato.md#grabar-fixtures-reales)).
+- **Nunca hagas commit de respuestas crudas de la API.** Todo lo que entra a `test/fixtures` pasa antes por la anonimización de `scripts/contrato.ts` (campos de funcionarios por nombre de clave, y correos y teléfonos en texto libre) o de `scripts/muestras.ts` (además, proveedores persona natural con RUT bajo 50 millones y nombres después de rótulos como "contacto" o "Sra."; reglas completas en [docs/testing.md](docs/testing.md#reglas-para-anonimizar)). Las reglas no atrapan todo: revisa el diff a mano y agrega a `ocultar.txt` lo que se escape. El caché crudo de `scripts/muestras.ts` (`$MUESTRAS_CACHE`) vive fuera del repo; bórralo al terminar.
 - **Lo que no esté verificado contra la API real se marca como tal**, en el código y en [docs/api-notes.md](docs/api-notes.md).
 
 ## Versiones

@@ -59,6 +59,20 @@ await mp.sync.ejecutar(plan);
 
 Detalle en [docs/sync.md](docs/sync.md).
 
+## Resiliencia
+
+La API falla seguido: rechaza con 10500 incluso consultas seriales (3 de cada 11 con 1 s de pausa) y a veces se cae entera. El SDK alarga la pausa sola ante cada 10500, pone un tope a los reintentos, deja de consultar una fuente caída por 60 s (circuit breaker) y acepta un `signal` en cada método. Un sync cortado en cualquier punto se reanuda sin huecos.
+
+```ts
+const mp = new MercadoPublico({
+  ticket: process.env.MP_TICKET!,
+  alEvento: (e) => console.error(JSON.stringify(e)), // consultas, reintentos, circuito, cuota, avisos de cambios en la API
+});
+mp.salud(); // { v1: { estado: "cerrado", fallas: 0, intervaloMs: 1000 }, v2: { … }, … }
+```
+
+Qué pasa en cada falla, en [docs/resiliencia.md](docs/resiliencia.md).
+
 ## Datos personales
 
 La v1 trae nombre, RUT, correo y teléfono de funcionarios (`RutUsuario`, `NombreUsuario`, `EmailResponsablePago`, `FonoResponsableContrato`, etc.). El SDK los separa en `proceso.personales`, y:
@@ -95,19 +109,25 @@ Salida en tabla si es una terminal y JSON si no; `--formato json|csv|tabla` para
 - [Sync](docs/sync.md): plan, costo en consultas, cursores y stores.
 - [CLI](docs/cli.md)
 - [OCDS](docs/ocds.md): el histórico de datos abiertos, en streaming.
-- [Radar](docs/radar.md): `mercadopublico/radar`, priorizar oportunidades y rangos de precio.
+- [Radar](docs/radar.md): `mercadopublico/radar` y `mercadopublico radar`: qué postular primero, a qué precio, contra quién y qué viene.
+- [Resiliencia](docs/resiliencia.md): qué hace el SDK cuando la API falla, eventos y `mp.salud()`.
+- [Testing](docs/testing.md): qué se prueba, dónde corre y cuántas consultas reales gasta.
 - [Contrato nocturno](docs/contrato.md)
 - [Notas de la API](docs/api-notes.md): lo que dice cada fuente oficial y dónde se contradicen.
+
+## Calidad
+
+Cada PR corre, en Node 20, 22 y 24, typecheck, tests unitarios, propiedades con fast-check, un corpus de 59 respuestas reales anonimizadas con snapshots y pruebas de caos contra un servidor local; además, cobertura con umbrales y el paquete tal como se publica, importado desde Node, Bun, Deno y un entorno tipo edge. Cada semana corren la prueba de mutación y un smoke contra la API real; cada noche, el [contrato](docs/contrato.md). Detalle en [docs/testing.md](docs/testing.md).
 
 ## Estado
 
 Versión 0.x: la API pública todavía puede cambiar entre versiones menores (ver [CONTRIBUTING.md](CONTRIBUTING.md#versiones)).
 
-Todavía no se ha llamado a la API con un ticket real. Los fixtures de los tests están reconstruidos desde la documentación oficial y llevan la marca `"_fixture": "reconstruido…"`; se reemplazan con respuestas reales usando `npm run fixtures:grabar` (ver [docs/contrato.md](docs/contrato.md)). Hasta entonces, estas dudas siguen abiertas (detalle en [docs/api-notes.md](docs/api-notes.md)):
+Probado con un ticket real desde el 2026-10-13: la v1 tiene fixtures grabados de la API (`test/fixtures/v1/*.real.json`) y un corpus de respuestas reales anonimizadas (ver [docs/testing.md](docs/testing.md#corpus-real-y-snapshots)). Los fixtures de la v2 y de OCDS siguen reconstruidos desde la documentación oficial y llevan la marca `"_fixture": "reconstruido…"`. Estas dudas siguen abiertas (detalle en [docs/api-notes.md](docs/api-notes.md)):
 
 - En qué zona horaria se reinicia la cuota (el SDK supone medianoche de Santiago) y si v1 y v2 comparten contador.
 - Si el servidor acepta la grafía correcta de dos filtros de estado de OC que la documentación escribe con errata (`recepcionaceptadacialmente`, `recepecionconformeincompleta`). El SDK manda la de la documentación.
-- Detalles de forma: la ruta de OC (`ordenesdecompra.json` o `OrdenCompra.json`), si `Publico` en las rutas de Empresas distingue mayúsculas, si la lista viene en `listaEmpresas`, si el filtro `region` de la v2 va separado por comas o repetido, y con qué status HTTP llega el error 10300.
+- Detalles de forma: si `Publico` en las rutas de Empresas distingue mayúsculas, si el filtro `region` de la v2 va separado por comas o repetido, y con qué status HTTP llega el error 10300.
 - Si las fechas OCDS con sufijo `Z` son UTC reales o la hora de Santiago etiquetada como UTC. El SDK las lee como hora de Santiago.
 - En Compra Ágil, `codigo_orden_compra` viene en `null` aunque la OC exista (el SDK usa `id_orden_compra`), y `seleccion.proveedor_seleccionado` está documentado pero no confirmado.
 - mindicador.cl no respondía al investigar; si falla, el conversor usa los valores diarios del Banco Central (sus páginas "Ver serie", no una API) y, si eso también falla, el promedio mensual oficial de ChileCompra.

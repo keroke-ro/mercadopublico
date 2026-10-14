@@ -1,6 +1,6 @@
 # Guía
 
-[Inicio](index.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md)
+[Inicio](index.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 ## Cliente
 
@@ -15,31 +15,57 @@ const mp = new MercadoPublico({ ticket: process.env.MP_TICKET! });
 | `ticket` | (obligatorio) | Tu ticket de la API. Va en la URL en la v1 y en un header en la v2. |
 | `conversor` | mindicador.cl; si falla, el Banco Central; y si no, la paridad mensual de ChileCompra | Cómo pasar UF, UTM, USD y EUR a pesos. `false` no convierte. Ver [Modelo](modelo.md#conversores). |
 | `reintentos` | `4` | Reintentos ante 10500, 5xx o corte de red. |
-| `intervaloMs` | `1000` | Pausa mínima entre consultas. La API da 10500 de forma intermitente aun con consultas seriales; con pausa pasa menos (medido: 4 de 10 sin pausa, 3 de 11 con 1 s). |
-| `esperaBaseMs` | `1000` | Base del backoff: cada espera es al azar entre la mitad y el total de `esperaBaseMs · 2^intento`. |
+| `intervaloMs` | `1000` | Mínimo entre el inicio de una consulta y la siguiente a la misma API. La API da 10500 de forma intermitente aun con consultas seriales; con pausa pasa menos (medido: 4 de 10 sin pausa, 3 de 11 con 1 s). `0` desactiva la pausa y el ritmo adaptativo. |
+| `ritmo` | `RITMO`: `{ factor: 2, maximoMs: 8000, exitos: 20, pasoMs: 250 }` | Ritmo adaptativo: ante un 10500 la pausa se multiplica por `factor` hasta `maximoMs`; tras `exitos` consultas seguidas sin 10500 baja `pasoMs` hasta `intervaloMs`. Puedes pasar solo lo que cambias. |
+| `esperaBaseMs` | `1000` | Base del backoff: la espera antes del reintento `n` es al azar entre la mitad y el total de `esperaBaseMs · 2^(n−1)` (1, 2, 4 y 8 s). |
+| `presupuestoReintentos` | `0.3` | Los reintentos no pasan de esta fracción de los últimos 100 intentos. Sin presupuesto, se entrega el error sin esperar. |
+| `circuito` | `CIRCUITO`: `{ umbral: 5, enfriamientoMs: 60000 }` | Circuit breaker de v1 y v2: tras `umbral` caídas seguidas (5xx, red, respuesta inválida), la fuente falla al tiro con `circuito_abierto` durante `enfriamientoMs`. |
 | `timeoutMs` | `30000` | Timeout por consulta. |
 | `limiteDiario` | `10000` | Consultas por día del ticket. |
 | `cuota` | — | `{ dia, usadas }` guardado de una ejecución anterior del mismo día. |
 | `fetch` | `globalThis.fetch` | Para inyectar un `fetch` propio (proxy, tests). |
+| `alEvento` | — | `(e: Evento) => void`. Recibe lo que el SDK observa de sí mismo: consultas, reintentos, ritmo, circuito, cuota, conversiones y avisos de cambios en la API. Ver [Resiliencia](resiliencia.md#observar-con-alevento). |
+
+`mp.salud()` dice, sin gastar consultas, el estado del circuito, las caídas seguidas y la pausa actual de cada fuente (v1, v2 y los conversores de montos). Ver [Resiliencia](resiliencia.md#salud-mpsalud).
 
 ### La cuota entre ejecuciones
 
-`mp.cuota` cuenta lo que gastó este proceso. Para que la cuenta sobreviva, guárdala y pásala de vuelta:
+`mp.cuota` cuenta lo que gastó este proceso. Para que la cuenta sobreviva, guárdala y pásala de vuelta. Al guardar, suma lo que gastaste a lo que diga el archivo en ese momento, en vez de sobrescribirlo: así otro proceso con el mismo ticket no pierde su parte.
 
 ```ts
 import { readFile, writeFile } from "node:fs/promises";
 import { MercadoPublico, type EstadoCuota } from "mercadopublico";
 
-const guardada = JSON.parse(await readFile("cuota.json", "utf8").catch(() => "null")) as EstadoCuota | null;
-const mp = new MercadoPublico({ ticket: process.env.MP_TICKET!, cuota: guardada ?? undefined });
+const leer = async () => JSON.parse(await readFile("cuota.json", "utf8").catch(() => "null")) as EstadoCuota | null;
+
+const inicial = await leer();
+// Una copia: el cliente actualiza el objeto que le pasas.
+const mp = new MercadoPublico({ ticket: process.env.MP_TICKET!, cuota: inicial ? { ...inicial } : undefined });
 
 // … tus consultas …
 
 const { dia, usadas } = mp.cuota.toJSON();
-await writeFile("cuota.json", JSON.stringify({ dia, usadas }));
+const antes = inicial?.dia === dia ? inicial.usadas : 0;
+const ahora = await leer(); // otro proceso pudo sumar mientras tanto
+const base = Math.max(ahora?.dia === dia ? ahora.usadas : 0, antes);
+await writeFile("cuota.json", JSON.stringify({ dia, usadas: base + usadas - antes }));
 ```
 
-Si `dia` ya no es hoy en Santiago, la cuenta parte de cero sola.
+Si `dia` ya no es hoy en Santiago, la cuenta parte de cero sola. La CLI hace lo mismo con `~/.mercadopublico/cuota.json`.
+
+## Validación y cancelación
+
+Todo método valida sus parámetros antes de consultar: un día que no existe (`"2026-02-30"`), un código vacío o con espacios, un RUT mal formado, un estado desconocido o filtros de Compra Ágil fuera de rango fallan con `parametros` sin gastar ninguna consulta.
+
+Todo método que consulta la API acepta `signal` en su último argumento. Al dispararse, rechaza con `cancelada`:
+
+```ts
+const lic = await mp.licitaciones.porCodigo("1509-5-L114", { signal: AbortSignal.timeout(10_000) });
+const ocs = await mp.ordenes.porOrganismo("7248", { dia: "2026-10-01", signal: AbortSignal.timeout(10_000) });
+for await (const ca of mp.compraAgil.listar({ q: "papel" }, { signal: AbortSignal.timeout(60_000) })) console.log(ca.codigo);
+```
+
+Detalle en [Resiliencia](resiliencia.md#cancelar-consultas).
 
 ## Licitaciones
 
@@ -99,9 +125,9 @@ ca?.cotizaciones; // [{ proveedor, monto, seleccionada, productos }]
 ca?.ordenCompra; // código o id de la OC; ver nota abajo
 ```
 
-Filtros (`FiltrosCompraAgil`): `estado`, `region` (1 a 16), `publicadoDesde`/`publicadoHasta`, `cambioDesde`/`cambioHasta` o `ttlCambioMs`, `q` o `id`, `ordenarPor`, `tamanoPagina` (1 a 50, por defecto 50) y `rutOrganismo`. Las fechas aceptan `Date` o ISO; sin offset se leen como hora de Santiago.
+Filtros (`FiltrosCompraAgil`): `estado`, `region` (1 a 16), `publicadoDesde`/`publicadoHasta`, `cambioDesde`/`cambioHasta` o `ttlCambioMs`, `q` o `id`, `ordenarPor`, `tamanoPagina` (10 a 50, por defecto 50: la API real rechaza menos de 10) y `rutOrganismo`. Las fechas aceptan `Date` o ISO; sin offset se leen como hora de Santiago.
 
-- Las combinaciones que la API rechaza (`q` con `id`, `ttlCambioMs` con `cambioDesde`) fallan en local con `parametros`, sin gastar consulta.
+- Las combinaciones que la API rechaza (`q` con `id`, `ttlCambioMs` con `cambioDesde`) y los valores fuera de rango (`region`, `tamanoPagina`, fechas inválidas, estados desconocidos) fallan en local con `parametros`, sin gastar consulta.
 - `rutOrganismo` no existe en la API: se filtra después de bajar cada página y no ahorra consultas. Combínalo con `region`.
 - `codigo_orden_compra` llega en `null` aunque la OC exista. `ordenCompra` usa `id_orden_compra` cuando falta el código.
 - `detalle` devuelve `null` si el código no existe, igual que `porCodigo` en la v1.
@@ -142,9 +168,11 @@ try {
 | `cuota_insuficiente` | El SDK se negó antes de gastar: la operación no cabe en lo que queda hoy | No |
 | `simultaneas` | Código 10500: dos consultas a la vez | Sí |
 | `no_encontrado` | 404 | No |
-| `parametros` | 400 o 422, o filtros inválidos detectados en local | No |
-| `servidor` | 5xx | Sí |
+| `parametros` | 400 o 422, o parámetros inválidos detectados en local (sin gastar consulta) | No |
+| `servidor` | 5xx, también la v2 con `success: "ERROR"` | Sí |
 | `red` | Corte de red o timeout | Sí |
-| `respuesta_invalida` | La API respondió algo que no es JSON o no se entiende | No |
+| `respuesta_invalida` | La API respondió algo que no es JSON o no se entiende (por ejemplo, HTML de mantención con 200) | No |
+| `circuito_abierto` | La fuente viene cayéndose (5 caídas seguidas): el SDK no consulta hasta que pase el enfriamiento | No; prueba de nuevo después de la hora que dice el mensaje |
+| `cancelada` | Se disparó tu `signal` | No |
 
-Los reintentos usan backoff exponencial con jitter y cada intento cuenta en la cuota. Un error de la v1 se detecta por el cuerpo (`{Codigo, Mensaje}`) aunque llegue con HTTP 200.
+Los reintentos usan backoff exponencial con jitter, con un tope de reintentos sobre los últimos 100 intentos, y cada intento cuenta en la cuota. Un error de la v1 se detecta por el cuerpo (`{Codigo, Mensaje}`) aunque llegue con HTTP 200. Qué pasa en cada falla, en [Resiliencia](resiliencia.md).

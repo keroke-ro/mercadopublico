@@ -1,6 +1,6 @@
 # OCDS
 
-[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [Radar](radar.md) · [Contrato](contrato.md)
+[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 ChileCompra publica el histórico de licitaciones y órdenes de compra en formato [OCDS](https://standard.open-contracting.org/). El espejo de Open Contracting Partnership lo entrega como `.jsonl.gz`, una compiled release por línea: 2026 pesa unos 186 MB y el archivo completo unos 2,5 GB. `leerOcds` lo lee en streaming y entrega `Proceso`, el mismo modelo de la API. No pide ticket ni gasta cuota.
 

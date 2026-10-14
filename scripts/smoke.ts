@@ -2,8 +2,8 @@
 //   npm run build && MP_TICKET=… node --experimental-strip-types scripts/smoke.ts
 // Presupuesto: ≤ 30 consultas (limiteDiario las corta). Imprime un resumen markdown. Sale con 1 solo si algo
 // se rompió de verdad; la v2 caída, la red o los reintentos agotados quedan como "degradado".
-import { mkdtempSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
 const PRESUPUESTO = 30;
@@ -90,6 +90,7 @@ await paso(`sync de órdenes del ${domingo} (sin detalle) a storeArchivo`, async
   const r = await mp.sync.ejecutar(plan);
   let guardados = 0;
   for await (const _ of store.todos()) guardados++;
+  await store.cerrar?.();
   afirmar(guardados === r.nuevos + r.actualizados, `guardó ${guardados} pero informó ${r.nuevos + r.actualizados}`);
   afirmar((await store.cursor("ordenes")) === domingo, "el cursor no avanzó");
   if (r.errores.length) return { aviso: `${r.errores.length} errores: ${r.errores[0]!.error}` };
@@ -107,7 +108,22 @@ await paso(`conversorPorDefecto UF y USD del ${habil}`, async () => {
   return notas.join("; ");
 });
 
+/** Suma lo gastado al archivo de cuota que comparten la CLI y los scripts (~/.mercadopublico/cuota.json). */
+function sumarCuota(n: number) {
+  try {
+    const ruta = join(process.env.MERCADOPUBLICO_HOME ?? join(homedir(), ".mercadopublico"), "cuota.json");
+    const dia = new Date().toLocaleDateString("en-CA", { timeZone: "America/Santiago" });
+    const previa = existsSync(ruta) ? (JSON.parse(readFileSync(ruta, "utf8")) as { dia?: string; usadas?: number }) : {};
+    mkdirSync(join(ruta, ".."), { recursive: true });
+    writeFileSync(`${ruta}.tmp`, JSON.stringify({ dia, usadas: (previa.dia === dia ? (previa.usadas ?? 0) : 0) + n }));
+    renameSync(`${ruta}.tmp`, ruta);
+  } catch {
+    // sin cuenta persistente no se rompe el smoke
+  }
+}
+
 const usadas = mp.cuota.usadas;
+sumarCuota(usadas);
 const fallas = filas.filter((f) => f.estado === "falla").length;
 console.log(
   [

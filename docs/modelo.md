@@ -1,6 +1,6 @@
 # Modelo
 
-[Inicio](index.md) · [Guía](guia.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md)
+[Inicio](index.md) · [Guía](guia.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 v1, v2 y OCDS se traducen a un solo tipo, `Proceso`. Tu código mira `tipo` y no le importa de qué API vino el dato (eso queda en `origen`).
 
@@ -43,6 +43,21 @@ Propios de cada tipo:
 - `CompraAgil`: `ordenCompra` y `cotizaciones` (`{ proveedor, monto, seleccionada, productos }[]`).
 
 Los parsers no lanzan: un campo vacío o con otro tipo queda en `null` y lo desconocido sigue en `raw`.
+
+### Avisos
+
+Además, cada parser compara la respuesta con la forma que conoce y avisa lo que no calza, sin cambiar el resultado: `campo_nuevo`, `campo_faltante`, `tipo_distinto` o `valor_desconocido` (un código que no está en las tablas), con la `ruta` del campo y el `codigo` del proceso. Con el cliente llegan a `alEvento`; con los parsers sueltos, pasa `avisar`:
+
+```ts
+import { parseLicitacion, type Aviso } from "mercadopublico";
+
+declare const raw: unknown; // un elemento de `Listado` de la v1
+const avisos: Aviso[] = [];
+const lic = parseLicitacion(raw, { avisar: (a) => avisos.push(a) });
+// avisos: [{ tipo: "campo_nuevo", origen: "v1", ruta: "Listado[].CampoNuevo", codigo: "1509-5-L114" }]
+```
+
+Ver [Resiliencia](resiliencia.md#avisos-cuando-la-api-cambia).
 
 ## De dónde sale cada campo
 
@@ -106,8 +121,18 @@ Un `Conversor` es `(moneda, dia) => Promise<Paridad | null>`, con `Paridad = { v
 | `conversorMindicador()` | Valores diarios de mindicador.cl, un request por moneda y año. Dólar y euro sin valor ese día: el último de los 7 días anteriores. UTM: el valor del mes. |
 | `conversorBancoCentral()` | Valores diarios oficiales del Banco Central, leídos de las páginas "Ver serie" de [Indicadores diarios](https://si3.bcentral.cl/Indicadoressiete/secure/Indicadoresdiarios.aspx): un request por moneda y año (la UTM trae todos los años en uno). Es HTML, no una API: si la página cambia o el antibots bloquea, devuelve `null` y la cadena sigue. |
 | `conversorParidadChileCompra()` | `ParidadMoneda.csv` oficial de ChileCompra: un promedio mensual, `fechaValor` es el día 1. El mes en curso no está hasta que termina. |
-| `conversorEncadenado(a, b, …)` | El primero que responda. |
-| `conversorPorDefecto` | `conversorEncadenado(conversorMindicador(), conversorBancoCentral(), conversorParidadChileCompra())` |
+| `conversorEncadenado(a, b, …)` | El primero que responda. Un conversor que lanza cuenta como `null`. |
+| `cadenaPorDefecto({ alEvento?, circuitos? })` | mindicador.cl, si no el Banco Central y si no la paridad de ChileCompra. Es la que usa `MercadoPublico` cuando no le pasas `conversor`, con su `alEvento` y sus circuitos (por eso salen en `mp.salud()`). |
+| `conversorPorDefecto` | `cadenaPorDefecto()` ya armada, con circuitos propios y sin eventos. Para usar fuera del cliente. |
+
+Los tres conversores aceptan `OpcionesConversor`: `fetch`, `timeoutMs` (10000 por descarga), `url`, `alEvento` y `circuito`.
+
+Cómo se degradan:
+
+- **Circuito por fuente:** tras 5 caídas seguidas (5xx o red), la fuente se salta por 60 s sin intentar descargar; después, una sola descarga de prueba decide si vuelve. La cadena pasa a la siguiente sin esperar el timeout.
+- **Caché:** los años pasados se descargan una vez; el año en curso y el CSV de ChileCompra, cada 12 horas. Una descarga fallida se recuerda 5 minutos para no pagar un timeout por cada monto.
+- **Sin ninguna fuente**, el monto queda con `clp: null` y se puede convertir después con `convertirMontos`. Nunca lanza.
+- Cada intento emite un evento `conversion` (`fuente`, `ok`, `moneda`, `dia`) y cada cambio de circuito, un evento `circuito`.
 
 ```ts
 import { MercadoPublico, convertirMontos, conversorEncadenado, conversorPorDefecto, type Conversor } from "mercadopublico";

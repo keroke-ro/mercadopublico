@@ -14,7 +14,7 @@ import { CompraAgilApi } from "./v2/compra-agil.js";
 export interface OpcionesMercadoPublico extends OpcionesTransporte {
   /**
    * Cómo pasar UF, UTM, USD y EUR a pesos con el valor del día del documento.
-   * Por defecto mindicador.cl y, si no responde, la paridad mensual de ChileCompra. `false` no convierte.
+   * Por defecto mindicador.cl; si no responde, el Banco Central; y si tampoco, la paridad mensual de ChileCompra. `false` no convierte.
    */
   conversor?: Conversor | false;
 }

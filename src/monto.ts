@@ -28,15 +28,23 @@ export interface OpcionesConversor {
   circuito?: Circuito;
 }
 
-/** Lanza "circuito_abierto" con la fuente caída; cualquier otra falla es null. */
-async function descargar(o: OpcionesConversor & { circuito: Circuito }, url: string, init: RequestInit = {}): Promise<{ texto: string; cookie: string } | null> {
+/**
+ * Lanza "circuito_abierto" con la fuente caída; cualquier otra falla es null. Si `leer` lanza, la fuente respondió
+ * 200 con algo que no es lo suyo (p. ej. una página antibots) y cuenta como caída.
+ */
+async function descargar<T = string>(
+  o: OpcionesConversor & { circuito: Circuito },
+  url: string,
+  init: RequestInit = {},
+  leer: (texto: string) => T = (t) => t as T,
+): Promise<{ texto: T; cookie: string } | null> {
   o.circuito.exigir();
   try {
     const res = await (o.fetch ?? fetch)(url, { ...init, signal: AbortSignal.timeout(o.timeoutMs ?? 10_000) });
     if (res.status >= 500) return (o.circuito.falla(), null);
     if (!res.ok) return (o.circuito.exito(), null);
     const cookie = (res.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
-    const texto = await res.text();
+    const texto = leer(await res.text());
     o.circuito.exito();
     return { texto, cookie };
   } catch {
@@ -122,21 +130,16 @@ export function conversorMindicador(opciones: OpcionesConversor = {}): Conversor
 function crearMindicador(opciones: OpcionesConversor & { circuito: Circuito }): Conversor {
   const base = opciones.url ?? "https://mindicador.cl/api";
   const cache = new Map<string, () => Promise<Map<string, number> | null>>();
-  const cargar = async (ruta: string) => {
-    const t = (await descargar(opciones, `${base}/${ruta}`))?.texto;
-    if (!t) return null;
-    try {
-      const dias = new Map<string, number>();
-      // `fecha` es la medianoche de Santiago expresada en UTC ("2026-01-02T03:00:00.000Z").
-      for (const { fecha, valor } of JSON.parse(t).serie as { fecha: string; valor: number }[]) {
-        if (Number.isFinite(valor)) dias.set(diaSantiago(new Date(fecha)), valor);
-      }
-      return dias;
-    } catch {
-      opciones.circuito.falla(); // respondió algo que no es la serie
-      return null;
+  // Lo que no es la serie lanza dentro de descargar: cuenta como caída sin que antes se anote un éxito.
+  const leer = (t: string) => {
+    const dias = new Map<string, number>();
+    // `fecha` es la medianoche de Santiago expresada en UTC ("2026-01-02T03:00:00.000Z").
+    for (const { fecha, valor } of JSON.parse(t).serie as { fecha: string; valor: number }[]) {
+      if (Number.isFinite(valor)) dias.set(diaSantiago(new Date(fecha)), valor);
     }
+    return dias;
   };
+  const cargar = async (ruta: string) => (await descargar(opciones, `${base}/${ruta}`, {}, leer))?.texto ?? null;
   const serie = (ind: string): Serie => (anio) => {
     const k = `${ind}/${anio}`;
     let c = cache.get(k);

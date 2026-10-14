@@ -100,10 +100,11 @@ const fixture = (fix: string) => JSON.parse(readFileSync(existsSync(ruta(fix, tr
 // Mismos campos que CAMPOS_PERSONALES_V1 en src/v1/parse.ts: nunca se commitean datos de funcionarios.
 const PERSONALES = new Set(["RutUsuario", "CodigoUsuario", "NombreUsuario", "CargoUsuario", "NombreResponsablePago", "EmailResponsablePago", "NombreResponsableContrato", "EmailResponsableContrato", "FonoResponsableContrato", "NombreContacto", "CargoContacto", "FonoContacto", "MailContacto", "contactPoint", "rut_proveedor", "razon_social"]);
 // Igual que taparTextoLibre en src/personales.ts.
-const CORREO = /[\w.+-]+@[\w-]+(\.[\w-]+)+/g;
-const FONO = /(\+?56[\s-]?)?(?<![\d-])[29](?:[\s-]?\d){8}(?![\d-])/g;
+const CORREO = /[\w.+-]+\s?@\s?[\w-]+(\.[\w-]+)+/g;
+const FONO = /(?<![\w/+=-])(\+?56[\s-]?)?[29](?:[\s-]?\d){8}(?![\w-])/g;
+const URL_ = /((?:https?:\/\/|www\.)\S+)/i;
 function anonimizar(x: unknown): unknown {
-  if (typeof x === "string") return x.replace(CORREO, "[oculto]").replace(FONO, "[oculto]");
+  if (typeof x === "string") return x.split(URL_).map((t, i) => (i % 2 ? t : t.replace(CORREO, "[oculto]").replace(FONO, "[oculto]"))).join("");
   if (Array.isArray(x)) return x.slice(0, 3).map(anonimizar);
   if (x === null || typeof x !== "object") return x;
   return Object.fromEntries(Object.entries(x).map(([k, v]) => [k, PERSONALES.has(k) && v ? "[oculto]" : anonimizar(v)]));

@@ -13,6 +13,7 @@ import {
   MercadoPublico,
   MercadoPublicoError,
   conversorEncadenado,
+  conversorBancoCentral,
   conversorMindicador,
   conversorParidadChileCompra,
   leerOcds,
@@ -178,13 +179,15 @@ async function leerCuota(env: IO["env"]): Promise<EstadoCuota | undefined> {
 /**
  * Suma lo gastado por este proceso a lo que haya en el archivo ahora (no lo que había al empezar), así dos CLI o la
  * CLI y scripts/contrato.ts no se pisan la cuenta. Escritura atómica (tmp + rename) para no dejar un JSON a medias.
+ * Se llama después de cada consulta (con 1 s entre consultas, el costo no se nota) y al terminar: devuelve la nueva
+ * base, así lo ya guardado no se suma dos veces y un `kill -9` pierde a lo más la consulta en vuelo.
  * ponytail: sin lock; dos procesos que terminan en el mismo milisegundo pueden perder lo de uno. Lock con `wx` si importa.
  */
-async function guardarCuota(env: IO["env"], c: Cuota, inicial: EstadoCuota | undefined) {
+async function guardarCuota(env: IO["env"], c: Cuota, inicial: EstadoCuota | undefined): Promise<EstadoCuota | undefined> {
   const ruta = archivoCuota(env);
   const { dia, usadas } = c.toJSON();
   const delta = usadas - (inicial?.dia === dia ? inicial.usadas : 0);
-  if (delta <= 0) return;
+  if (delta <= 0) return inicial;
   try {
     await mkdir(dirname(ruta), { recursive: true });
     const ahora = await leerCuota(env);
@@ -192,14 +195,17 @@ async function guardarCuota(env: IO["env"], c: Cuota, inicial: EstadoCuota | und
     const tmp = `${ruta}.${process.pid}.tmp`;
     await writeFile(tmp, JSON.stringify({ dia, usadas: base + delta }));
     await rename(tmp, ruta);
+    return { dia, usadas };
   } catch {
-    // Sin cuenta persistente no se rompe el comando.
+    return inicial; // Sin cuenta persistente no se rompe el comando; se reintenta en el próximo guardado.
   }
 }
+
 
 export async function main(argv: string[], io: IO): Promise<number> {
   let mp: MercadoPublico | undefined;
   let guardada: EstadoCuota | undefined;
+  let persistir: () => Promise<unknown> = async () => {};
   try {
     const { values: o, positionals } = parseArgs({ args: argv, options: OPCIONES, allowPositionals: true });
     const [comando, arg, ...sobra] = positionals;
@@ -229,9 +235,19 @@ export async function main(argv: string[], io: IO): Promise<number> {
           ? fuente
           : (Readable.toWeb(createReadStream(fuente)) as ReadableStream<Uint8Array>);
       let malas = 0;
-      const ps = await tomar(leerOcds(entrada, { fetch: io.fetch, alError: () => malas++ }), entero(o.max, 100, "max"));
+      const max = entero(o.max, 100, "max");
+      const ps: Proceso[] = [];
+      let corte: unknown;
+      // Si la descarga se corta a mitad de camino se entrega lo leído y se avisa, en vez de perderlo todo.
+      try {
+        if (max > 0) for await (const p of leerOcds(entrada, { fetch: io.fetch, alError: () => malas++ })) if (ps.push(p) >= max) break;
+      } catch (e) {
+        corte = e;
+      }
       if (malas) io.stderr.write(`${malas} líneas no se pudieron leer\n`);
-      return salir(ps);
+      salir(ps);
+      if (corte) throw new Error(`La lectura OCDS se cortó después de ${ps.length} procesos (${(corte as Error).message ?? corte}); lo leído quedó en la salida`);
+      return 0;
     }
 
     guardada = await leerCuota(io.env);
@@ -240,11 +256,17 @@ export async function main(argv: string[], io: IO): Promise<number> {
     const ticket = o.ticket ?? io.env.MP_TICKET;
     if (!ticket) throw new ErrorUso("Falta el ticket: usa --ticket o la variable de entorno MP_TICKET");
     const f = io.fetch;
+    let base = guardada;
+    let guardando: Promise<unknown> = Promise.resolve();
+    persistir = () => (guardando = guardando.then(async () => mp && (base = await guardarCuota(io.env, mp.cuota, base))));
     mp = new MercadoPublico({
       ticket,
       fetch: f,
+      alEvento: (e) => {
+        if (e.tipo === "consulta") void persistir();
+      },
       cuota: guardada && { ...guardada }, // copia: Cuota la modifica y aquí hace falta la de partida
-      conversor: o["sin-conversion"] ? false : f && conversorEncadenado(conversorMindicador({ fetch: f }), conversorParidadChileCompra({ fetch: f })),
+      conversor: o["sin-conversion"] ? false : f && conversorEncadenado(conversorMindicador({ fetch: f }), conversorBancoCentral({ fetch: f }), conversorParidadChileCompra({ fetch: f })),
     });
 
     const d = dia(o.dia, "dia");
@@ -327,9 +349,10 @@ export async function main(argv: string[], io: IO): Promise<number> {
     const uso = e instanceof ErrorUso || (e as { code?: string }).code?.startsWith("ERR_PARSE_ARGS");
     io.stderr.write(`mercadopublico: ${String((e as Error).message ?? e).replace(/\s*\n\s*/g, " ")}${uso ? " (ver --ayuda)" : ""}\n`);
     if (io.env.DEBUG) io.stderr.write(`${(e as Error).stack}\n`);
-    return uso ? 2 : 1;
+    // Ctrl-C en sync mientras planifica llega como "cancelada": también es 130, igual que durante ejecutar.
+    return uso ? 2 : e instanceof MercadoPublicoError && e.tipo === "cancelada" ? 130 : 1;
   } finally {
-    if (mp) await guardarCuota(io.env, mp.cuota, guardada);
+    if (mp) await persistir();
   }
 }
 

@@ -28,7 +28,8 @@ export class Cuota {
     private readonly ahora: () => Date = () => new Date(),
     private readonly alEvento?: AlEvento,
   ) {
-    this.estado = estado ?? { dia: diaSantiago(this.ahora()), usadas: 0 };
+    // Copia: el estado que pasa el usuario (p. ej. leído de un archivo) no se toca.
+    this.estado = estado ? { ...estado } : { dia: diaSantiago(this.ahora()), usadas: 0 };
   }
 
   private hoy(): EstadoCuota {
@@ -57,6 +58,12 @@ export class Cuota {
       this.avisados.add(u);
       emitir(this.alEvento, { tipo: "cuota", usadas, limite: this.limite, restante: this.restante });
     }
+  }
+
+  /** La API dijo que la cuota se acabó: la cuenta local pasa a agotada para no seguir consultando hoy. */
+  agotar(): void {
+    const falta = this.restante;
+    if (falta > 0) this.registrar(falta);
   }
 
   /** Falla antes de empezar si la operación no cabe en lo que queda del día. */
@@ -328,6 +335,7 @@ export class Transporte {
       } catch (e) {
         circuito.anotar(e);
         if (e instanceof MercadoPublicoError && e.tipo === "simultaneas") this.ajustarRitmo(api, false);
+        if (e instanceof MercadoPublicoError && e.tipo === "cuota_agotada") this.cuota.agotar();
         if (!(e instanceof MercadoPublicoError) || !e.reintentable || intento > this.o.reintentos) throw e;
         // Con el circuito recién abierto o sin presupuesto, se entrega el error real en vez de esperar para nada.
         if (circuito.estado === "abierto" || !this.hayPresupuesto()) throw e;
@@ -439,6 +447,10 @@ function clasificar(status: number, cuerpo: unknown, api: "v1" | "v2"): MercadoP
     const errs = (Array.isArray(c.errors) ? c.errors : [c.errors]) as ({ codigo?: string; mensaje?: string } | string | null)[];
     codigo = typeof errs[0] === "object" ? errs[0]?.codigo : undefined;
     mensaje = errs.map((e) => (typeof e === "object" && e ? (e.mensaje ?? JSON.stringify(e)) : String(e))).join("; ");
+  } else if (api === "v2" && c && status >= 400 && typeof c.mensaje === "string") {
+    // Error de la v2 sin sobre: {"codigo":"ERROR_INTERNO","mensaje":"…"}.
+    codigo = c.codigo as string | undefined;
+    mensaje = c.mensaje;
   }
   if (status < 400 && mensaje === undefined) {
     return c ? undefined : new MercadoPublicoError("respuesta_invalida", "La API respondió un JSON inesperado", { status });

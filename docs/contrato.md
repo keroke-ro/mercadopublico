@@ -1,6 +1,6 @@
 # Contrato nocturno
 
-[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md)
+[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 La API de Mercado Público cambia sin avisar. Todas las noches, el workflow [`contrato`](https://github.com/keroke-ro/mercadopublico/actions/workflows/contrato.yml) llama a la API real con pocas consultas y compara la forma de las respuestas con los fixtures de `test/fixtures`. Si algo cambió, abre un issue y el badge del README se pone rojo.
 
@@ -60,5 +60,5 @@ MP_TICKET=... npm run fixtures:grabar
 
 - Por cada caso guarda la primera respuesta en `test/fixtures/<caso>.real.json`, con `"_fixture": "grabado de la API real el AAAA-MM-DD"`.
 - Desde ahí, el contrato compara contra el `.real.json` cuando existe. Los tests unitarios siguen usando los reconstruidos.
-- **Anonimización:** los campos de funcionarios (`RutUsuario`, `NombreUsuario`, `EmailResponsablePago`, `FonoContacto`, `contactPoint`…) se reemplazan por `"[oculto]"` y cada arreglo se corta a 3 elementos.
+- **Anonimización:** los campos de funcionarios (`RutUsuario`, `NombreUsuario`, `EmailResponsablePago`, `FonoContacto`, `contactPoint`…) se reemplazan por `"[oculto]"`, igual que los correos y teléfonos dentro de cualquier texto, y cada arreglo se corta a 3 elementos. El corpus de muestras usa reglas más estrictas (ver [Testing](testing.md#reglas-para-anonimizar)).
 - **Revisa a mano antes de hacer commit.** No se tapan el RUT ni la razón social de los proveedores (en Compra Ágil, `rut_proveedor` y `razon_social`), que pueden ser de una persona natural. Nunca hagas commit del ticket.

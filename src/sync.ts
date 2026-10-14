@@ -194,7 +194,7 @@ export class Sync {
     cuota.exigir(plan.consultas - plan.listadas + (plan.margenReintentos ?? 0), "el sync");
     const antes = cuota.usadas;
     const r: ResultadoSync = { consultas: 0, nuevos: 0, actualizados: 0, omitidos: 0, errores: [] };
-    let reintentar = 0; // errores reintentables vistos
+    let reintentar = 0; // errores pasajeros vistos: reintentables o respuesta inválida
     const fin = () => ({ ...r, consultas: plan.gastadas + cuota.usadas - antes });
     /** ¿Hay que parar ya? Anota por qué. */
     const parar = () => {
@@ -235,7 +235,8 @@ export class Sync {
           } catch (e) {
             if (signal?.aborted) return (parar(), undefined);
             if (e instanceof MercadoPublicoError && ABORTAN.has(e.tipo)) throw e;
-            if (e instanceof MercadoPublicoError && e.reintentable) reintentar++;
+            // Una respuesta inválida (p. ej. una página HTML de mantención con 200) es una caída, no un "no existe".
+            if (e instanceof MercadoPublicoError && (e.reintentable || e.tipo === "respuesta_invalida")) reintentar++;
             r.errores.push({ codigo: it.codigo, error: e instanceof Error ? e.message : String(e) });
           }
           if (detalle) avanzar();
@@ -248,8 +249,8 @@ export class Sync {
     };
 
     if (parar()) return fin();
-    // Un cursor solo avanza mientras todo lo anterior de su fuente salió sin errores reintentables (red, 5xx), para
-    // reintentarlos la próxima vez. Los permanentes (no_encontrado, parametros…) se anotan y no lo frenan.
+    // Un cursor solo avanza mientras todo lo anterior de su fuente salió sin errores pasajeros (red, 5xx, respuesta
+    // inválida), para reintentarlos la próxima vez. Los permanentes (no_encontrado, parametros…) se anotan y no lo frenan.
     const conErrores = new Set<FuenteSync>();
     for (const l of plan.listados) {
       if (l.fuente !== actual) {

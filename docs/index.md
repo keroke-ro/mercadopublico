@@ -20,7 +20,9 @@ const activas = await mp.licitaciones.activas(); // 1 consulta
 - [Sync](sync.md): plan, costo en consultas, cursores y stores.
 - [CLI](cli.md): `npx mercadopublico …`
 - [OCDS](ocds.md): el histórico de datos abiertos, en streaming.
-- [Radar](radar.md): priorizar oportunidades y rangos de precio.
+- [Radar](radar.md): qué postular primero, a qué precio, contra quién y qué viene.
+- [Resiliencia](resiliencia.md): qué hace el SDK cuando la API falla, y cómo verlo con eventos y `mp.salud()`.
+- [Testing](testing.md): cómo se prueba, qué corre en cada PR y qué contra la API real.
 - [Contrato nocturno](contrato.md): cómo se vigila que la API no cambie.
 - [Notas de la API](api-notes.md): lo que dice cada fuente oficial y dónde se contradicen.
 

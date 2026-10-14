@@ -1,6 +1,6 @@
 # CLI
 
-[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md)
+[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 ```sh
 npx mercadopublico --ayuda
@@ -68,6 +68,14 @@ npx mercadopublico cuota
 - **Datos personales:** se ocultan en toda salida que sea un proceso, salvo `--incluir-personales`.
 - **Formato:** tabla si la salida es una terminal y JSON si no (por ejemplo, con `| jq`). La tabla y el CSV de procesos muestran tipo, código, nombre, estado, organismo, región, publicación, cierre y monto.
 - **Fechas:** `--dia`, `--desde` y `--hasta` van en `AAAA-MM-DD`. En `compra-agil`, `--desde` es la fecha de publicación y acepta ISO. `--organismo` y `--proveedor` sin `--dia` usan hoy.
-- **Cuota:** la CLI guarda las consultas del día en `~/.mercadopublico/cuota.json` (o en `$MERCADOPUBLICO_HOME`) y la retoma en la siguiente llamada. `cuota` la muestra sin gastar nada. Si corres dos CLI a la vez, la cuenta del último que termina pisa a la del otro.
-- **sync:** imprime el plan y el avance en stderr y el resultado en stdout. Con `--plan` solo planifica, pero eso ya gasta los listados (ver [Sync](sync.md#lo-que-cuesta)).
-- **Salida:** código 0 si todo bien, 1 si falló la API o la cuota, 2 si el comando está mal escrito. `DEBUG=1` muestra el stack.
+- **Cuota:** la CLI guarda las consultas del día en `~/.mercadopublico/cuota.json` (o en `$MERCADOPUBLICO_HOME`) y la retoma en la siguiente llamada. `cuota` la muestra sin gastar nada. Al terminar, cada proceso suma lo que gastó a lo que diga el archivo en ese momento, así que dos CLI a la vez (o la CLI y `npm run contrato`) no se pisan la cuenta.
+- **sync:** imprime el plan y el avance en stderr y el resultado en stdout. La línea del plan muestra las consultas previstas, las ya gastadas, el margen por reintentos y lo que queda hoy:
+
+  ```
+  Plan: ~1240 consultas (31 ya gastadas) + ~403 de margen por reintentos, quedan 8760 hoy
+  ```
+
+  Con `--plan` solo planifica, pero eso ya gasta los listados (ver [Sync](sync.md#lo-que-cuesta)).
+- **sync y el store:** mientras corre, el store queda tomado con `<store>.lock`. Un segundo `sync` sobre el mismo archivo falla al tiro con un mensaje que lo dice; si no hay otro corriendo, borra el `.lock` (ver [Sync](sync.md#stores)).
+- **Ctrl-C en sync:** cancela ordenado, guarda lo hecho y la cuota, y sale con 130. La próxima vuelta sigue desde el cursor. Un segundo Ctrl-C mata el proceso como siempre.
+- **Salida:** código 0 si todo bien, 1 si falló la API, la cuota o el store, 2 si el comando está mal escrito y 130 si cancelaste un sync con Ctrl-C. `DEBUG=1` muestra el stack.
