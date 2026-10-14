@@ -42,10 +42,16 @@ export function desdeHoraSantiago(texto: string): Date {
   if (/(Z|[+-]\d{2}:?\d{2})$/.test(texto)) return new Date(texto);
   const comoUtc = new Date(`${texto.length === 10 ? `${texto}T00:00:00` : texto}Z`);
   if (Number.isNaN(comoUtc.getTime())) throw new RangeError(`Fecha inválida: ${texto}`);
-  // Dos pasadas: la segunda corrige cuando el offset cambia justo en el borde del horario de verano.
-  let t = comoUtc.getTime() - minutos(piezas(comoUtc).off) * 60_000;
-  t = comoUtc.getTime() - minutos(piezas(new Date(t)).off) * 60_000;
-  return new Date(t);
+  // Se prueba el offset de un día antes y el de un día después y se queda el que reproduce la misma hora de pared.
+  // Hora repetida (fin del horario de verano): gana la primera. Hora inexistente (inicio): se usa el offset previo,
+  // así 00:30 del día del cambio queda en 01:30.
+  const pared = comoUtc.toISOString().slice(0, 19);
+  const candidatos = [-1, 1].map((d) => comoUtc.getTime() - minutos(piezas(new Date(comoUtc.getTime() + d * 864e5)).off) * 60_000);
+  const t = candidatos.find((c) => {
+    const p = piezas(new Date(c));
+    return `${p.dia}T${p.hora}` === pared;
+  });
+  return new Date(t ?? candidatos[0]!);
 }
 
 /** Normaliza cualquier fecha de la API a ISO con offset de Santiago; null si viene vacía. */

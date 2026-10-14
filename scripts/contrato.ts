@@ -96,7 +96,7 @@ const ruta = (fix: string, real: boolean) => new URL(`../test/fixtures/${fix}${r
 const fixture = (fix: string) => JSON.parse(readFileSync(existsSync(ruta(fix, true)) ? ruta(fix, true) : ruta(fix, false), "utf8")) as unknown;
 
 // Mismos campos que CAMPOS_PERSONALES_V1 en src/v1/parse.ts: nunca se commitean datos de funcionarios.
-const PERSONALES = new Set(["RutUsuario", "CodigoUsuario", "NombreUsuario", "CargoUsuario", "NombreResponsablePago", "EmailResponsablePago", "NombreResponsableContrato", "EmailResponsableContrato", "FonoResponsableContrato", "NombreContacto", "CargoContacto", "FonoContacto", "MailContacto", "contactPoint"]);
+const PERSONALES = new Set(["RutUsuario", "CodigoUsuario", "NombreUsuario", "CargoUsuario", "NombreResponsablePago", "EmailResponsablePago", "NombreResponsableContrato", "EmailResponsableContrato", "FonoResponsableContrato", "NombreContacto", "CargoContacto", "FonoContacto", "MailContacto", "contactPoint", "rut_proveedor", "razon_social"]);
 function anonimizar(x: unknown): unknown {
   if (Array.isArray(x)) return x.slice(0, 3).map(anonimizar);
   if (x === null || typeof x !== "object") return x;

@@ -19,7 +19,10 @@ const perfil: Perfil = {
 // Solo la primera página (1 consulta) y el detalle de unas pocas, que es el que trae ítems y cotizaciones.
 const { items } = await mp.compraAgil.pagina({ region: [13], estado: ["publicada"], q: "papel" }, 1);
 const detalles: CompraAgil[] = [];
-for (const ca of items.slice(0, 5)) detalles.push(await mp.compraAgil.detalle(ca.codigo));
+for (const ca of items.slice(0, 5)) {
+  const d = await mp.compraAgil.detalle(ca.codigo);
+  if (d) detalles.push(d);
+}
 
 for (const o of priorizar(detalles, perfil)) {
   console.log(`\n${o.puntaje.toFixed(2)}  ${o.proceso.codigo}  ${o.proceso.nombre}`);
@@ -29,11 +32,14 @@ for (const o of priorizar(detalles, perfil)) {
 // Precios de lo que ya cerró: cotizaciones de compras con proveedor elegido.
 const cerradas: CompraAgil[] = [];
 const pasadas = await mp.compraAgil.pagina({ region: [13], estado: ["proveedor_seleccionado", "oc_emitida"], q: "papel" }, 1);
-for (const ca of pasadas.items.slice(0, 10)) cerradas.push(await mp.compraAgil.detalle(ca.codigo));
+for (const ca of pasadas.items.slice(0, 10)) {
+  const d = await mp.compraAgil.detalle(ca.codigo);
+  if (d) cerradas.push(d);
+}
 const codigo = cerradas.flatMap((c) => c.items).find((i) => i.codigoProducto !== null)?.codigoProducto;
 if (codigo) {
   const r = rangoDePrecio(codigo, cerradas, { minimo: 5 });
   console.log(`\nPrecio unitario de ${codigo}:`, "insuficiente" in r ? `${r.motivo} (n = ${r.n})` : `p25 ${r.p25} · p50 ${r.p50} · p75 ${r.p75} CLP por ${r.unidad} (n = ${r.n})`);
   for (const s of r.supuestos) console.log(`  - ${s}`);
 }
-console.log("\nCuota:", mp.cuota);
+console.log("\nCuota:", mp.cuota.toJSON());

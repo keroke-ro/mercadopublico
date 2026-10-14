@@ -16,6 +16,11 @@ export interface OpcionesSync {
   fuentes?: FuenteSync[];
   /** Pedir el detalle de cada proceso nuevo o cambiado (1 consulta c/u). Por defecto true. */
   detalle?: boolean;
+  /**
+   * Volver a pedir el detalle de licitaciones y OC guardadas que siguen abiertas (1 consulta c/u), porque la v1 lista
+   * cada día una sola vez. Por defecto true; requiere `detalle`. Ver REFRESCO_DIAS.
+   */
+  refrescar?: boolean;
   store: Store;
 }
 
@@ -28,6 +33,8 @@ export interface ListadoSync {
   items: Proceso[];
   /** Páginas del listado (v2); 1 en la v1. */
   paginas: number;
+  /** v1: procesos guardados que se vuelven a pedir; no es un listado ni mueve el cursor. */
+  refresco?: true;
 }
 
 export interface PlanSync {
@@ -40,6 +47,12 @@ export interface PlanSync {
   cabeHoy: boolean;
   restante: number;
   listados: ListadoSync[];
+  /** Día (Santiago) en que se planificó: lo que se listó de ese día o después no estaba completo. */
+  dia: string;
+  /** `opciones.hasta` resuelto al planificar, para que ejecutar pida lo mismo aunque pase la medianoche. */
+  hasta: string;
+  /** Consultas de listado previstas (1 por día v1 y la página 1 de la v2), sin contar reintentos. */
+  listadas: number;
 }
 
 export interface ResultadoSync {
@@ -70,6 +83,13 @@ function necesita(s: Proceso | undefined, item: Proceso, detalle: boolean): bool
   return detalle || s.estado !== item.estado; // sin detalle, no se pisa lo guardado si nada cambió
 }
 
+/**
+ * ponytail: el refresco v1 mira licitaciones con cierre y OC con creación en los últimos REFRESCO_DIAS días;
+ * lo que siga abierto después de eso (OC que nunca se recepcionan, licitaciones olvidadas) ya no se re-pide.
+ * Si hace falta, re-listar esos días con un `desde` viejo y sin cursor.
+ */
+const REFRESCO_DIAS = 90;
+
 const filtrosCA = (cambioDesde: string, hasta: string) => ({ cambioDesde, cambioHasta: sumarDias(hasta, 1) });
 
 export class Sync {
@@ -80,7 +100,8 @@ export class Sync {
   }
 
   async planificar(opciones: OpcionesSync): Promise<PlanSync> {
-    const { store, desde, hasta = this.hoy(), fuentes = ["licitaciones", "ordenes", "compra_agil"], detalle = true } = opciones;
+    const dia = this.hoy();
+    const { store, desde, hasta = dia, fuentes = ["licitaciones", "ordenes", "compra_agil"], detalle = true, refrescar = true } = opciones;
     const cuota = this.mp.cuota;
     const antes = cuota.usadas;
     const dias = new Map<FuenteSync, string[]>();
@@ -92,7 +113,8 @@ export class Sync {
       dias.set(f, lista);
     }
     // Los listados se gastan aquí mismo: si ni eso cabe, falla antes de pedir nada.
-    cuota.exigir([...dias.values()].flat().length + (fuentes.includes("compra_agil") ? 1 : 0), "planificar el sync");
+    const listadas = [...dias.values()].flat().length + (fuentes.includes("compra_agil") ? 1 : 0);
+    cuota.exigir(listadas, "planificar el sync");
 
     const listados: ListadoSync[] = [];
     const desglose: PlanSync["desglose"] = [];
@@ -108,26 +130,42 @@ export class Sync {
       let pedir = 0;
       let omitidos = 0;
       const ds = dias.get(f)!;
-      for (const dia of ds) {
-        const items: Proceso[] = await (f === "licitaciones" ? this.mp.licitaciones : this.mp.ordenes).delDia(dia);
-        listados.push({ fuente: f, desde: dia, items, paginas: 1 });
-        for (const it of items) (necesita(await store.obtener(it.codigo), it, detalle) ? pedir++ : omitidos++);
+      const listados0 = new Set<string>();
+      for (const d of ds) {
+        const items: Proceso[] = await (f === "licitaciones" ? this.mp.licitaciones : this.mp.ordenes).delDia(d);
+        listados.push({ fuente: f, desde: d, items, paginas: 1 });
+        for (const it of items) (listados0.add(it.codigo), necesita(await store.obtener(it.codigo), it, detalle) ? pedir++ : omitidos++);
+      }
+      const abiertos: Proceso[] = [];
+      if (detalle && refrescar) {
+        const tipo = f === "licitaciones" ? "licitacion" : "orden_compra";
+        for await (const s of store.todos()) {
+          const ref = (s.tipo === "licitacion" ? s.fechas.cierre : (s.fechas.creacion ?? s.fechas.publicacion))?.slice(0, 10);
+          if (s.tipo === tipo && !FINALES.has(s.estado) && !listados0.has(s.codigo) && ref && ref < dia && ref >= sumarDias(dia, -REFRESCO_DIAS)) abiertos.push(s);
+        }
+        if (abiertos.length) listados.push({ fuente: f, desde: dia, items: abiertos, paginas: 0, refresco: true });
       }
       const rango = ds.length ? `${ds[0]} a ${ds.at(-1)}` : "sin días nuevos";
-      desglose.push({ fuente: f, consultas: ds.length + (detalle ? pedir : 0), nota: `exacto: ${ds.length} días (${rango}) + ${detalle ? pedir : 0} detalles; ${omitidos} ya guardados se omiten` });
+      const que = f === "licitaciones" ? "cerradas" : "creadas";
+      desglose.push({
+        fuente: f,
+        consultas: ds.length + (detalle ? pedir : 0) + abiertos.length,
+        nota: `exacto: ${ds.length} días (${rango}) + ${detalle ? pedir : 0} detalles + ${abiertos.length} abiertas ${que} en los últimos ${REFRESCO_DIAS} días a refrescar; ${omitidos} ya guardados se omiten`,
+      });
     }
     const consultas = desglose.reduce((a, d) => a + d.consultas, 0);
     const gastadas = cuota.usadas - antes;
-    return { opciones, consultas, gastadas, desglose, cabeHoy: consultas - gastadas <= cuota.restante, restante: cuota.restante, listados };
+    return { opciones, consultas, gastadas, desglose, cabeHoy: consultas - listadas <= cuota.restante, restante: cuota.restante, listados, dia, hasta, listadas };
   }
 
   async ejecutar(plan: PlanSync, o: { store?: Store; alAvanzar?: (p: { fuente: FuenteSync; hechas: number; total: number }) => void } = {}): Promise<ResultadoSync> {
     const store = o.store ?? plan.opciones.store;
-    const { detalle = true, hasta = this.hoy() } = plan.opciones;
+    const { detalle = true } = plan.opciones;
     const cuota = this.mp.cuota;
-    cuota.exigir(plan.consultas - plan.gastadas, "el sync");
+    cuota.exigir(plan.consultas - plan.listadas, "el sync");
     const antes = cuota.usadas;
     const r: ResultadoSync = { consultas: 0, nuevos: 0, actualizados: 0, omitidos: 0, errores: [] };
+    let reintentar = 0; // errores reintentables vistos
     const fin = () => ({ ...r, consultas: plan.gastadas + cuota.usadas - antes });
     const sinCuota = () => {
       if (cuota.restante >= 1) return false;
@@ -158,6 +196,7 @@ export class Sync {
             else r.nuevos++;
           } catch (e) {
             if (e instanceof MercadoPublicoError && ABORTAN.has(e.tipo)) throw e;
+            if (e instanceof MercadoPublicoError && e.reintentable) reintentar++;
             r.errores.push({ codigo: it.codigo, error: e instanceof Error ? e.message : String(e) });
           }
           if (detalle) avanzar();
@@ -168,20 +207,22 @@ export class Sync {
       }
     };
 
-    // Un cursor solo avanza mientras todo lo anterior de su fuente salió sin errores, para reintentarlos la próxima vez.
+    // Un cursor solo avanza mientras todo lo anterior de su fuente salió sin errores reintentables (red, 5xx), para
+    // reintentarlos la próxima vez. Los permanentes (no_encontrado, parametros…) se anotan y no lo frenan.
     const conErrores = new Set<FuenteSync>();
     for (const l of plan.listados) {
       if (l.fuente !== actual) {
         actual = l.fuente;
-        base = plan.listados.filter((x) => x.fuente === actual).length;
+        base = plan.listados.filter((x) => x.fuente === actual && !x.refresco).length;
         inicio = cuota.usadas;
       }
-      const e0 = r.errores.length;
+      const e0 = reintentar;
       if (l.fuente !== "compra_agil") {
         if (!(await lote(l.items))) return fin();
-        if (r.errores.length > e0) conErrores.add(l.fuente);
-        // Hoy no está completo: no se marca, la próxima vez se vuelve a listar.
-        if (!conErrores.has(l.fuente) && l.desde < this.hoy()) await store.fijarCursor(l.fuente, l.desde);
+        if (l.refresco) continue;
+        if (reintentar > e0) conErrores.add(l.fuente);
+        // El día en que se planificó no estaba completo: no se marca, la próxima vez se vuelve a listar.
+        if (!conErrores.has(l.fuente) && l.desde < plan.dia) await store.fijarCursor(l.fuente, l.desde);
         avanzar();
         continue;
       }
@@ -197,10 +238,10 @@ export class Sync {
         }
         if (++n > total) break;
         if (sinCuota()) return fin();
-        ({ items, totalPaginas: total } = await this.mp.compraAgil.pagina(filtrosCA(l.desde, hasta), n));
+        ({ items, totalPaginas: total } = await this.mp.compraAgil.pagina(filtrosCA(l.desde, plan.hasta), n));
         avanzar();
       }
-      if (r.errores.length === e0 && max) await store.fijarCursor(l.fuente, max);
+      if (reintentar === e0 && max) await store.fijarCursor(l.fuente, max);
       avanzar();
     }
     return fin();

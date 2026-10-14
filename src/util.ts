@@ -28,13 +28,14 @@ export function moneda(x: unknown): Moneda | null {
 }
 
 /**
- * Monto sin convertir. Si es CLP, `clp` ya es el valor; si no, queda null hasta que
+ * Monto sin convertir. Sin moneda se asume CLP; con una moneda que no se reconoce, null (no se inventa). Si es CLP, `clp` ya es el valor; si no, queda null hasta que
  * `convertirMontos` lo complete con el valor del día del documento.
  */
 export function monto(valor: unknown, mon: unknown, dia: string | null): Monto | null {
   const v = num(valor);
   if (v === null) return null;
-  const m = moneda(mon) ?? "CLP";
+  const m = str(mon) === null ? "CLP" : moneda(mon);
+  if (!m) return null;
   return m === "CLP"
     ? { valor: v, moneda: m, clp: v, fechaValor: dia, fuente: "identidad" }
     : { valor: v, moneda: m, clp: null, fechaValor: null, fuente: null };

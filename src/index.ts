@@ -57,7 +57,7 @@ export function ocultarPersonales<T extends Proceso>(p: T): T {
 export { MercadoPublicoError, type TipoError } from "./errores.js";
 export { Cuota, Transporte, type EstadoCuota, type OpcionesTransporte } from "./http.js";
 export type * from "./modelo.js";
-export { convertirMontos, conversorEncadenado, conversorMindicador, conversorParidadChileCompra, conversorPorDefecto, type Conversor, type Paridad } from "./monto.js";
+export { convertirMontos, conversorEncadenado, conversorMindicador, conversorParidadChileCompra, conversorPorDefecto, type Conversor, type OpcionesConversor, type Paridad } from "./monto.js";
 export { desdeOcds, leerOcds, urlOcds, type OpcionesOcds } from "./ocds.js";
 export { storeArchivo, storeMemoria, type Store } from "./store.js";
 export type { FuenteSync, ListadoSync, OpcionesSync, PlanSync, ResultadoSync } from "./sync.js";

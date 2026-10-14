@@ -30,18 +30,34 @@ async function descargar(o: OpcionesConversor, url: string): Promise<string | nu
   }
 }
 
+/** Tras una descarga fallida se espera esto antes de reintentar, para no pagar un timeout por monto con el servicio caído. */
+const REINTENTO_MS = 5 * 60_000;
+/** Lo que aún puede cambiar (el año en curso, el CSV) se vuelve a bajar pasado esto. */
+const VIGENCIA_MS = 12 * 3_600_000;
+
+/** Memoriza `cargar`: un null (falla) vale REINTENTO_MS y un resultado vale `vigencia` ms. */
+function cacheado<T>(cargar: () => Promise<T | null>, vigencia: number): () => Promise<T | null> {
+  let p: Promise<T | null> | undefined;
+  let vence = 0;
+  return () => {
+    if (p && Date.now() < vence) return p;
+    vence = Infinity; // mientras carga, todos esperan la misma promesa
+    return (p = cargar()
+      .catch(() => null)
+      .then((v) => ((vence = Date.now() + (v === null ? REINTENTO_MS : vigencia)), v)));
+  };
+}
+
 const INDICADOR = { CLF: "uf", UTM: "utm", USD: "dolar", EUR: "euro" } as const;
 
 /**
  * Valores diarios de mindicador.cl, un request por moneda y año (`/api/{indicador}/{AAAA}`).
  * Si el día no tiene valor (dólar y euro en fin de semana) usa el último de los 7 días anteriores.
- * La UTM es mensual: vale el valor del mes.
- * ponytail: un año que falló queda en caché como fallido mientras viva el conversor, para no esperar
- * el timeout en cada monto si el servicio está caído; crear otro conversor para reintentar.
+ * La UTM es mensual: vale el valor del mes. Los años pasados se bajan una vez; el en curso, cada VIGENCIA_MS.
  */
 export function conversorMindicador(opciones: OpcionesConversor = {}): Conversor {
   const base = opciones.url ?? "https://mindicador.cl/api";
-  const cache = new Map<string, Promise<Map<string, number> | null>>();
+  const cache = new Map<string, () => Promise<Map<string, number> | null>>();
   const cargar = async (ruta: string) => {
     const t = await descargar(opciones, `${base}/${ruta}`);
     if (!t) return null;
@@ -58,9 +74,9 @@ export function conversorMindicador(opciones: OpcionesConversor = {}): Conversor
   };
   const serie = (ind: string, anio: string) => {
     const k = `${ind}/${anio}`;
-    let p = cache.get(k);
-    if (!p) cache.set(k, (p = cargar(k)));
-    return p;
+    let c = cache.get(k);
+    if (!c) cache.set(k, (c = cacheado(() => cargar(k), anio < diaSantiago(new Date()).slice(0, 4) ? Infinity : VIGENCIA_MS)));
+    return c();
   };
   const paridad = (valor: number, fechaValor: string): Paridad => ({ valor, fechaValor, fuente: "mindicador.cl" });
 
@@ -84,11 +100,10 @@ export const URL_PARIDAD = "https://transparenciachc.blob.core.windows.net/oc-da
 
 /**
  * ParidadMoneda.csv oficial de ChileCompra: un promedio por moneda y mes, así que `fechaValor` es el
- * primer día del mes. Se descarga una vez por conversor. El mes en curso no está hasta que termina.
+ * primer día del mes. Se vuelve a bajar cada VIGENCIA_MS. El mes en curso no está hasta que termina.
  */
 export function conversorParidadChileCompra(opciones: OpcionesConversor = {}): Conversor {
-  let tabla: Promise<Map<string, number> | null> | undefined;
-  const cargar = async () => {
+  const tabla = cacheado(async () => {
     const t = await descargar(opciones, opciones.url ?? URL_PARIDAD);
     if (!t) return null;
     const filas = t.split(/\r?\n/).map((l) => l.split(";").map((c) => c.trim().replace(/^"|"$/g, "")));
@@ -102,10 +117,10 @@ export function conversorParidadChileCompra(opciones: OpcionesConversor = {}): C
       if (m && anio && mes && resto[iClp - 3] && Number.isFinite(v)) meses.set(`${m}/${anio}-${mes.padStart(2, "0")}`, v);
     }
     return meses;
-  };
+  }, VIGENCIA_MS);
   return async (moneda, dia) => {
     const mes = dia.slice(0, 7);
-    const v = (await (tabla ??= cargar()))?.get(`${moneda}/${mes}`);
+    const v = (await tabla())?.get(`${moneda}/${mes}`);
     return v === undefined ? null : { valor: v, fechaValor: `${mes}-01`, fuente: "chilecompra:ParidadMoneda (mensual)" };
   };
 }

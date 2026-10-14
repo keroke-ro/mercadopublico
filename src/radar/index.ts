@@ -243,6 +243,6 @@ export function rangoDePrecio(
   supuestos.push(`Mismo producto (${codigoProducto}) y misma unidad (${unidad ?? "sin unidad"}).`);
 
   const xs = [...(porUnidad.get(unidad) ?? [])].sort((a, b) => a - b);
-  if (xs.length < minimo) return { n: xs.length, insuficiente: true, motivo: "muestra insuficiente", supuestos };
+  if (!xs.length || xs.length < minimo) return { n: xs.length, insuficiente: true, motivo: "muestra insuficiente", supuestos };
   return { n: xs.length, p25: percentil(xs, 0.25), p50: percentil(xs, 0.5), p75: percentil(xs, 0.75), unidad, moneda: "CLP", soloSeleccionadas, supuestos };
 }

@@ -1,0 +1,9 @@
+# GitHub Pages: Settings → Pages → Deploy from a branch → main, carpeta /docs. Sin build propio.
+title: mercadopublico
+description: SDK TypeScript para la API de Mercado Público (ChileCompra)
+theme: jekyll-theme-minimal
+lang: es
+# Borradores internos que no van al sitio.
+exclude:
+  - PRD.md
+  - kerokero.md

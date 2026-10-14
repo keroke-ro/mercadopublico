@@ -6,6 +6,7 @@ import { Empresas, formatearRut } from "../src/v1/empresas.js";
 import { Licitaciones } from "../src/v1/licitaciones.js";
 import { OrdenesCompra } from "../src/v1/ordenes.js";
 import { CAMPOS_PERSONALES_V1, parseLicitacion, parseOrdenCompra } from "../src/v1/parse.js";
+import { monto } from "../src/util.js";
 
 const fixture = (n: string) => readFileSync(new URL(`./fixtures/v1/${n}.json`, import.meta.url), "utf8");
 const primero = (n: string) => (JSON.parse(fixture(n)) as { Listado: unknown[] }).Listado[0];
@@ -64,7 +65,7 @@ describe("OrdenesCompra: URL y parámetros", () => {
 describe("Empresas", () => {
   it("buscarProveedor formatea el RUT y usa la ruta con Publico en mayúscula", async () => {
     const { t, urls, q } = api(fixture("empresas-proveedor"));
-    await expect(new Empresas(t).buscarProveedor("70017820K")).resolves.toEqual({ codigoEmpresa: "17793", nombre: "Cámara de Comercio de Santiago A.G. (CCS)" });
+    await expect(new Empresas(t).buscarProveedor("70017820K")).resolves.toEqual({ codigo: "17793", nombre: "Cámara de Comercio de Santiago A.G. (CCS)" });
     expect(urls[0]!.pathname).toBe("/servicios/v1/Publico/Empresas/BuscarProveedor");
     expect(q()).toEqual({ rutempresaproveedor: "70.017.820-k", ticket: "TICKET" });
   });
@@ -231,5 +232,18 @@ describe("respuestas de la API", () => {
     const err = await new Licitaciones(api(fixture(n), n === "error-10300" ? 400 : 500).t).activas().catch((e: unknown) => e);
     expect(err).toBeInstanceOf(MercadoPublicoError);
     expect(err).toMatchObject({ tipo });
+  });
+});
+
+describe("bordes", () => {
+  it("porCodigo vacío no gasta consultas ni devuelve un proceso cualquiera", async () => {
+    let llamadas = 0;
+    const t = new Transporte({ ticket: "T", fetch: async () => (llamadas++, new Response("{}")) });
+    await expect(new Licitaciones(t).porCodigo(" ")).rejects.toMatchObject({ tipo: "parametros" });
+    expect(llamadas).toBe(0);
+  });
+  it("una moneda desconocida no se hace pasar por CLP", () => {
+    expect(monto(100, "US$", "2026-10-01")).toBeNull();
+    expect(monto(100, null, "2026-10-01")).toMatchObject({ moneda: "CLP", clp: 100 });
   });
 });

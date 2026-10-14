@@ -18,8 +18,8 @@ export function urlOcds(anio: number | "full"): string {
 
 /**
  * Claves con datos personales dentro de `raw`, para `ocultarPersonales` (se tapa `contactPoint` entero).
- * Los nombres de persona natural en `suppliers[].name` sí van a `personales`, pero no se pueden tapar en `raw`
- * por clave sin borrar también todos los `name` del documento.
+ * Los nombres y RUT de persona natural no se tapan por clave (borraría todos los `name`): van a `personales`
+ * con su ruta en `raw`, y `ocultarPersonales` tapa esas rutas.
  */
 export const CAMPOS_PERSONALES_OCDS: readonly string[] = ["contactPoint"];
 
@@ -121,7 +121,8 @@ const lista = (x: unknown): Obj[] => (Array.isArray(x) ? x.map(obj) : []);
 /**
  * ponytail: las fechas OCDS de ChileCompra traen "Z", pero se leen como hora de pared de Santiago (se descarta la Z).
  * Su base guarda hora local sin huso, así que lo más probable es que la Z sea solo una etiqueta, y esta lectura
- * deja el día tal como lo publicó ChileCompra (leerlas como UTC correría de día lo publicado después de las 20-21 h).
+ * deja el día tal como lo publicó ChileCompra (leerlas como UTC pasaría al día anterior lo publicado entre las 00:00
+ * y las 03:00-04:00 de Santiago).
  * Si se confirma que son UTC reales, cambiar a `normalizarFecha(str(x))`; esta es la única función que lo decide.
  */
 function fecha(x: unknown): string | null {
@@ -215,14 +216,31 @@ function proceso(r: Obj): Proceso {
       if (s) personales[`parties.${i}.contactPoint.${k}`] = s;
     }
   });
-  // "EMPRESA | SUCURSAL": si el proveedor es persona natural, la segunda parte suele ser su nombre.
-  awards.forEach((a, i) =>
-    lista(a.suppliers).forEach((s, j) => {
-      const nombre = str(s.name);
-      const [empresa, sucursal] = (nombre ?? "").split(" | ");
-      if (nombre && sucursal && sucursal !== empresa) personales[`awards.${i}.suppliers.${j}.name`] = nombre;
-    }),
-  );
+  // Proveedores y oferentes ("EMPRESA | SUCURSAL"): se anotan su nombre y el de su party, y el RUT si es de persona.
+  // ponytail: heurística conservadora. Es persona si la sucursal difiere de la empresa (suele ser el nombre de quien
+  // atiende) o si el RUT del party es < 50.000.000 (las personas jurídicas parten en 50 millones). Un
+  // "JUAN PEREZ SOTO | JUAN PEREZ SOTO" sin RUT en `parties` se escapa: distinguirlo de "COMERCIAL ANDES | COMERCIAL
+  // ANDES" pediría un diccionario de nombres o el registro del SII.
+  const anotar = (ruta: string, v: unknown) => {
+    const s = str(v);
+    if (s) personales[ruta] = s;
+  };
+  const refs = [
+    ...awards.flatMap((a, i) => lista(a.suppliers).map((s, j) => [`awards.${i}.suppliers.${j}`, s] as const)),
+    ...lista(t.tenderers).map((s, j) => [`tender.tenderers.${j}`, s] as const),
+  ];
+  for (const [ruta, s] of refs) {
+    const p = parte(s.id);
+    const n = parseInt(rut(p)?.replace(/\./g, "") ?? "", 10);
+    const persona = n > 0 && n < 50_000_000;
+    const [empresa, sucursal] = (str(s.name) ?? str(p?.name) ?? "").split(" | ");
+    if (!persona && !(sucursal && sucursal !== empresa)) continue;
+    anotar(`${ruta}.name`, s.name);
+    if (!p) continue;
+    const k = partes.indexOf(p);
+    anotar(`parties.${k}.name`, p.name);
+    if (persona) for (const c of ["id", "legalName"]) anotar(`parties.${k}.identifier.${c}`, obj(p.identifier)[c]);
+  }
 
   const base = {
     codigo,

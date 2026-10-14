@@ -7,7 +7,7 @@ import { parseCompraAgil } from "../src/v2/parse.js";
 const HOY = "2026-06-20";
 
 /** Cliente con fetch falso: `ruta` recibe la URL y devuelve el JSON (o una Response). */
-function cliente(ruta: (u: URL) => unknown, limiteDiario = 10_000) {
+function cliente(ruta: (u: URL) => unknown, limiteDiario = 10_000, extra: { reintentos?: number; ahora?: () => Date } = {}) {
   const pedidos: URL[] = [];
   const mp = new MercadoPublico({
     ticket: "T",
@@ -16,6 +16,7 @@ function cliente(ruta: (u: URL) => unknown, limiteDiario = 10_000) {
     limiteDiario,
     dormir: async () => {},
     ahora: () => new Date(`${HOY}T12:00:00-04:00`),
+    ...extra,
     fetch: async (url) => {
       const u = new URL(String(url));
       pedidos.push(u);
@@ -99,14 +100,60 @@ describe("sync v1", () => {
     expect(pedidos.slice(n).map((u) => u.searchParams.get("codigo"))).toEqual([null, "E"]);
   });
 
-  it("un detalle que falla se anota, no corta el sync y no avanza el cursor", async () => {
-    const { mp } = cliente(v1(dias, { A: 5, B: 8 })); // C no tiene detalle
+  it("un detalle que falla por la red se anota, no corta el sync y no avanza el cursor", async () => {
+    const ruta = v1(dias, { A: 5, B: 8 });
+    const { mp } = cliente((u) => (u.searchParams.get("codigo") === "C" ? new Response("", { status: 503 }) : ruta(u)));
     const store = storeMemoria();
     const plan = await mp.sync.planificar({ desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones"], store });
     const r = await mp.sync.ejecutar(plan);
-    expect(r.errores).toEqual([{ codigo: "C", error: "falló C" }]);
+    expect(r.errores.map((e) => e.codigo)).toEqual(["C"]);
     expect(r).toMatchObject({ nuevos: 2 }); // A y B
     expect(await store.cursor("licitaciones")).toBe("2026-06-01");
+  });
+
+  it("un error permanente (400) se anota pero el cursor avanza: no se re-lista para siempre", async () => {
+    const { mp } = cliente(v1(dias, { A: 5, B: 8 })); // C no tiene detalle
+    const store = storeMemoria();
+    const r = await mp.sync.ejecutar(await mp.sync.planificar({ desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones"], store }));
+    expect(r.errores).toEqual([{ codigo: "C", error: "falló C" }]);
+    expect(await store.cursor("licitaciones")).toBe("2026-06-02");
+  });
+
+  it("planificar a las 23:59 y ejecutar a las 00:01 no marca el día planificado", async () => {
+    let t = new Date("2026-06-20T23:59:00-04:00");
+    const { mp } = cliente(v1({ "CodigoExterno:20062026": { D: 5 } }, { D: 5 }), 10_000, { ahora: () => t });
+    const store = storeMemoria();
+    const plan = await mp.sync.planificar({ desde: HOY, fuentes: ["licitaciones"], store });
+    t = new Date("2026-06-21T00:01:00-04:00");
+    await mp.sync.ejecutar(plan);
+    expect(plan).toMatchObject({ dia: HOY, hasta: HOY });
+    expect(await store.cursor("licitaciones")).toBeUndefined();
+  });
+
+  it("lo que queda por gastar no cuenta los reintentos del plan", async () => {
+    let fallo = false;
+    const ruta = v1(dias, estados);
+    const { mp } = cliente((u) => (!fallo && !u.searchParams.has("codigo") ? ((fallo = true), new Response("", { status: 503 })) : ruta(u)), 5, { reintentos: 1 });
+    const plan = await mp.sync.planificar({ desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones"], store: storeMemoria() });
+    expect(plan).toMatchObject({ consultas: 5, gastadas: 3, listadas: 2, restante: 2, cabeHoy: false }); // faltan 3 detalles
+  });
+
+  it("refresca licitaciones guardadas abiertas con cierre pasado, y se puede apagar", async () => {
+    const { mp, pedidos } = cliente(v1({}, { V: 8 }));
+    const store = storeMemoria();
+    const vieja = (codigo: string, FechaCierre: string, CodigoEstado = 5) => parseLicitacion({ CodigoExterno: codigo, Nombre: codigo, CodigoEstado, FechaCierre });
+    await store.guardar([vieja("V", "2026-06-10T15:00:00"), vieja("F", "2026-06-25T15:00:00"), vieja("X", "2026-01-01T15:00:00"), vieja("Z", "2026-06-10T15:00:00", 8)]);
+    await store.fijarCursor("licitaciones", "2026-06-19");
+    const o = { desde: "2026-06-01", fuentes: ["licitaciones" as const], store };
+    expect((await mp.sync.planificar({ ...o, refrescar: false })).consultas).toBe(1);
+    const plan = await mp.sync.planificar(o);
+    expect(plan.consultas).toBe(1 + 1); // listado de hoy + V (F aún no cierra, X es muy vieja, Z es final)
+    expect(plan.desglose[0]!.nota).toMatch(/1 abiertas cerradas en los últimos 90 días/);
+    const r = await mp.sync.ejecutar(plan);
+    expect(r).toMatchObject({ actualizados: 1, errores: [] });
+    expect((await store.obtener("V"))?.estado).toBe("adjudicada");
+    expect(pedidos.at(-1)!.searchParams.get("codigo")).toBe("V");
+    expect(await store.cursor("licitaciones")).toBe("2026-06-19");
   });
 
   it("ticket inválido aborta después de guardar lo hecho", async () => {
@@ -157,5 +204,24 @@ describe("sync v2 (Compra Ágil)", () => {
 
     await mp.sync.planificar({ desde: "2026-06-01", hasta: HOY, fuentes: ["compra_agil"], store });
     expect(pedidos.at(-1)!.searchParams.get("cambio_desde")).toBe("2026-06-11T12:00:00.000Z");
+  });
+
+  it("las páginas 2+ usan el mismo cambio_hasta que la 1 aunque se ejecute pasada la medianoche", async () => {
+    let t = new Date("2026-06-20T23:59:00-04:00");
+    const { mp, pedidos } = cliente(ruta, 10_000, { ahora: () => t });
+    const plan = await mp.sync.planificar({ desde: "2026-06-01", fuentes: ["compra_agil"], store: await storeConPyQ() });
+    t = new Date("2026-06-21T00:01:00-04:00");
+    await mp.sync.ejecutar(plan);
+    const hastas = pedidos.filter((u) => u.searchParams.has("numero_pagina")).map((u) => u.searchParams.get("cambio_hasta"));
+    expect(hastas).toHaveLength(2);
+    expect(hastas[1]).toBe(hastas[0]);
+  });
+
+  it("un detalle con error permanente no frena el cursor de la v2", async () => {
+    const { mp } = cliente((u) => (/compra-agil\/R$/.test(u.pathname) ? Response.json({ success: "NOK", errors: [{ codigo: "404", mensaje: "no existe" }] }, { status: 404 }) : ruta(u)));
+    const store = await storeConPyQ();
+    const r = await mp.sync.ejecutar(await mp.sync.planificar({ desde: "2026-06-01", hasta: HOY, fuentes: ["compra_agil"], store }));
+    expect(r.errores.map((e) => e.codigo)).toEqual(["R"]);
+    expect(Date.parse((await store.cursor("compra_agil"))!)).toBe(Date.parse("2026-06-11T12:00:00Z"));
   });
 });

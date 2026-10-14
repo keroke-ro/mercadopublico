@@ -47,6 +47,16 @@ describe("Transporte", () => {
     expect(urls).toHaveLength(1);
   });
 
+  it.each([
+    ["10300 con HTTP 500 (v1 manda el código, no el status)", json({ Codigo: 10300, Mensaje: "El formato del parametro fechas es incorrecto" }, 500), "parametros"],
+    ["un 400 que menciona un límite que no es la cuota", json({ Codigo: 1, Mensaje: "La fecha supera el límite permitido" }, 400), "parametros"],
+    ["200 con un cuerpo que no es objeto", json("Servicio no disponible"), "respuesta_invalida"],
+  ])("tampoco reintenta %s", async (_, res, tipo) => {
+    const { t, urls } = transporte([res, json({})]);
+    await expect(t.v1("x.json")).rejects.toMatchObject({ tipo });
+    expect(urls).toHaveLength(1);
+  });
+
   it("se rinde después de los reintentos configurados", async () => {
     const { t, urls } = transporte(Array.from({ length: 5 }, () => json({}, 502)), { reintentos: 2 });
     await expect(t.v1("x.json")).rejects.toMatchObject({ tipo: "servidor" });
@@ -107,6 +117,16 @@ describe("fechas", () => {
     expect(isoSantiago(desdeHoraSantiago("2026-07-15T15:00:00"))).toBe("2026-07-15T15:00:00-04:00");
     expect(normalizarFecha("2026-07-15T19:00:00Z")).toBe("2026-07-15T15:00:00-04:00");
     expect(normalizarFecha(null)).toBeNull();
+  });
+  it("bordes del horario de verano en Santiago (2026-09-06 y 2026-04-05)", () => {
+    // Inicio: de 00:00 se salta a 01:00; la hora inexistente avanza y no cae en el día anterior.
+    expect(normalizarFecha("2026-09-06")).toBe("2026-09-06T01:00:00-03:00");
+    expect(normalizarFecha("2026-09-06T00:30:00")).toBe("2026-09-06T01:30:00-03:00");
+    expect(normalizarFecha("2026-09-06T02:00:00")).toBe("2026-09-06T02:00:00-03:00");
+    expect(proximaMedianoche(new Date("2026-09-05T12:00:00-04:00"))).toBe("2026-09-06T01:00:00-03:00");
+    // Fin: 23:30 del 4 de abril ocurre dos veces; gana la primera (-03).
+    expect(normalizarFecha("2026-04-04T23:30:00")).toBe("2026-04-04T23:30:00-03:00");
+    expect(normalizarFecha("2026-04-05T10:00:00")).toBe("2026-04-05T10:00:00-04:00");
   });
   it("formatos auxiliares", () => {
     expect(ddmmaaaa("2026-10-01")).toBe("01102026");

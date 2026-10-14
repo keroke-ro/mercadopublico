@@ -1,3 +1,4 @@
+import { MercadoPublicoError } from "../errores.js";
 import { ddmmaaaa } from "../fecha.js";
 import type { Transporte } from "../http.js";
 import type { Enriquecer, Licitacion } from "../modelo.js";
@@ -19,7 +20,9 @@ export class Licitaciones {
 
   /** Detalle completo; null si no existe. */
   async porCodigo(codigo: string): Promise<Licitacion | null> {
-    const p = (await this.listar({ codigo }))[0];
+    // Sin código la API devuelve el listado del día y se tomaría un proceso cualquiera como "detalle".
+    if (!codigo?.trim()) throw new MercadoPublicoError("parametros", "Falta el código");
+    const p = (await this.listar({ codigo: codigo.trim() }))[0];
     return p ? this.enriquecer(p) : null;
   }
 

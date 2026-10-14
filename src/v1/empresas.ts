@@ -22,9 +22,9 @@ export class Empresas {
   constructor(private readonly t: Transporte) {}
 
   /** Código de empresa del proveedor en Mercado Público; null si el RUT no está registrado. 1 consulta. */
-  async buscarProveedor(rut: string): Promise<{ codigoEmpresa: string; nombre: string } | null> {
+  async buscarProveedor(rut: string): Promise<Empresa | null> {
     const e = (await this.listar("BuscarProveedor", { rutempresaproveedor: formatearRut(rut) }))[0];
-    return e ? { codigoEmpresa: e.codigo, nombre: e.nombre } : null;
+    return e ?? null;
   }
 
   /** Todos los organismos compradores. 1 consulta. */

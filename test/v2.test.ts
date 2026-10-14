@@ -108,7 +108,7 @@ describe("CompraAgilApi.listar", () => {
 describe("CompraAgilApi.detalle", () => {
   it("parsea productos, cotizaciones, OC y fechas", async () => {
     const { ca, pedidos } = api(res("detalle"));
-    const d = await ca.detalle("1195-39-COT26");
+    const d = (await ca.detalle("1195-39-COT26"))!;
     expect(pedidos[0]!.url.pathname).toBe("/v2/compra-agil/1195-39-COT26");
 
     expect(d).toMatchObject({
@@ -199,5 +199,12 @@ describe("parseCompraAgil", () => {
     delete d.resumen;
     expect(parseCompraAgil(d, { detalle: true }).oferentes).toBe(2);
     expect(parseCompraAgil({ codigo: "x" }, { detalle: false }).oferentes).toBeNull();
+  });
+});
+
+describe("detalle inexistente", () => {
+  it("devuelve null como porCodigo de la v1", async () => {
+    const t = new Transporte({ ticket: "T", fetch: async () => new Response(JSON.stringify({ success: "NOK", payload: null, errors: [{ codigo: "404", mensaje: "No encontrado" }] }), { status: 404 }) });
+    await expect(new CompraAgilApi(t).detalle("1-1-COT26")).resolves.toBeNull();
   });
 });

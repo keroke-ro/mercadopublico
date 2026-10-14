@@ -242,6 +242,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
       porEstado(e: E, x: { dia?: string }): Promise<Proceso[]>;
       delDia(dia: string): Promise<Proceso[]>;
     }, estado: E | undefined, sinFiltros: () => Promise<Proceso[]>) => {
+      if (estado && (o.organismo || o.proveedor)) throw new ErrorUso("--estado no se combina con --organismo ni --proveedor");
       if (o.organismo) return api.porOrganismo(o.organismo, { dia: d ?? diaSantiago() });
       if (o.proveedor) return api.porProveedor(o.proveedor, { dia: d ?? diaSantiago() });
       if (estado) return api.porEstado(estado, { dia: d });
@@ -262,7 +263,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
         return salir(await filtrosV1(mp.ordenes, e, () => mp!.ordenes.porEstado("todos")));
       }
       case "compra-agil": {
-        if (arg) return salir(await mp.compraAgil.detalle(arg));
+        if (arg) return salir((await mp.compraAgil.detalle(arg)) ?? noExiste("la Compra Ágil"));
         const max = entero(o.max, 100, "max");
         const region = lista(o.region)?.map(Number);
         const filtros = { region, estado: lista(o.estado) as EstadoCompraAgil[] | undefined, q: o.q, publicadoDesde: o.desde, tamanoPagina: Math.min(50, max) };
@@ -278,7 +279,9 @@ export async function main(argv: string[], io: IO): Promise<number> {
         const fuentes = lista(o.fuentes)?.map((x) => uno<FuenteSync>(x, ["licitaciones", "ordenes", "compra_agil"], "fuentes")!);
         const opciones = { desde: dia(o.desde, "desde")!, hasta: dia(o.hasta, "hasta"), fuentes, store: await storeArchivo(ruta) };
         const plan = await mp.sync.planificar(opciones);
-        const visible = { ...plan, opciones: { ...opciones, store: ruta } };
+        // Sin `listados`: son procesos crudos (con datos personales) que solo usa ejecutar.
+        const { listados: _, ...resumen } = plan;
+        const visible = { ...resumen, opciones: { ...opciones, store: ruta } };
         if (o.plan) return salir(formato === "json" ? visible : plan.desglose);
         io.stderr.write(
           `Plan: ~${plan.consultas} consultas (${plan.gastadas} ya gastadas), quedan ${plan.restante} hoy\n` +

@@ -105,9 +105,14 @@ export class CompraAgilApi {
     }
   }
 
-  async detalle(codigo: string): Promise<CompraAgil> {
+  /** Detalle; null si no existe (igual que `porCodigo` en la v1). */
+  async detalle(codigo: string): Promise<CompraAgil | null> {
     if (!codigo?.trim()) throw fallo("Falta el código de la Compra Ágil");
-    const p = await this.t.v2(`compra-agil/${encodeURIComponent(codigo.trim())}`);
+    const p = await this.t.v2(`compra-agil/${encodeURIComponent(codigo.trim())}`).catch((e: unknown) => {
+      if (e instanceof MercadoPublicoError && e.tipo === "no_encontrado") return null;
+      throw e;
+    });
+    if (p === null) return null;
     if (!p || typeof p !== "object") throw new MercadoPublicoError("respuesta_invalida", `La API no devolvió el detalle de ${codigo}`);
     return this.enriquecer(parseCompraAgil(p, { detalle: true }));
   }

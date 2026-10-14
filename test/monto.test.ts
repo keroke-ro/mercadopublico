@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CompraAgil, Licitacion, Monto } from "../src/modelo.js";
 import {
   type Conversor,
@@ -7,6 +7,8 @@ import {
   conversorParidadChileCompra,
   convertirMontos,
 } from "../src/monto.js";
+
+afterEach(() => vi.useRealTimers());
 
 /** fetch falso: responde según el final de la URL y anota cada llamada. */
 function falso(rutas: Record<string, unknown>) {
@@ -54,6 +56,24 @@ describe("conversorMindicador", () => {
     expect(await c("EUR", "2026-10-11")).toBeNull();
     expect(llamadas).toHaveLength(1);
   });
+
+  it("reintenta una falla pasados 5 minutos y refresca el año en curso cada 12 h, no los pasados", async () => {
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-13T12:00:00Z") });
+    const rutas: Record<string, unknown> = { "/dolar/2025": serie(["2025-12-31", 900]) };
+    const { fetch, llamadas } = falso(rutas);
+    const c = conversorMindicador({ fetch });
+    expect(await c("USD", "2026-10-09")).toBeNull(); // 2026 cae
+    expect(await c("USD", "2025-12-31")).toMatchObject({ valor: 900 });
+    rutas["/dolar/2026"] = serie(["2026-10-09", 947.5]);
+    vi.advanceTimersByTime(5 * 60_000);
+    expect(await c("USD", "2026-10-09")).toMatchObject({ valor: 947.5 });
+    rutas["/dolar/2026"] = serie(["2026-10-09", 947.5], ["2026-10-13", 950]);
+    expect(await c("USD", "2026-10-13")).toMatchObject({ valor: 947.5 }); // aún en caché
+    vi.advanceTimersByTime(12 * 3_600_000);
+    expect(await c("USD", "2026-10-13")).toMatchObject({ valor: 950 });
+    expect(await c("USD", "2025-12-31")).toMatchObject({ valor: 900 }); // el año pasado no se vuelve a pedir
+    expect(llamadas.filter((u) => u.endsWith("/2025"))).toHaveLength(1);
+  });
 });
 
 describe("conversorParidadChileCompra", () => {
@@ -74,6 +94,18 @@ describe("conversorParidadChileCompra", () => {
     expect(await c("UTM", "2026-10-01")).toBeNull(); // el mes en curso aún no está
     expect(await c("USD", "2026-09-01")).toBeNull();
     expect(llamadas).toHaveLength(1);
+  });
+
+  it("una descarga fallida no queda en caché para siempre", async () => {
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-13T12:00:00Z") });
+    const rutas: Record<string, unknown> = {};
+    const { fetch } = falso(rutas);
+    const c = conversorParidadChileCompra({ fetch });
+    expect(await c("CLF", "2026-09-15")).toBeNull();
+    rutas["ParidadMoneda.csv"] = csv;
+    expect(await c("CLF", "2026-09-15")).toBeNull(); // dentro de los 5 minutos
+    vi.advanceTimersByTime(5 * 60_000);
+    expect(await c("CLF", "2026-09-15")).toMatchObject({ valor: 40946.9149739583 });
   });
 });
 

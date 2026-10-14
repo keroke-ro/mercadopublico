@@ -12,7 +12,20 @@ function limpiar(x: unknown, campos: ReadonlySet<string>): unknown {
   return out;
 }
 
-/** Copia del proceso sin datos personales: `personales` en null y esos campos tapados dentro de `raw`. */
+/** Tapa en `x` (ya copiado) la ruta "a.0.b" de una clave de `personales`; si no existe, no hace nada. */
+function taparRuta(x: unknown, [k, ...resto]: string[]): void {
+  if (x === null || typeof x !== "object" || !(k! in x)) return;
+  const o = x as Record<string, unknown>;
+  if (resto.length) taparRuta(o[k!], resto);
+  else if (o[k!] !== null && o[k!] !== "") o[k!] = OCULTO;
+}
+
+/**
+ * Copia del proceso sin datos personales: `personales` en null y, dentro de `raw`, tapados los `campos` (por nombre
+ * de clave, a cualquier profundidad) y cada ruta que el parser anotó en `personales` (relativa a `raw`).
+ */
 export function ocultarPersonales<T extends Proceso>(p: T, campos: ReadonlySet<string>): T {
-  return { ...p, personales: null, raw: limpiar(p.raw, campos) };
+  const raw = limpiar(p.raw, campos); // copia nueva: se puede mutar
+  for (const ruta of Object.keys(p.personales ?? {})) taparRuta(raw, ruta.split("."));
+  return { ...p, personales: null, raw };
 }

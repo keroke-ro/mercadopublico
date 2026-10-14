@@ -169,5 +169,6 @@ describe("rangoDePrecio", () => {
     expect(r.supuestos.join(" ")).toMatch(/varias unidades \(unidad: 10, caja: 3\); se usó la más frecuente, unidad/);
     expect(rangoDePrecio(COD, mezcla, { unidad: "Caja", minimo: 3 })).toMatchObject({ n: 3, p50: 2, unidad: "caja" });
     expect(rangoDePrecio(COD, mezcla, { unidad: "kilo" })).toMatchObject({ n: 0, insuficiente: true });
+    expect(rangoDePrecio(COD, [], { minimo: 0 })).toMatchObject({ n: 0, insuficiente: true }); // no NaN
   });
 });

@@ -126,8 +126,7 @@ export class Transporte {
       try {
         return await this.unaVez(url, headers, api);
       } catch (e) {
-        const err = e instanceof MercadoPublicoError ? e : new MercadoPublicoError("red", "Error de red", { cause: e });
-        if (!err.reintentable || intento >= this.o.reintentos) throw err;
+        if (!(e instanceof MercadoPublicoError) || !e.reintentable || intento >= this.o.reintentos) throw e;
         // Backoff exponencial con jitter: entre la mitad y el total de base·2^intento.
         const espera = this.o.esperaBaseMs * 2 ** intento;
         await this.o.dormir(espera / 2 + Math.random() * (espera / 2));
@@ -143,7 +142,12 @@ export class Transporte {
     } catch (e) {
       throw new MercadoPublicoError("red", `No se pudo conectar con ${new URL(url).host}`, { cause: e });
     }
-    const texto = await res.text();
+    let texto: string;
+    try {
+      texto = await res.text();
+    } catch (e) {
+      throw new MercadoPublicoError("red", `Se cortó la respuesta de ${new URL(url).host}`, { cause: e });
+    }
     let cuerpo: unknown;
     try {
       cuerpo = texto ? JSON.parse(texto) : undefined;
@@ -169,29 +173,40 @@ function armarUrl(base: string, ruta: string, params: Params): string {
   return url.toString();
 }
 
-/** Mensaje de error de cualquiera de los dos formatos: v1 {Codigo, Mensaje} o v2 {success:"NOK", errors:[{codigo, mensaje}]}. */
+const TICKET_INVALIDO = /ticket.*(no es v[aá]lido|no v[aá]lido|inv[aá]lido|no existe)/;
+const CUOTA_AGOTADA = /cuota|l[ií]mite (diario|de (solicitudes|peticiones|consultas))/;
+
+/**
+ * Error de cualquiera de los dos formatos: v1 {Codigo, Mensaje} o v2 {success:"NOK", errors:[{codigo, mensaje}]}.
+ * Decide primero por código y status; el texto del mensaje es el último recurso porque la v1 no documenta sus códigos.
+ */
 function clasificar(status: number, cuerpo: unknown, api: "v1" | "v2"): MercadoPublicoError | undefined {
-  const c = (cuerpo ?? {}) as Record<string, unknown>;
+  const c = cuerpo && typeof cuerpo === "object" && !Array.isArray(cuerpo) ? (cuerpo as Record<string, unknown>) : undefined;
   let codigo: number | string | undefined;
   let mensaje: string | undefined;
-  if (api === "v1" && "Codigo" in c && !("Listado" in c)) {
+  if (api === "v1" && c && "Codigo" in c && !("Listado" in c)) {
     codigo = c.Codigo as number | string;
     mensaje = String(c.Mensaje ?? "");
-  } else if (api === "v2" && (c.success === "NOK" || c.success === false)) {
+  } else if (api === "v2" && c && (c.success === "NOK" || c.success === false)) {
     const errs = (Array.isArray(c.errors) ? c.errors : [c.errors]) as ({ codigo?: string; mensaje?: string } | string | null)[];
     codigo = typeof errs[0] === "object" ? errs[0]?.codigo : undefined;
     mensaje = errs.map((e) => (typeof e === "object" && e ? (e.mensaje ?? JSON.stringify(e)) : String(e))).join("; ");
   }
-  if (status < 400 && mensaje === undefined) return undefined;
+  if (status < 400 && mensaje === undefined) {
+    return c ? undefined : new MercadoPublicoError("respuesta_invalida", "La API respondió un JSON inesperado", { status });
+  }
 
-  const texto = `${mensaje ?? ""}`.toLowerCase();
+  const texto = (mensaje ?? "").toLowerCase();
   let tipo: TipoError;
-  if (Number(codigo) === 10500 || texto.includes("simult")) tipo = "simultaneas";
-  else if (status === 429 || Number(codigo) === 429 || texto.includes("cuota") || texto.includes("límite") || texto.includes("limite")) tipo = "cuota_agotada";
-  else if (status === 401 || status === 403 || texto.includes("ticket")) tipo = "ticket_invalido";
+  if (Number(codigo) === 10500 || /simult[aá]ne/.test(texto)) tipo = "simultaneas";
+  else if (status === 429 || Number(codigo) === 429) tipo = "cuota_agotada";
+  else if (status === 401 || status === 403) tipo = "ticket_invalido";
+  // En la v1 el status HTTP no es confiable: si vino un Codigo, manda el código (y el mensaje para ticket y cuota).
+  else if (api === "v1" && codigo !== undefined)
+    tipo = TICKET_INVALIDO.test(texto) ? "ticket_invalido" : CUOTA_AGOTADA.test(texto) ? "cuota_agotada" : "parametros";
   else if (status === 404) tipo = "no_encontrado";
   else if (status >= 500) tipo = "servidor";
-  else if (status === 400 || status === 422 || mensaje !== undefined) tipo = "parametros";
+  else if (mensaje !== undefined || status === 400 || status === 422) tipo = "parametros";
   else tipo = "respuesta_invalida";
 
   return new MercadoPublicoError(tipo, mensaje || `HTTP ${status}`, { status, codigo });
