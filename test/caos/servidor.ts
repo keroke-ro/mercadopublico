@@ -352,6 +352,10 @@ export const TICKET = "TICKET-CAOS-0000-SECRETO";
 /** Cliente apuntado al servidor: sin pausa, backoff de 1 ms, timeout corto y sin conversión de montos. */
 export function cliente(srv: Servidor, extra: Partial<OpcionesMercadoPublico> = {}) {
   const eventos: Evento[] = [];
+  // performance.now() al llamar a fetch: el SDK promete separación entre inicios en el cliente. Las llegadas al
+  // servidor dependen además del event loop (con carga, una llegada puede atrasarse y la siguiente no).
+  const inicios: number[] = [];
+  const f = extra.fetch ?? fetch;
   const mp = new MercadoPublico({
     ticket: TICKET,
     baseV1: srv.baseV1,
@@ -362,9 +366,10 @@ export function cliente(srv: Servidor, extra: Partial<OpcionesMercadoPublico> = 
     conversor: false,
     alEvento: (e) => void eventos.push(e),
     ...extra,
+    fetch: (u, i) => (inicios.push(performance.now()), f(u, i)),
   });
   const de = <T extends Evento["tipo"]>(tipo: T) => eventos.filter((e): e is Extract<Evento, { tipo: T }> => e.tipo === tipo);
-  return { mp, eventos, de };
+  return { mp, eventos, de, inicios };
 }
 
 /** Todo lo que el SDK deja ver (eventos, errores con su cadena de causas, textos) sin el ticket. */

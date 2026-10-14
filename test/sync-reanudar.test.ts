@@ -1,4 +1,7 @@
 // Cortar un sync en CUALQUIER punto y reanudarlo deja el store igual que un sync sin cortes, sin re-pedir sin fin.
+// L503 falla siempre con 503: queda pendiente, y vueltas sin cortes lo reintentan hasta abandonarlo. Con cortes puede
+// sumar intentos de más (un corte también es una vuelta), así que se compara en dos momentos: tras reanudar (mismos
+// datos, cursores y códigos pendientes) y asentado, cuando ya no quedan pendientes (todo igual).
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -29,7 +32,7 @@ const OPCIONES = { desde: "2026-06-17", hasta: HOY } as const;
 // Licitaciones y OC por día ("ddmmaaaa" → código → CodigoEstado del listado) y estado del detalle (sin entrada → 400).
 const LIC: Record<string, Record<string, number>> = {
   "17062026": { L1: 5, L2: 6 },
-  "18062026": { L3: 5, L1: 6, L404: 5 },
+  "18062026": { L3: 5, L1: 6, L404: 5, L503: 5 },
   "19062026": { L4: 8, L2: 8, L6: 5 },
   "20062026": { L5: 5 },
 };
@@ -63,6 +66,7 @@ function servidor(u: URL): Response {
   const lic = u.pathname.endsWith("licitaciones.json");
   const campo = lic ? "CodigoExterno" : "Codigo";
   const codigo = u.searchParams.get("codigo");
+  if (codigo === "L503") return new Response("caído", { status: 503 });
   if (codigo) {
     const e = (lic ? LIC_DET : OC_DET)[codigo];
     if (e === undefined) return Response.json({ Codigo: 400, Mensaje: `sin detalle ${codigo}` }, { status: 400 });
@@ -104,11 +108,36 @@ async function correr(store: Store, matarEn?: number, corte: Corte = "fatal") {
   return { consultas: n, terminado };
 }
 
-async function volcar(store: Store) {
+const CLAVES = ["licitaciones", "ordenes", "compra_agil"].flatMap((f) => [f, `${f}:pendientes`]);
+type Volcado = { procesos: Record<string, unknown>; cursores: Record<string, unknown> };
+
+/** Procesos y cursores, con los pendientes ya parseados (sin escribir = vacío). */
+async function volcar(store: Store): Promise<Volcado> {
   const procesos: Record<string, unknown> = {};
   for await (const p of store.todos()) procesos[p.codigo] = p;
-  const cursores = Object.fromEntries(await Promise.all(["licitaciones", "ordenes", "compra_agil"].map(async (f) => [f, await store.cursor(f)])));
-  return JSON.parse(JSON.stringify({ procesos, cursores })) as unknown;
+  const cursores = Object.fromEntries(
+    await Promise.all(CLAVES.map(async (c) => [c, c.endsWith(":pendientes") ? JSON.parse((await store.cursor(c)) ?? "{}") : await store.cursor(c)])),
+  );
+  return JSON.parse(JSON.stringify({ procesos, cursores })) as Volcado;
+}
+
+/** Igual que volcar, pero de los pendientes solo los códigos (sin los intentos). */
+const codigos = (v: Volcado): Volcado => ({
+  ...v,
+  cursores: Object.fromEntries(Object.entries(v.cursores).map(([c, x]) => [c, c.endsWith(":pendientes") ? Object.keys(x as object).sort() : x])),
+});
+
+/** Vueltas sin cortes hasta que no quedan pendientes (salen o se abandonan). Devuelve lo gastado. */
+async function asentar(store: Store) {
+  let consultas = 0;
+  for (let i = 0; i <= 5; i++) {
+    const { cursores } = await volcar(store);
+    if (CLAVES.every((c) => !c.endsWith(":pendientes") || !Object.keys(cursores[c] as object).length)) return consultas;
+    const r = await correr(store);
+    expect(r.terminado).toBe(true);
+    consultas += r.consultas;
+  }
+  throw new Error("los pendientes no se asentaron");
 }
 
 type Abrir = () => Promise<{ store: Store; reabrir: () => Promise<Store> }>;
@@ -131,7 +160,24 @@ async function referencia(abrir: Abrir) {
   romper.n = 0;
   const r = await correr(store);
   expect(r.terminado).toBe(true);
-  return { esperado: await volcar(store), consultas: r.consultas, escrituras: romper.n };
+  const escrituras = romper.n;
+  const tras1 = await volcar(store);
+  expect(tras1.cursores["licitaciones:pendientes"]).toEqual({ L503: 1 });
+  const asentar0 = await asentar(store);
+  const esperado = await volcar(store);
+  expect(esperado.cursores["licitaciones:pendientes"]).toEqual({});
+  await store.cerrar?.();
+  return { tras1: codigos(tras1), esperado, consultas: r.consultas, escrituras, asentar0 };
+}
+
+/**
+ * Tras reanudar: mismos datos, cursores y códigos pendientes; asentado: idéntico y sin gastar más que sin cortes.
+ * Con muchas vueltas cortadas, L503 puede abandonarse antes de terminar: ahí solo vale lo asentado.
+ */
+async function comparar(store: Store, ref: Awaited<ReturnType<typeof referencia>>, msg: string, tras1 = true) {
+  if (tras1) expect(codigos(await volcar(store)), msg).toEqual(ref.tras1);
+  expect(await asentar(store), msg).toBeLessThanOrEqual(ref.asentar0);
+  expect(await volcar(store), msg).toEqual(ref.esperado);
 }
 
 /** Reanuda (plan nuevo + ejecutar) hasta terminar. Devuelve el store final y lo gastado al reanudar. */
@@ -151,7 +197,8 @@ describe.each([
   ["archivo", archivo],
 ] as const)("reanudar con store en %s", (_, abrir) => {
   it.each(["fatal", "cancelar"] as const)("cortado (%s) en cada consulta k, reanudar da lo mismo que sin cortes", async (corte) => {
-    const { esperado, consultas: N } = await referencia(abrir);
+    const ref = await referencia(abrir);
+    const N = ref.consultas;
     expect(N).toBeGreaterThan(20);
     for (let k = 1; k <= N; k++) {
       const s = await abrir();
@@ -159,9 +206,9 @@ describe.each([
       expect(cortado).toMatchObject({ consultas: k, terminado: false });
       const { store, gastadas, intentos } = await reanudar(s);
       expect(intentos, `k=${k}`).toBe(1);
-      expect(await volcar(store), `k=${k}`).toEqual(esperado);
       // Reanudar nunca cuesta más que un sync completo: lo ya guardado solo ahorra.
       expect(gastadas, `k=${k}`).toBeLessThanOrEqual(N);
+      await comparar(store, ref, `k=${k}`);
       await store.cerrar?.();
     }
   });
@@ -169,9 +216,11 @@ describe.each([
 
 describe("reanudar con store en archivo y cortes al escribir", () => {
   it("un corte antes o después de cada escritura, reanudar da lo mismo que sin cortes", async () => {
-    const { esperado, consultas: N, escrituras } = await referencia(archivo);
-    // Una escritura por lote (día o página) con datos o cursor: guardar + cursor van juntos.
-    expect(escrituras).toBeLessThanOrEqual(4 + 3 + 3);
+    const ref = await referencia(archivo);
+    const { consultas: N, escrituras } = ref;
+    // Una escritura por lote (día o página) con datos o cursor: guardar + cursor van juntos. +1: los pendientes del
+    // día de L503, antes de su cursor.
+    expect(escrituras).toBeLessThanOrEqual(4 + 1 + 3 + 3);
     for (const despues of [false, true]) {
       for (let j = 1; j <= escrituras; j++) {
         const s = await archivo();
@@ -180,15 +229,16 @@ describe("reanudar con store en archivo y cortes al escribir", () => {
         romper.en = 0;
         expect(cortado.terminado, `j=${j}`).toBe(false);
         const { store, gastadas } = await reanudar(s);
-        expect(await volcar(store), `j=${j} despues=${despues}`).toEqual(esperado);
         expect(gastadas).toBeLessThanOrEqual(N);
+        await comparar(store, ref, `j=${j} despues=${despues}`);
         await store.cerrar!();
       }
     }
   });
 
   it("muchos cortes seguidos al azar (consultas y escrituras) terminan igual y con gasto acotado", async () => {
-    const { esperado, consultas: N, escrituras } = await referencia(archivo);
+    const ref = await referencia(archivo);
+    const { consultas: N, escrituras } = ref;
     let semilla = 42;
     const azar = (n: number) => ((semilla = (semilla * 1103515245 + 12345) % 2 ** 31), 1 + (semilla % n));
     for (let caso = 0; caso < 20; caso++) {
@@ -205,8 +255,8 @@ describe("reanudar con store en archivo y cortes al escribir", () => {
         gastadas += r.consultas;
         terminado = r.terminado;
       }
-      expect(await volcar(store), `caso ${caso}`).toEqual(esperado);
       expect(gastadas).toBeLessThanOrEqual(intentos * N);
+      await comparar(store, ref, `caso ${caso}`, false);
       await store.cerrar!();
     }
   });

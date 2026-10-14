@@ -37,6 +37,8 @@ const procesos = desdeOcds(JSON.parse(texto));
 
 `leerOcds` acepta `{ fetch, signal, alError }`. Una línea que no se puede leer se salta y se avisa en `alError`; no corta la lectura.
 
+Si la descarga se corta a mitad (conexión caída, gzip truncado), `leerOcds` entrega lo que alcanzó a procesarse, en orden, y después lanza el error de la descarga. Lo que ya había llegado pero no se alcanzó a procesar se pierde, así que puede no entregar nada antes del error.
+
 ## Lo que hay que saber
 
 - **Solo licitaciones y OC.** Compra Ágil no se publica en OCDS. Una release es OC si el código termina en TD (trato directo) o CM (convenio marco), o si el award dice "Orden de Compra".

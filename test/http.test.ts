@@ -82,11 +82,12 @@ describe("Transporte", () => {
 
   it("deja un intervalo mínimo entre consultas (la API da 10500 a consultas seriales muy seguidas)", async () => {
     const esperas: number[] = [];
-    const t = new Transporte({ ticket: "T", dormir: async (ms) => void esperas.push(ms), fetch: async () => json({ Listado: [] }) });
+    // Reloj fijo: con el real, una máquina cargada se come parte del segundo entre las dos consultas.
+    const ahora = () => new Date("2026-10-13T12:00:00Z");
+    const t = new Transporte({ ticket: "T", ahora, dormir: async (ms) => void esperas.push(ms), fetch: async () => json({ Listado: [] }) });
     await t.v1("a");
     await t.v1("b");
-    expect(esperas).toHaveLength(1);
-    expect(esperas[0]).toBeGreaterThan(900);
+    expect(esperas).toEqual([1000]);
   });
 
   it("v2 manda el ticket en header y devuelve payload", async () => {

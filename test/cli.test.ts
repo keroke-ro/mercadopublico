@@ -1,14 +1,17 @@
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import { main } from "../src/cli.js";
 import { diaSantiago } from "../src/fecha.js";
 
 const fixture = (n: string) => readFileSync(new URL(`./fixtures/v1/${n}.json`, import.meta.url), "utf8");
+const dirs: string[] = [];
+const temporal = () => dirs[dirs.push(mkdtempSync(join(tmpdir(), "mp-cli-"))) - 1]!;
+afterAll(() => dirs.forEach((d) => rmSync(d, { recursive: true, force: true })));
 
 async function correr(argv: string[], { env = { MP_TICKET: "T-SECRETO" } as Record<string, string>, cuerpo = fixture("licitacion-detalle") } = {}) {
-  const home = mkdtempSync(join(tmpdir(), "mp-cli-"));
+  const home = temporal();
   let out = "";
   let err = "";
   const urls: string[] = [];
@@ -53,8 +56,10 @@ describe("cli", () => {
   });
 
   it("suma lo suyo a lo que haya en el archivo al terminar: otro proceso que gastó a la vez no se pierde", async () => {
-    const home = mkdtempSync(join(tmpdir(), "mp-cli-"));
+    const home = temporal();
     const ruta = join(home, "cuota.json");
+    // Reloj congelado (solo Date): con el real, el test falla si cruza la medianoche de Santiago a mitad de camino.
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-13T23:59:59.900-03:00") });
     const dia = diaSantiago(new Date());
     writeFileSync(ruta, JSON.stringify({ dia, usadas: 10 }));
     const codigo = await main(["licitaciones", "--sin-conversion"], {
@@ -65,13 +70,14 @@ describe("cli", () => {
         writeFileSync(ruta, JSON.stringify({ dia, usadas: 15 })); // otro CLI gastó 5 mientras tanto
         return new Response(fixture("licitaciones-listado"));
       },
-    });
+    }).finally(() => vi.useRealTimers());
+    expect(dia).toBe("2026-10-13");
     expect(codigo).toBe(0);
     expect(JSON.parse(readFileSync(ruta, "utf8"))).toEqual({ dia, usadas: 16 });
   });
 
   it("sync: muestra el margen de reintentos, guarda el cursor y suelta el lock del store", async () => {
-    const store = join(mkdtempSync(join(tmpdir(), "mp-cli-")), "mp.json");
+    const store = join(temporal(), "mp.json");
     const vacio = JSON.stringify({ Cantidad: 0, Listado: [] });
     const r = await correr(["sync", "--desde", "2026-06-01", "--hasta", "2026-06-01", "--fuentes", "licitaciones", "--store", store, "--sin-conversion"], { cuerpo: vacio });
     expect(r.codigo).toBe(0);

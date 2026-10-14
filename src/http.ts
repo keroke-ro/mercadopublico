@@ -189,18 +189,25 @@ export function cancelable<T>(p: Promise<T>, signal?: AbortSignal): Promise<T> {
   });
 }
 
-function unirSeñales(s: AbortSignal[]): AbortSignal {
-  if (typeof AbortSignal.any === "function") return AbortSignal.any(s);
+/** Une señales; `soltar` quita los listeners del respaldo (sin AbortSignal.any) para no acumularlos en una señal larga. */
+function unirSeñales(s: AbortSignal[]): { signal: AbortSignal; soltar: () => void } {
+  if (typeof AbortSignal.any === "function") return { signal: AbortSignal.any(s), soltar: () => {} };
   const c = new AbortController();
+  const quitar: (() => void)[] = [];
   for (const x of s) {
     if (x.aborted) c.abort(x.reason);
-    else x.addEventListener("abort", () => c.abort(x.reason), { once: true });
+    else {
+      const f = () => c.abort(x.reason);
+      x.addEventListener("abort", f, { once: true });
+      quitar.push(() => x.removeEventListener("abort", f));
+    }
   }
-  return c.signal;
+  return { signal: c.signal, soltar: () => quitar.forEach((q) => q()) };
 }
 
 const dormirReal = (ms: number, signal?: AbortSignal) =>
   new Promise<void>((r) => {
+    if (signal?.aborted) return r(); // ya cancelada: no dejar un timer vivo
     const fin = () => {
       clearTimeout(t);
       signal?.removeEventListener("abort", fin);
@@ -252,7 +259,17 @@ export class Transporte {
   readonly cuota: Cuota;
   readonly alEvento?: AlEvento;
   /** Para los parsers: convierte cada `Aviso` en un evento. */
-  readonly avisar = ({ tipo, ...a }: Aviso): void => emitir(this.alEvento, { tipo: "aviso", aviso: tipo, ...a });
+  private avisados = new Set<string>();
+  /**
+   * Un aviso por (origen, tipo, ruta) por cliente: un campo nuevo en la API no puede generar un evento por proceso.
+   * ponytail: por vida del cliente; si hace falta volver a verlos, crear otro cliente.
+   */
+  readonly avisar = ({ tipo, ...a }: Aviso): void => {
+    const k = `${a.origen}|${tipo}|${a.ruta}`;
+    if (this.avisados.has(k)) return;
+    this.avisados.add(k);
+    emitir(this.alEvento, { tipo: "aviso", aviso: tipo, ...a });
+  };
   /** Uno por fuente. Los de los conversores los usa la cadena por defecto de `MercadoPublico`. */
   readonly circuitos: Record<Fuente, Circuito>;
   private cola: Promise<unknown> = Promise.resolve();
@@ -324,8 +341,9 @@ export class Transporte {
     const circuito = this.circuitos[api];
     for (let intento = 1; ; intento++) {
       if (signal?.aborted) throw cancelada(signal);
-      circuito.exigir();
+      // La cuota primero: si fallara después de pasar el circuito a semiabierto, la sonda quedaría tomada para siempre.
       if (this.cuota.restante <= 0) this.cuota.exigir(1, "la consulta");
+      circuito.exigir();
       this.anotarIntento(intento > 1);
       try {
         const r = await this.unaVez(url, visible, headers, api, intento, signal);
@@ -383,14 +401,16 @@ export class Transporte {
     this.cuota.registrar();
     let status: number | null = null;
     const host = new URL(url).host;
+    let soltar = () => {};
     try {
       let res: Response;
       const senal = unirSeñales(signal ? [signal, AbortSignal.timeout(this.o.timeoutMs)] : [AbortSignal.timeout(this.o.timeoutMs)]);
+      soltar = senal.soltar;
       try {
-        res = await cancelable(this.o.fetch(url, { headers: { accept: "application/json", ...headers }, signal: senal }), signal);
+        res = await cancelable(this.o.fetch(url, { headers: { accept: "application/json", ...headers }, signal: senal.signal }), signal);
       } catch (e) {
         if (signal?.aborted) throw cancelada(signal);
-        throw new MercadoPublicoError("red", `No se pudo conectar con ${host}`, { cause: e });
+        throw new MercadoPublicoError("red", `No se pudo conectar con ${host}`, { cause: this.sinTicket(e) });
       }
       status = res.status;
       let texto: string;
@@ -398,7 +418,7 @@ export class Transporte {
         texto = await cancelable(res.text(), signal);
       } catch (e) {
         if (signal?.aborted) throw cancelada(signal);
-        throw new MercadoPublicoError("red", `Se cortó la respuesta de ${host}`, { cause: e });
+        throw new MercadoPublicoError("red", `Se cortó la respuesta de ${host}`, { cause: this.sinTicket(e) });
       }
       let cuerpo: unknown;
       try {
@@ -410,8 +430,22 @@ export class Transporte {
       if (error) throw error;
       return api === "v2" ? (cuerpo as { payload?: unknown }).payload : cuerpo;
     } finally {
+      soltar();
       emitir(this.alEvento, { tipo: "consulta", fuente: api, url: visible, status, ms: this.o.ahora().getTime() - t0, intento });
     }
+  }
+
+  /**
+   * Copia del error de red sin el ticket: Bun guarda la URL completa en `path` y Deno la pone en el mensaje, y la v1
+   * lleva el ticket en la URL. Se conserva nombre, mensaje y `code` (también el de `cause`), que es lo útil para depurar.
+   */
+  private sinTicket(e: unknown): Error {
+    const tapar = (t: unknown) => String(t ?? "").replaceAll(this.o.ticket, "***");
+    const x = (e ?? {}) as { name?: string; message?: string; code?: string; cause?: { code?: string } };
+    const limpio = new Error(tapar(x.message ?? e), x.cause?.code ? { cause: { code: x.cause.code } } : undefined) as Error & { code?: string };
+    limpio.name = x.name ?? "Error";
+    if (x.code) limpio.code = tapar(x.code);
+    return limpio;
   }
 }
 
@@ -458,14 +492,20 @@ function clasificar(status: number, cuerpo: unknown, api: "v1" | "v2"): MercadoP
 
   const texto = (mensaje ?? "").toLowerCase();
   let tipo: TipoError;
+  const codigoHttp5xx = Number(codigo) >= 500 && Number(codigo) < 600;
   if (Number(codigo) === 10500 || /simult[aá]ne/.test(texto)) tipo = "simultaneas";
-  else if (status === 429 || Number(codigo) === 429) tipo = "cuota_agotada";
+  // Cuota agotada solo si el mensaje lo dice, o si la v2 lo informa con su código 429 documentado.
+  else if (CUOTA_AGOTADA.test(texto) && (status === 429 || codigo !== undefined)) tipo = "cuota_agotada";
+  else if (api === "v2" && (status === 429 || Number(codigo) === 429)) tipo = "cuota_agotada";
+  // Un 429 de la v1 sin mensaje de cuota (cuerpo vacío, HTML de un proxy, 10500 cortado) es freno por ritmo: se reintenta.
+  else if (api === "v1" && status === 429) tipo = "simultaneas";
   else if (status === 401 || status === 403) tipo = "ticket_invalido";
-  // En la v1 el status HTTP no es confiable: si vino un Codigo, manda el código (y el mensaje para ticket y cuota).
-  else if (api === "v1" && codigo !== undefined)
-    tipo = TICKET_INVALIDO.test(texto) ? "ticket_invalido" : CUOTA_AGOTADA.test(texto) ? "cuota_agotada" : "parametros";
+  else if (api === "v1" && codigo !== undefined && TICKET_INVALIDO.test(texto)) tipo = "ticket_invalido";
+  // En la v1 el status HTTP no es confiable: un Codigo propio (10300…) es error del pedido aunque venga con 500.
+  // Un Codigo que es un 5xx HTTP, en cambio, es falla del servidor.
+  else if (api === "v1" && codigo !== undefined && !codigoHttp5xx) tipo = "parametros";
   else if (status === 404) tipo = "no_encontrado";
-  else if (status >= 500) tipo = "servidor";
+  else if (status >= 500 || codigoHttp5xx) tipo = "servidor";
   else if (mensaje !== undefined || status === 400 || status === 422) tipo = "parametros";
   else tipo = "respuesta_invalida";
 

@@ -48,6 +48,43 @@ describe("storeArchivo", () => {
     await (await storeArchivo(ruta)).cerrar!();
   });
 
+  it("un proceso vivo de esta máquina no pierde el lock aunque lleve más de 10 min sin renovarlo (suspendido)", async () => {
+    const ruta = join(dir(), "mp.json");
+    const viejo = new Date(Date.now() - 60 * 60_000);
+    writeFileSync(`${ruta}.lock`, JSON.stringify({ pid: process.pid, host: hostname() }));
+    utimesSync(`${ruta}.lock`, viejo, viejo);
+    await expect(storeArchivo(ruta)).rejects.toThrow(/en uso/);
+
+    writeFileSync(`${ruta}.lock`, JSON.stringify({ host: hostname() })); // sin pid: solo queda la antigüedad
+    utimesSync(`${ruta}.lock`, viejo, viejo);
+    await (await storeArchivo(ruta)).cerrar!();
+  });
+
+  it("si le quitaron el lock, no escribe: falla claro y deja intacto el store del otro", async () => {
+    const ruta = join(dir(), "mp.json");
+    const s = await storeArchivo(ruta);
+    await s.guardar([lic("A")]);
+    const otro = JSON.stringify({ pid: 1, host: "otra-maquina", desde: "2026-10-13T00:00:00Z" });
+    writeFileSync(`${ruta}.lock`, otro);
+    writeFileSync(ruta, '{"procesos":{},"cursores":{"del":"otro"}}');
+    await expect(s.guardar([lic("B")])).rejects.toThrow(/Se perdió el lock.*otra-maquina/);
+    expect(readFileSync(ruta, "utf8")).toBe('{"procesos":{},"cursores":{"del":"otro"}}');
+    expect(readFileSync(`${ruta}.lock`, "utf8")).toBe(otro);
+    expect(existsSync(`${ruta}.${process.pid}.tmp`)).toBe(false);
+    await s.cerrar!(); // no borra el lock ajeno
+    expect(readFileSync(`${ruta}.lock`, "utf8")).toBe(otro);
+  });
+
+  it("escribe a un temporal propio del proceso: no toca el .tmp de otro", async () => {
+    const ruta = join(dir(), "mp.json");
+    writeFileSync(`${ruta}.tmp`, "ajeno");
+    const s = await storeArchivo(ruta);
+    await s.guardar([lic("A")]);
+    await s.cerrar!();
+    expect(readFileSync(`${ruta}.tmp`, "utf8")).toBe("ajeno");
+    expect(existsSync(`${ruta}.${process.pid}.tmp`)).toBe(false);
+  });
+
   it("un archivo dañado se aparta y falla con un mensaje claro, sin partir vacío en silencio", async () => {
     const d = dir();
     const ruta = join(d, "mp.json");

@@ -17,15 +17,15 @@ afterAll(async () => {
 });
 
 const r10500 = (status: number): Respuesta => ({ status, cuerpo: { Codigo: 10500, Mensaje: "Lo sentimos. Hemos detectado que existen peticiones simultáneas." } });
-const intervalos = (ruta: Ruta) => srv.de(ruta).map((l, i, a) => (i ? l.t - a[i - 1]!.t : 0)).slice(1);
+const intervalos = (t: number[]) => t.slice(1).map((x, i) => x - t[i]!);
 
 describe("lentitud y cortes", () => {
   it("headers después del timeout: error de red, se reintenta, cuenta en la cuota y el servidor ve el socket cerrado", async () => {
     srv.fallar("lic", { demoraMs: 2000 });
-    const { mp, eventos, de } = cliente(srv, { timeoutMs: 100 });
+    const { mp, eventos, de } = cliente(srv, { timeoutMs: 500 }); // holgado: el reintento (normal) no debe expirar con carga
     const r = await medir(mp.licitaciones.porCodigo("1000-1-LE26"));
     expect(r.valor?.codigo).toBe("1000-1-LE26");
-    expect(r.ms).toBeLessThan(1000);
+    expect(r.ms).toBeLessThan(2000); // no esperó la demora del servidor (los eventos de abajo lo prueban sin reloj)
     expect(mp.cuota.usadas).toBe(2);
     expect(de("consulta").map((e) => [e.status, e.intento])).toEqual([[null, 1], [200, 2]]);
     expect(de("reintento").map((e) => e.motivo)).toEqual(["red"]);
@@ -35,10 +35,9 @@ describe("lentitud y cortes", () => {
 
   it("headers rápidos y cuerpo a goteo más allá del timeout: el timeout cubre el cuerpo", async () => {
     srv.fallar("lic", { goteo: { trozo: 64, pausaMs: 30 } });
-    const { mp, de } = cliente(srv, { timeoutMs: 150 });
+    const { mp, de } = cliente(srv, { timeoutMs: 500 }); // el goteo completo tarda ≥ 1,7 s
     const r = await medir(mp.licitaciones.porCodigo("1000-2-LE26"));
     expect(r.valor?.codigo).toBe("1000-2-LE26");
-    expect(r.ms).toBeLessThan(1000);
     expect(de("consulta").map((e) => e.status)).toEqual([200, 200]); // el primero llegó a dar status, después se cortó
     expect(de("reintento").map((e) => e.motivo)).toEqual(["red"]);
     await srv.cerrada(srv.de("lic")[0]!);
@@ -98,19 +97,22 @@ describe("HTTP 200 con un cuerpo que no es la API", () => {
 });
 
 describe("tormenta de 10500", () => {
-  it.each([429, 500, 200])("con HTTP %i: la pausa real entre llegadas sube con cada rechazo y baja tras los éxitos", async (status) => {
+  it.each([429, 500, 200])("con HTTP %i: la pausa real entre consultas sube con cada rechazo y baja tras los éxitos", async (status) => {
     srv.fallar("lic", r10500(status), r10500(status), r10500(status));
-    const { mp, de } = cliente(srv, { intervaloMs: 10, ritmo: { factor: 2, maximoMs: 80, exitos: 2, pasoMs: 30 } });
+    const { mp, de, inicios } = cliente(srv, { intervaloMs: 10, ritmo: { factor: 2, maximoMs: 80, exitos: 2, pasoMs: 30 } });
     expect(await mp.licitaciones.delDia("2026-10-01")).toHaveLength(3);
     expect(de("reintento").map((e) => e.motivo)).toEqual(["simultaneas", "simultaneas", "simultaneas"]);
     expect(de("ritmo").map((e) => e.intervaloMs)).toEqual([20, 40, 80]);
     for (let i = 0; i < 6; i++) await mp.licitaciones.delDia("2026-10-02");
     expect(de("ritmo").map((e) => e.intervaloMs)).toEqual([20, 40, 80, 50, 20, 10]);
     expect(mp.salud().v1.intervaloMs).toBe(10);
-    // Lo que importa es lo que ve el servidor: cada llegada respeta la pausa vigente (3 ms de holgura: reloj en ms
-    // del cliente y latencia distinta entre una conexión nueva y una reutilizada).
+    // Entre inicios de fetch en el cliente, no entre llegadas al servidor (con carga una se atrasa y la siguiente no, y
+    // el hueco "se achica"). 5 ms de holgura: el ritmo usa Date (ms enteros) y setTimeout cuenta desde el reloj del
+    // loop, que Node cachea al inicio de cada vuelta, así que puede disparar un poco antes de lo pedido (con load ~25
+    // se vio 2 ms antes).
     const esperado = [20, 40, 80, 80, 50, 50, 20, 20, 10];
-    intervalos("lic").forEach((g, i) => expect(g).toBeGreaterThanOrEqual(esperado[i]! - 3));
+    expect(inicios).toHaveLength(10);
+    intervalos(inicios).forEach((g, i) => expect(g).toBeGreaterThanOrEqual(esperado[i]! - 5));
     expect(mp.cuota.usadas).toBe(10);
   });
 
@@ -129,8 +131,7 @@ describe("tormenta de 10500", () => {
 describe("cuota agotada", () => {
   const nok = { success: "NOK", trace: null, payload: null, errors: [{ codigo: "429", mensaje: "Se ha alcanzado el límite de solicitudes permitido. Intente nuevamente más tarde.", detalle: null }] };
   it.each<[string, Ruta, Respuesta]>([
-    ["v1 HTTP 429 sin cuerpo", "lic", { status: 429, cuerpo: "" }],
-    ["v1 HTTP 429 con HTML", "lic", { status: 429, cuerpo: "<html>Too Many Requests</html>", headers: { "content-type": "text/html" } }],
+    ["v1 HTTP 429 con mensaje de cuota", "lic", { status: 429, cuerpo: { Codigo: 429, Mensaje: "Ha superado el límite diario de solicitudes" } }],
     ["v1 HTTP 200 con mensaje de límite diario", "lic", { status: 200, cuerpo: { Codigo: 10001, Mensaje: "Ha superado el límite diario de solicitudes" } }],
     ["v2 HTTP 429 NOK (guía §4.2)", "v2", { status: 429, cuerpo: nok, headers: { "retry-after": "3600" } }],
     ["v2 HTTP 200 NOK con código 429", "v2", { status: 200, cuerpo: nok }],
@@ -142,6 +143,21 @@ describe("cuota agotada", () => {
     expect(srv.de(ruta)).toHaveLength(1);
     expect(de("reintento")).toEqual([]);
     expect(mp.salud()[ruta === "lic" ? "v1" : "v2"]).toMatchObject({ estado: "cerrado", fallas: 0 }); // el servicio responde
+  });
+
+  // En la v1 un 429 sin mensaje de cuota es freno por ritmo (un 10500 cortado, un proxy): se reintenta.
+  it.each<[string, Respuesta]>([
+    ["v1 HTTP 429 sin cuerpo", { status: 429, cuerpo: "" }],
+    ["v1 HTTP 429 con HTML", { status: 429, cuerpo: "<html>Too Many Requests</html>", headers: { "content-type": "text/html" } }],
+    ["v1 HTTP 429 con JSON sin mensaje de cuota", { status: 429, cuerpo: { Mensaje: "Too Many Requests" } }],
+  ])("%s → simultaneas, se reintenta y responde", async (_, falla) => {
+    srv.fallar("lic", falla);
+    const { mp, de } = cliente(srv);
+    expect(await mp.licitaciones.delDia("2026-10-01")).toHaveLength(3);
+    expect(srv.de("lic")).toHaveLength(2);
+    expect(de("reintento").map((e) => e.motivo)).toEqual(["simultaneas"]);
+    expect(mp.cuota.usadas).toBe(2);
+    expect(mp.cuota.restante).toBeGreaterThan(0);
   });
 });
 
@@ -157,9 +173,8 @@ describe("circuito de la v2 ante success ERROR con HTTP 500", () => {
     await expect(mp.compraAgil.pagina({}, 1)).rejects.toMatchObject({ tipo: "servidor" });
     expect(mp.salud().v2).toMatchObject({ estado: "abierto", fallas: 3 });
 
-    const rapido = await medir(mp.compraAgil.pagina({}, 1));
-    expect(rapido.error).toMatchObject({ tipo: "circuito_abierto" });
-    expect(rapido.ms).toBeLessThan(20);
+    // Falla rápido = sin tocar el servidor (se cuenta abajo), no un tiempo: con carga cualquier umbral en ms es frágil.
+    await expect(mp.compraAgil.pagina({}, 1)).rejects.toMatchObject({ tipo: "circuito_abierto" });
     await expect(mp.compraAgil.detalle("3000-1-COT26")).rejects.toMatchObject({ tipo: "circuito_abierto" });
     expect(srv.de("v2").length + srv.de("v2det").length).toBe(3);
     expect(mp.cuota.usadas).toBe(3);
@@ -184,7 +199,7 @@ describe("concurrencia", () => {
     for (const r of ["lic", "oc", "v2", "v2det"] as const) srv.siempre(r, (l) => ({ demoraMs: 2 + (l.n % 3) }));
     srv.fallar("lic", r10500(429), undefined, { status: 503, cuerpo: "" }, { demoraMs: 500 });
     srv.fallar("v2det", undefined, { status: 429, cuerpo: { success: "NOK", errors: [{ codigo: "10500", mensaje: "peticiones simultáneas" }] } });
-    const { mp } = cliente(srv, { timeoutMs: 100 });
+    const { mp } = cliente(srv, { timeoutMs: 250 }); // corta la demora de 500 ms; con carga, 100 ms cortaba también las normales
     const tareas: Promise<unknown>[] = [];
     for (let i = 0; i < 8; i++) {
       tareas.push(mp.licitaciones.porCodigo(`1000-${(i % 6) + 1}-LE26`));
@@ -201,7 +216,7 @@ describe("concurrencia", () => {
 });
 
 describe("cancelación sobre sockets reales", () => {
-  it("con la consulta en vuelo: rechaza en < 100 ms, el servidor ve el socket cerrado y no hay reintento", async () => {
+  it("con la consulta en vuelo: rechaza de inmediato, el servidor ve el socket cerrado y no hay reintento", async () => {
     srv.fallar("lic", { colgar: true });
     const { mp, de } = cliente(srv, { timeoutMs: 30_000 });
     const ac = new AbortController();
@@ -211,14 +226,14 @@ describe("cancelación sobre sockets reales", () => {
     ac.abort();
     const r = await medir(p);
     expect(r.error).toMatchObject({ tipo: "cancelada" });
-    expect(r.ms).toBeLessThan(100);
+    expect(r.ms).toBeLessThan(1000); // la alternativa es 10-60 s o nunca; con carga, 100 ms no alcanza
     await srv.cerrada(l);
     expect(de("reintento")).toEqual([]);
     expect(mp.cuota.usadas).toBe(1);
     expect(timers()).toBeLessThanOrEqual(antes);
   });
 
-  it("en la pausa del ritmo: rechaza en < 100 ms sin llegar al servidor ni gastar cuota", async () => {
+  it("en la pausa del ritmo: rechaza de inmediato sin llegar al servidor ni gastar cuota", async () => {
     const { mp } = cliente(srv, { intervaloMs: 10_000 });
     await mp.licitaciones.delDia("2026-10-01");
     const antes = timers();
@@ -228,13 +243,13 @@ describe("cancelación sobre sockets reales", () => {
     ac.abort();
     const r = await medir(p);
     expect(r.error).toMatchObject({ tipo: "cancelada" });
-    expect(r.ms).toBeLessThan(100);
+    expect(r.ms).toBeLessThan(1000); // la alternativa es 10-60 s o nunca; con carga, 100 ms no alcanza
     expect(srv.de("lic")).toHaveLength(1);
     expect(mp.cuota.usadas).toBe(1);
     expect(timers()).toBeLessThanOrEqual(antes);
   });
 
-  it("en el backoff: rechaza en < 100 ms y no vuelve a pedir", async () => {
+  it("en el backoff: rechaza de inmediato y no vuelve a pedir", async () => {
     srv.fallar("lic", { status: 503, cuerpo: "" });
     const { mp, de } = cliente(srv, { esperaBaseMs: 60_000 });
     const antes = timers();
@@ -244,7 +259,7 @@ describe("cancelación sobre sockets reales", () => {
     ac.abort();
     const r = await medir(p);
     expect(r.error).toMatchObject({ tipo: "cancelada" });
-    expect(r.ms).toBeLessThan(100);
+    expect(r.ms).toBeLessThan(1000); // la alternativa es 10-60 s o nunca; con carga, 100 ms no alcanza
     await new Promise((r) => setTimeout(r, 20));
     expect(srv.de("lic")).toHaveLength(1);
     expect(timers()).toBeLessThanOrEqual(antes);
@@ -258,7 +273,7 @@ describe("cancelación sobre sockets reales", () => {
     await srv.llegada("lic");
     ac.abort();
     const rs = await Promise.all(ps);
-    expect(rs.every((r) => (r.error as MercadoPublicoError)?.tipo === "cancelada" && r.ms < 100)).toBe(true);
+    expect(rs.every((r) => (r.error as MercadoPublicoError)?.tipo === "cancelada" && r.ms < 1000)).toBe(true);
     await new Promise((r) => setTimeout(r, 20));
     expect(srv.de("lic")).toHaveLength(1);
     expect(mp.cuota.usadas).toBe(1);

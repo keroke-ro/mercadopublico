@@ -190,13 +190,14 @@ describe("cancelación", () => {
   });
 
   it("corta la pausa del ritmo y el backoff de inmediato, con el dormir real", async () => {
-    const { t, urls } = armar([], { dormir: undefined, ahora: undefined });
+    const { t, urls } = armar([], { dormir: undefined, ahora: undefined, intervaloMs: 60_000 });
     await t.v1("x");
-    const t0 = Date.now();
-    await expect(t.v1("x", {}, { signal: abortar() })).rejects.toMatchObject(cancelada); // esperaba ~1 s
+    const t0 = performance.now();
+    await expect(t.v1("x", {}, { signal: abortar() })).rejects.toMatchObject(cancelada); // esperaba 60 s
     const b = armar([json({}, 503)], { dormir: undefined, intervaloMs: 0, esperaBaseMs: 60_000 });
     await expect(b.t.v1("x", {}, { signal: abortar() })).rejects.toMatchObject(cancelada);
-    expect(Date.now() - t0).toBeLessThan(500);
+    // Las esperas eran de 60 s: el margen es para una máquina cargada, no para distinguir.
+    expect(performance.now() - t0).toBeLessThan(2000);
     expect(urls).toHaveLength(1);
     expect(b.urls).toHaveLength(1);
   });

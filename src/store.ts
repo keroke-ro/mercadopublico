@@ -45,7 +45,10 @@ export function storeMemoria(): Store {
   return new StoreMemoria();
 }
 
-/** Un lock sin señales de vida por más de esto se considera abandonado. Mientras el dueño vive, lo renueva cada minuto. */
+/**
+ * Un lock de otra máquina (o sin pid) sin señales de vida por más de esto se considera abandonado. Mientras el dueño
+ * vive, lo renueva cada minuto. En la misma máquina manda el pid: un proceso vivo pero suspendido no lo pierde.
+ */
 const VENCE_LOCK_MS = 10 * 60_000;
 
 type Fs = typeof import("node:fs/promises");
@@ -54,6 +57,7 @@ type Fs = typeof import("node:fs/promises");
  * Store en un archivo JSON. Se lee entero al abrir y se reescribe (atómico: tmp + fsync + rename) en cada lote.
  * Toma `<ruta>.lock` (pid, host y hora; nunca el ticket) para que dos procesos no escriban el mismo archivo: si otro
  * lo tiene, falla con un mensaje claro. El lock se libera con `cerrar()` o queda abandonado si el proceso muere.
+ * Antes de cada rename revisa que el lock siga siendo suyo: si se lo quitaron, falla sin pisar el store del otro.
  * Si el JSON está dañado, lo mueve a `<ruta>.corrupto-<fecha>` y falla: nunca parte de cero en silencio.
  * ponytail: sirve hasta unas decenas de miles de procesos; más allá, usar un Store con base de datos.
  * Solo Node/Bun/Deno: importa node:fs al abrir.
@@ -63,6 +67,7 @@ export async function storeArchivo(ruta: string): Promise<Store> {
   const { hostname } = await import("node:os");
   const lock = `${ruta}.lock`;
   const yo = await tomarLock(fs, ruta, lock, hostname());
+  const tmp = `${ruta}.${process.pid}.tmp`; // por proceso: otro que escriba la misma ruta no comparte el temporal
   const latido = setInterval(() => {
     const t = new Date();
     fs.utimes(lock, t, t).catch(() => {});
@@ -89,14 +94,20 @@ export async function storeArchivo(ruta: string): Promise<Store> {
       .catch(() => {})
       .then(async () => {
         if (cerrado) throw new Error(`El store ${ruta} ya se cerró`);
-        const h = await fs.open(`${ruta}.tmp`, "w");
+        const h = await fs.open(tmp, "w");
         try {
           await h.writeFile(JSON.stringify(d));
           await h.sync();
         } finally {
           await h.close();
         }
-        await fs.rename(`${ruta}.tmp`, ruta);
+        // ponytail: queda una ventana de ms entre revisar y renombrar; cerrarla del todo pide un lock del sistema (flock).
+        const dueño = await fs.readFile(lock, "utf8").catch(() => "");
+        if (dueño !== yo) {
+          await fs.rm(tmp, { force: true });
+          throw new Error(`Se perdió el lock de ${ruta} (${lock}: ${dueño || "no existe"}); no se escribe para no pisar el store de otro proceso. Vuelve a abrirlo.`);
+        }
+        await fs.rename(tmp, ruta);
       }));
 
   return new (class extends StoreMemoria {
@@ -141,17 +152,24 @@ async function tomarLock(fs: Fs, ruta: string, lock: string, host: string): Prom
   }
 }
 
-/** ¿El dueño del lock murió (mismo host) o dejó de renovarlo? */
+/** ¿El dueño del lock murió (mismo host: por pid, aunque lleve rato sin renovarlo) o dejó de renovarlo (otro host o sin pid)? */
 function abandonado(contenido: string, mtimeMs: number, host: string): boolean {
-  if (Date.now() - mtimeMs > VENCE_LOCK_MS) return true;
-  try {
-    const l = JSON.parse(contenido) as { pid?: number; host?: string };
-    if (l.host !== host || !Number.isInteger(l.pid)) return false;
-    process.kill(l.pid!, 0); // no mata: solo pregunta si existe
-    return false;
-  } catch (e) {
-    return (e as NodeJS.ErrnoException).code === "ESRCH";
+  const l = ((): { pid?: unknown; host?: unknown } | null => {
+    try {
+      return JSON.parse(contenido);
+    } catch {
+      return null;
+    }
+  })();
+  if (l?.host === host && Number.isInteger(l.pid)) {
+    try {
+      process.kill(l.pid as number, 0); // no mata: solo pregunta si existe
+      return false;
+    } catch (e) {
+      return (e as NodeJS.ErrnoException).code === "ESRCH"; // EPERM: existe, de otro usuario
+    }
   }
+  return Date.now() - mtimeMs > VENCE_LOCK_MS;
 }
 
 async function leer(fs: Fs, ruta: string): Promise<Datos> {

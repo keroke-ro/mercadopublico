@@ -41,6 +41,8 @@ export interface ListadoSync {
   paginas: number;
   /** v1: procesos guardados que se vuelven a pedir; no es un listado ni mueve el cursor. */
   refresco?: true;
+  /** Códigos cuyo detalle falló por algo pasajero en vueltas anteriores; se reintentan primero (1 consulta c/u). */
+  pendientes?: string[];
 }
 
 export interface PlanSync {
@@ -73,6 +75,8 @@ export interface ResultadoSync {
   /** Procesos ya guardados que no se volvieron a consultar: en estado final o (v2) sin cambios desde la última vez. */
   omitidos: number;
   errores: { codigo: string; error: string }[];
+  /** Pendientes que fallaron PENDIENTES_MAX veces seguidas y se dejan de reintentar (también van en `errores`). */
+  abandonados?: string[];
   /**
    * Si se detuvo antes de terminar: `"cancelado"` si se disparó el `signal`, o por qué (se acabó la cuota local).
    * Lo hecho quedó guardado y los cursores nunca quedan adelante de lo guardado: la próxima vuelta sigue desde ahí.
@@ -88,6 +92,8 @@ export interface ResultadoSync {
  */
 const FINALES: ReadonlySet<string> = new Set(["adjudicada", "desierta", "revocada", "cancelada", "recepcion_conforme", "oc_emitida"]);
 const ABORTAN: ReadonlySet<string> = new Set(["cuota_agotada", "cuota_insuficiente", "ticket_invalido", "circuito_abierto", "cancelada"]);
+/** Vueltas en que un detalle puede fallar por algo pasajero antes de abandonarlo. */
+const PENDIENTES_MAX = 5;
 /** Medido el 2026-10-13: la API rechaza con 10500 entre 15% y 30% de las consultas seriales. */
 const TASA_RECHAZO = 0.25;
 
@@ -105,6 +111,13 @@ function necesita(s: Proceso | undefined, item: Proceso, detalle: boolean): bool
  * Si hace falta, re-listar esos días con un `desde` viejo y sin cursor.
  */
 const REFRESCO_DIAS = 90;
+
+/** Detalles que fallaron por algo pasajero: `{ codigo: intentos }`, en el cursor `<fuente>:pendientes`. */
+const clavePendientes = (f: FuenteSync) => `${f}:pendientes`;
+async function leerPendientes(store: Store, f: FuenteSync): Promise<Record<string, number>> {
+  const v = await store.cursor(clavePendientes(f));
+  return v ? (JSON.parse(v) as Record<string, number>) : {};
+}
 
 const filtrosCA = (cambioDesde: string, hasta: string) => ({ cambioDesde, cambioHasta: sumarDias(hasta, 1) });
 
@@ -138,18 +151,21 @@ export class Sync {
     const listados: ListadoSync[] = [];
     const desglose: PlanSync["desglose"] = [];
     for (const f of fuentes) {
+      const pend = detalle ? Object.keys(await leerPendientes(store, f)) : [];
+      if (pend.length) listados.push({ fuente: f, desde: dia, items: [], paginas: 0, pendientes: pend });
+      const notaPend = pend.length ? ` + ${pend.length} pendientes de vueltas anteriores` : "";
       if (f === "compra_agil") {
         const cambioDesde = (await store.cursor(f)) ?? desde;
         const p = await this.mp.compraAgil.pagina(filtrosCA(cambioDesde, hasta), 1, { signal });
         listados.push({ fuente: f, desde: cambioDesde, items: p.items, paginas: p.totalPaginas });
         const det = detalle ? ` + hasta ${p.totalResultados} detalles (se saltan los sin cambios y los cerrados)` : "";
-        desglose.push({ fuente: f, consultas: Math.max(1, p.totalPaginas) + (detalle ? p.totalResultados : 0), nota: `cota superior: ${p.totalPaginas} páginas${det}, cambios desde ${cambioDesde}` });
+        desglose.push({ fuente: f, consultas: Math.max(1, p.totalPaginas) + (detalle ? p.totalResultados : 0) + pend.length, nota: `cota superior: ${p.totalPaginas} páginas${det}${notaPend}, cambios desde ${cambioDesde}` });
         continue;
       }
       let pedir = 0;
       let omitidos = 0;
       const ds = dias.get(f)!;
-      const listados0 = new Set<string>();
+      const listados0 = new Set<string>(pend);
       for (const d of ds) {
         const items: Proceso[] = await (f === "licitaciones" ? this.mp.licitaciones : this.mp.ordenes).delDia(d, { signal });
         listados.push({ fuente: f, desde: d, items, paginas: 1 });
@@ -168,8 +184,8 @@ export class Sync {
       const que = f === "licitaciones" ? "cerradas" : "creadas";
       desglose.push({
         fuente: f,
-        consultas: ds.length + (detalle ? pedir : 0) + abiertos.length,
-        nota: `exacto: ${ds.length} días (${rango}) + ${detalle ? pedir : 0} detalles + ${abiertos.length} abiertas ${que} en los últimos ${REFRESCO_DIAS} días a refrescar; ${omitidos} ya guardados se omiten`,
+        consultas: ds.length + (detalle ? pedir : 0) + abiertos.length + pend.length,
+        nota: `exacto: ${ds.length} días (${rango}) + ${detalle ? pedir : 0} detalles${notaPend} + ${abiertos.length} abiertas ${que} en los últimos ${REFRESCO_DIAS} días a refrescar; ${omitidos} ya guardados se omiten`,
       });
     }
     const consultas = desglose.reduce((a, d) => a + d.consultas, 0);
@@ -182,6 +198,7 @@ export class Sync {
   /**
    * Con `signal`, cancelar guarda lo ya pedido y devuelve con `detenido: "cancelado"` (no rechaza). Cada lote (un día
    * o una página) se guarda antes de mover su cursor, en una sola escritura si el store tiene `guardarConCursor`.
+   * Un detalle que falla por algo pasajero queda en los pendientes de su fuente, que se escriben antes que el cursor.
    */
   async ejecutar(
     plan: PlanSync,
@@ -194,8 +211,6 @@ export class Sync {
     cuota.exigir(plan.consultas - plan.listadas + (plan.margenReintentos ?? 0), "el sync");
     const antes = cuota.usadas;
     const r: ResultadoSync = { consultas: 0, nuevos: 0, actualizados: 0, omitidos: 0, errores: [] };
-    let reintentar = 0; // errores pasajeros vistos: reintentables o respuesta inválida
-    const fin = () => ({ ...r, consultas: plan.gastadas + cuota.usadas - antes });
     /** ¿Hay que parar ya? Anota por qué. */
     const parar = () => {
       if (signal?.aborted) r.detenido = "cancelado";
@@ -209,35 +224,63 @@ export class Sync {
     const avanzar = () =>
       o.alAvanzar?.({ fuente: actual!, hechas: base + cuota.usadas - inicio, total: plan.desglose.find((d) => d.fuente === actual)?.consultas ?? 0 });
 
+    // Pendientes de la fuente actual. Se escriben antes de mover su cursor (para no saltarse un día con fallas) y
+    // después de guardar los datos de los que salieron (para no perder uno que salió pero no alcanzó a guardarse).
+    let pend: Record<string, number> = {};
+    let sucio = false;
+    const fijarPendientes = async () => {
+      if (sucio) await store.fijarCursor(clavePendientes(actual!), JSON.stringify(pend));
+      sucio = false;
+    };
+    const fin = async () => (await fijarPendientes(), { ...r, consultas: plan.gastadas + cuota.usadas - antes });
+
     /** Lo pedido de un lote, y el cursor si el lote terminó. Datos antes que cursor, o los dos juntos. */
     const guardar = async (ps: Proceso[], clave?: FuenteSync, valor?: string) => {
+      if (clave && valor) await fijarPendientes();
       if (clave && valor && store.guardarConCursor) return store.guardarConCursor(ps, clave, valor);
       if (ps.length) await store.guardar(ps);
       if (clave && valor) await store.fijarCursor(clave, valor);
     };
 
-    /** Pide lo que falte de un lote (un día o una página). undefined = hay que parar; lo pedido ya quedó guardado. */
-    const lote = async (items: Proceso[]): Promise<Proceso[] | undefined> => {
+    /**
+     * Pide lo que falte de un lote (un día, una página, el refresco o los pendientes, que llegan como códigos).
+     * undefined = hay que parar; lo pedido ya quedó guardado. `anotar`: si un error pasajero queda pendiente.
+     */
+    const lote = async (items: (Proceso | string)[], anotar = true): Promise<Proceso[] | undefined> => {
       const listos: Proceso[] = [];
       let completo = false;
       try {
         for (const it of items) {
-          const s = await store.obtener(it.codigo);
-          if (!necesita(s, it, detalle)) {
+          const codigo = typeof it === "string" ? it : it.codigo;
+          const s = await store.obtener(codigo);
+          if (typeof it === "string" ? s && FINALES.has(s.estado) : !necesita(s, it, detalle)) {
+            if (typeof it === "string") (delete pend[codigo], (sucio = true));
             r.omitidos++;
             continue;
           }
           if (detalle && parar()) return undefined;
           try {
-            listos.push(detalle ? await this.detalle(actual!, it.codigo, signal) : it);
+            listos.push(detalle ? await this.detalle(actual!, codigo, signal) : (it as Proceso));
             if (s) r.actualizados++;
             else r.nuevos++;
+            if (codigo in pend) (delete pend[codigo], (sucio = true));
           } catch (e) {
             if (signal?.aborted) return (parar(), undefined);
             if (e instanceof MercadoPublicoError && ABORTAN.has(e.tipo)) throw e;
+            let error = e instanceof Error ? e.message : String(e);
             // Una respuesta inválida (p. ej. una página HTML de mantención con 200) es una caída, no un "no existe".
-            if (e instanceof MercadoPublicoError && (e.reintentable || e.tipo === "respuesta_invalida")) reintentar++;
-            r.errores.push({ codigo: it.codigo, error: e instanceof Error ? e.message : String(e) });
+            if (!(e instanceof MercadoPublicoError && (e.reintentable || e.tipo === "respuesta_invalida"))) {
+              if (codigo in pend) (delete pend[codigo], (sucio = true)); // permanente: reintentar no sirve
+            } else if (typeof it === "string") {
+              // Ya estaba pendiente: un intento más por vuelta (un pendiente que vuelve a fallar en un día no suma).
+              sucio = true;
+              if ((pend[codigo] = (pend[codigo] ?? 0) + 1) >= PENDIENTES_MAX) {
+                delete pend[codigo];
+                (r.abandonados ??= []).push(codigo);
+                error += ` (se abandona tras ${PENDIENTES_MAX} vueltas con error)`;
+              }
+            } else if (anotar && !(codigo in pend)) (pend[codigo] = 1), (sucio = true);
+            r.errores.push({ codigo, error });
           }
           if (detalle) avanzar();
         }
@@ -249,23 +292,29 @@ export class Sync {
     };
 
     if (parar()) return fin();
-    // Un cursor solo avanza mientras todo lo anterior de su fuente salió sin errores pasajeros (red, 5xx, respuesta
-    // inválida), para reintentarlos la próxima vez. Los permanentes (no_encontrado, parametros…) se anotan y no lo frenan.
-    const conErrores = new Set<FuenteSync>();
+    // Un cursor avanza aunque haya detalles con errores pasajeros (red, 5xx, respuesta inválida): quedan pendientes y
+    // se reintentan al principio de las vueltas siguientes, sin re-listar días. Los permanentes (no_encontrado,
+    // parametros…) solo se anotan.
     for (const l of plan.listados) {
       if (l.fuente !== actual) {
+        if (actual) await fijarPendientes();
         actual = l.fuente;
-        base = plan.listados.filter((x) => x.fuente === actual && !x.refresco).length;
+        pend = await leerPendientes(store, actual);
+        base = plan.listados.filter((x) => x.fuente === actual && !x.refresco && !x.pendientes).length;
         inicio = cuota.usadas;
       }
-      const e0 = reintentar;
-      if (l.fuente !== "compra_agil") {
-        const listos = await lote(l.items);
+      if (l.pendientes) {
+        const listos = await lote(l.pendientes);
         if (!listos) return fin();
-        if (reintentar > e0 && !l.refresco) conErrores.add(l.fuente);
+        await guardar(listos);
+        await fijarPendientes();
+        continue;
+      }
+      if (l.fuente !== "compra_agil") {
+        const listos = await lote(l.items, !l.refresco);
+        if (!listos) return fin();
         // El día en que se planificó no estaba completo: no se marca, la próxima vez se vuelve a listar.
-        const marca = !l.refresco && !conErrores.has(l.fuente) && l.desde < plan.dia;
-        await guardar(listos, l.fuente, marca ? l.desde : undefined);
+        await guardar(listos, l.fuente, !l.refresco && l.desde < plan.dia ? l.desde : undefined);
         if (!l.refresco) avanzar();
         continue;
       }
@@ -282,7 +331,7 @@ export class Sync {
         }
         if (n >= total) {
           // La última página va junto con el cursor.
-          await guardar(listos, l.fuente, reintentar === e0 ? max : undefined);
+          await guardar(listos, l.fuente, max);
           break;
         }
         await guardar(listos);

@@ -15,7 +15,7 @@ afterAll(async () => {
 });
 
 /** Cliente con la cadena por defecto (mindicador → Banco Central → paridad) apuntada al servidor y sus circuitos en salud(). */
-function conCadena(timeoutMs = 100) {
+function conCadena(timeoutMs = 300) {
   let cadena: Conversor = async () => null;
   const c = cliente(srv, { conversor: (m, d) => cadena(m, d) });
   const o = { timeoutMs, alEvento: (e: Parameters<NonNullable<typeof c.mp.http.alEvento>>[0]) => c.eventos.push(e) };
@@ -34,8 +34,7 @@ describe("cadena de conversores sobre sockets reales", () => {
   it("mindicador colgado: el timeout corta, responde el Banco Central y no se vuelve a esperar a mindicador", async () => {
     srv.siempre("mindicador", { colgar: true });
     const c = conCadena();
-    const r = await medir(c.mp.licitaciones.porCodigo("1000-7-LE26"));
-    expect(r.ms).toBeLessThan(1000);
+    const r = await medir(c.mp.licitaciones.porCodigo("1000-7-LE26")); // sin timeout, colgar haría expirar el test
     expect(r.valor?.monto).toEqual({ valor: 100, moneda: "CLF", clp: 100 * VALOR.uf, fechaValor: "2026-10-06", fuente: "bcentral.cl" });
     await srv.cerrada(srv.de("mindicador")[0]!);
 
@@ -95,12 +94,12 @@ describe("conversores: respuestas 200 que no son la serie", () => {
 });
 
 describe("OCDS en streaming", () => {
-  const leer = async (url: string, o: Parameters<typeof leerOcds>[1] = {}) => {
+  const leer = async (fuente: Parameters<typeof leerOcds>[0], o: Parameters<typeof leerOcds>[1] = {}, alLeer?: (ps: Proceso[]) => void) => {
     const ps: Proceso[] = [];
     const malas: number[] = [];
     let error: unknown;
     try {
-      for await (const p of leerOcds(url, { ...o, alError: (_, __, n) => malas.push(n) })) ps.push(p);
+      for await (const p of leerOcds(fuente, { ...o, alError: (_, __, n) => malas.push(n) })) ps.push(p), alLeer?.(ps);
     } catch (e) {
       error = e;
     }
@@ -117,37 +116,51 @@ describe("OCDS en streaming", () => {
     expect(OCDS_MALAS).toHaveLength(2);
   });
 
-  // Semántica: leerOcds entrega cada release completa que alcanzó a llegar y después el iterador lanza el error de la
-  // descarga tal cual (fetch: TypeError "terminated"; gzip truncado: error del descompresor). La línea a medias no se
-  // entrega ni pasa por alError: no es una línea mala, es una descarga incompleta.
-  it.each([
-    ["conexión cortada a mitad (socket destruido)", { cortarEn: Math.floor(OCDS_GZ.length / 2) }],
-    ["cierre limpio con el gzip truncado", { cortarEn: Math.floor(OCDS_GZ.length / 2), limpio: true }],
-  ])("%s: entrega lo leído y lanza", async (_, falla) => {
-    srv.fallar("ocds", falla);
-    const r = await leer(srv.urlOcds);
-    expect(r.error).toBeInstanceOf(Error);
+  // Semántica: leerOcds entrega lo que alcanzó a procesarse y después el iterador lanza el error de la descarga tal
+  // cual (fetch: TypeError "terminated"; gzip truncado: error del descompresor). Lo que ya llegó pero nadie había leído
+  // cuando llega el error se descarta (los web streams lo hacen al propagar el error), así que con sockets reales y
+  // carga el prefijo puede quedar vacío. La línea a medias no se entrega ni pasa por alError.
+  it("corte a mitad (stream controlado): entrega lo ya procesado, en orden, y lanza el mismo error", async () => {
+    const corte = new Error("corte");
+    let cortar!: () => void;
+    const leida = new Promise<void>((r) => (cortar = r));
+    // Media descarga y, en la lectura siguiente, el error; pero solo después de que salió la primera release.
+    const s = new ReadableStream<Uint8Array>({
+      start: (c) => c.enqueue(OCDS_GZ.subarray(0, Math.floor(OCDS_GZ.length / 2))),
+      pull: async (c) => (await leida, c.error(corte)),
+    });
+    const r = await leer(s, {}, (ps) => ps.length === 1 && cortar());
+    expect(r.error).toBe(corte);
     expect(r.ps.length).toBeGreaterThan(0);
     expect(r.ps.length).toBeLessThan(OCDS_VALIDAS);
     expect(r.ps.map((p) => p.codigo)).toEqual(r.ps.map((_, i) => `9000-${i + 1}-CM26`)); // en orden, sin huecos
+    expect(r.malas).toEqual([]);
+  });
+
+  it.each([
+    ["conexión cortada a mitad (socket destruido)", { cortarEn: Math.floor(OCDS_GZ.length / 2) }],
+    ["cierre limpio con el gzip truncado", { cortarEn: Math.floor(OCDS_GZ.length / 2), limpio: true }],
+  ])("%s: un prefijo en orden (quizás vacío) y lanza", async (_, falla) => {
+    srv.fallar("ocds", falla);
+    const r = await leer(srv.urlOcds);
+    expect(r.error).toBeInstanceOf(Error);
+    expect(r.ps.length).toBeLessThan(OCDS_VALIDAS);
+    expect(r.ps.map((p) => p.codigo)).toEqual(r.ps.map((_, i) => `9000-${i + 1}-CM26`));
     expect(r.malas.every((n) => n === 21 || n === 42)).toBe(true);
   });
 
-  it("cancelar con el signal a mitad de la descarga: lanza en < 100 ms y el servidor ve el socket cerrado", async () => {
+  it("cancelar con el signal a mitad de la descarga: lanza AbortError sin terminarla y el servidor ve el socket cerrado", async () => {
     srv.fallar("ocds", { goteo: { trozo: 64, pausaMs: 20 } });
     const ac = new AbortController();
-    const p = leer(srv.urlOcds, { signal: ac.signal });
-    const l = await srv.llegada("ocds");
-    await new Promise((r) => setTimeout(r, 50));
-    ac.abort();
-    const { valor, ms } = await medir(p);
-    expect(ms).toBeLessThan(100);
-    expect((valor?.error as Error)?.name).toBe("AbortError");
-    await srv.cerrada(l);
+    // Se cancela al recibir la primera release, no tras un tiempo fijo: con carga el goteo podría haber terminado.
+    const r = await leer(srv.urlOcds, { signal: ac.signal }, () => ac.abort());
+    expect((r.error as Error)?.name).toBe("AbortError");
+    expect(r.ps.length).toBeLessThan(OCDS_VALIDAS); // puede salir el resto del trozo ya descomprimido, no el archivo
+    await srv.cerrada(srv.de("ocds")[0]!);
   });
 
   it("dejar de leer antes del final (--max): se suelta la conexión", async () => {
-    srv.fallar("ocds", { goteo: { trozo: 256, pausaMs: 5 } });
+    srv.fallar("ocds", { goteo: { trozo: 256, pausaMs: 50 } }); // pausa holgada: con carga, que no termine antes del break
     const it = leerOcds(srv.urlOcds);
     for await (const p of it) if (p.codigo === "9000-3-CM26") break;
     await srv.cerrada((await srv.llegada("ocds"))!);

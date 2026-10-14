@@ -41,6 +41,19 @@ function v1(dias: Record<string, Record<string, number>>, estados: Record<string
   };
 }
 
+/** Store en memoria que anota cada escritura: `fijarCursor clave=valor` o `códigos@cursor`. */
+function espiar(llamadas: string[]): Store {
+  const base = storeMemoria();
+  return {
+    obtener: (c) => base.obtener(c),
+    cursor: (c) => base.cursor(c),
+    todos: () => base.todos(),
+    guardar: async (ps) => (llamadas.push("guardar"), base.guardar(ps)),
+    fijarCursor: async (c, v) => (llamadas.push(`fijarCursor ${c}=${v}`), base.fijarCursor(c, v)),
+    guardarConCursor: async (ps, c, v) => (llamadas.push(`${ps.map((p) => p.codigo).join("")}@${v}`), await base.guardar(ps), base.fijarCursor(c, v)),
+  };
+}
+
 const lic = (codigo: string, CodigoEstado: number) => parseLicitacion({ CodigoExterno: codigo, Nombre: codigo, CodigoEstado });
 
 describe("sync v1", () => {
@@ -100,15 +113,58 @@ describe("sync v1", () => {
     expect(pedidos.slice(n).map((u) => u.searchParams.get("codigo"))).toEqual([null, "E"]);
   });
 
-  it("un detalle que falla por la red se anota, no corta el sync y no avanza el cursor", async () => {
+  it("un detalle que falla por la red queda pendiente (escrito antes que el cursor), no corta el sync y el cursor avanza", async () => {
     const ruta = v1(dias, { A: 5, B: 8 });
     const { mp } = cliente((u) => (u.searchParams.get("codigo") === "C" ? new Response("", { status: 503 }) : ruta(u)));
-    const store = storeMemoria();
+    const llamadas: string[] = [];
+    const store = espiar(llamadas);
     const plan = await mp.sync.planificar({ desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones"], store });
     const r = await mp.sync.ejecutar(plan);
     expect(r.errores.map((e) => e.codigo)).toEqual(["C"]);
     expect(r).toMatchObject({ nuevos: 2 }); // A y B
-    expect(await store.cursor("licitaciones")).toBe("2026-06-01");
+    expect(r.abandonados).toBeUndefined();
+    expect(llamadas).toEqual(["AB@2026-06-01", 'fijarCursor licitaciones:pendientes={"C":1}', "@2026-06-02"]);
+  });
+
+  it("liveness: un detalle que falla siempre no frena el cursor, cuesta 1 consulta por vuelta y se abandona tras 5", async () => {
+    // Un día nuevo por vuelta; X (día 1) responde 503 siempre.
+    const dias6 = Object.fromEntries([1, 2, 3, 4, 5, 6].map((d) => [`CodigoExterno:0${d}062026`, d === 1 ? { X: 5, D1: 5 } : { [`D${d}`]: 5 }]));
+    const estados6 = Object.fromEntries([1, 2, 3, 4, 5, 6].map((d) => [`D${d}`, 5]));
+    const ruta = v1(dias6, estados6);
+    const { mp } = cliente((u) => (u.searchParams.get("codigo") === "X" ? new Response("", { status: 503 }) : ruta(u)));
+    const store = storeMemoria();
+    const costos: number[] = [];
+    for (let d = 1; d <= 6; d++) {
+      const hasta = `2026-06-0${d}`;
+      const plan = await mp.sync.planificar({ desde: "2026-06-01", hasta, fuentes: ["licitaciones"], store });
+      if (d === 2) expect(plan.desglose[0]!.nota).toMatch(/1 pendientes de vueltas anteriores/);
+      const r = await mp.sync.ejecutar(plan);
+      expect(r.consultas).toBe(plan.consultas); // el plan cuenta los pendientes
+      costos.push(r.consultas);
+      expect(await store.cursor("licitaciones"), hasta).toBe(hasta);
+      expect(r.errores.map((e) => e.codigo)).toEqual(d <= 5 ? ["X"] : []);
+      if (d === 5) {
+        expect(r.abandonados).toEqual(["X"]);
+        expect(r.errores[0]!.error).toMatch(/abandona tras 5/);
+      } else expect(r.abandonados).toBeUndefined();
+      expect(JSON.parse((await store.cursor("licitaciones:pendientes"))!)).toEqual(d < 5 ? { X: d } : {});
+    }
+    expect(costos).toEqual([3, 3, 3, 3, 3, 2]); // día 1: listado + X + D1; después: X + listado + Dd
+  });
+
+  it("un pendiente que vuelve a fallar con un error permanente se descarta sin abandonarlo", async () => {
+    let tipo = 503;
+    const ruta = v1(dias, { A: 5, B: 8 });
+    const { mp } = cliente((u) => (u.searchParams.get("codigo") !== "C" ? ruta(u) : tipo === 503 ? new Response("", { status: 503 }) : Response.json({ Codigo: 400, Mensaje: "falló C" }, { status: 400 })));
+    const store = storeMemoria();
+    const o = { desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones" as const], store };
+    await mp.sync.ejecutar(await mp.sync.planificar(o));
+    expect(await store.cursor("licitaciones:pendientes")).toBe('{"C":1}');
+    tipo = 400;
+    const r = await mp.sync.ejecutar(await mp.sync.planificar(o));
+    expect(r).toMatchObject({ consultas: 1, errores: [{ codigo: "C", error: "falló C" }] });
+    expect(r.abandonados).toBeUndefined();
+    expect(await store.cursor("licitaciones:pendientes")).toBe("{}");
   });
 
   it("un error permanente (400) se anota pero el cursor avanza: no se re-lista para siempre", async () => {
@@ -203,17 +259,8 @@ describe("sync v1", () => {
 
   it("con guardarConCursor, cada día es una sola escritura y el cursor va con sus datos", async () => {
     const { mp } = cliente(v1(dias, estados));
-    const base = storeMemoria();
     const llamadas: string[] = [];
-    const store: Store = {
-      ...base,
-      obtener: (c) => base.obtener(c),
-      cursor: (c) => base.cursor(c),
-      todos: () => base.todos(),
-      guardar: async (ps) => (llamadas.push("guardar"), base.guardar(ps)),
-      fijarCursor: async (c, v) => (llamadas.push("fijarCursor"), base.fijarCursor(c, v)),
-      guardarConCursor: async (ps, c, v) => (llamadas.push(`${ps.map((p) => p.codigo).join("")}@${v}`), await base.guardar(ps), base.fijarCursor(c, v)),
-    };
+    const store = espiar(llamadas);
     await mp.sync.ejecutar(await mp.sync.planificar({ desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones"], store }));
     expect(llamadas).toEqual(["A@2026-06-01", "C@2026-06-02"]);
   });
@@ -285,5 +332,26 @@ describe("sync v2 (Compra Ágil)", () => {
     const r = await mp.sync.ejecutar(await mp.sync.planificar({ desde: "2026-06-01", hasta: HOY, fuentes: ["compra_agil"], store }));
     expect(r.errores.map((e) => e.codigo)).toEqual(["R"]);
     expect(Date.parse((await store.cursor("compra_agil"))!)).toBe(Date.parse("2026-06-11T12:00:00Z"));
+  });
+
+  it("un detalle con error pasajero queda pendiente, el cursor avanza igual y la vuelta siguiente lo trae", async () => {
+    let caido = true;
+    const { mp, detalles } = cliente((u) => (caido && /compra-agil\/R$/.test(u.pathname) ? new Response("", { status: 503 }) : ruta(u)));
+    const store = await storeConPyQ();
+    const o = { desde: "2026-06-01", hasta: HOY, fuentes: ["compra_agil" as const], store };
+    const r = await mp.sync.ejecutar(await mp.sync.planificar(o));
+    expect(r.errores.map((e) => e.codigo)).toEqual(["R"]);
+    expect(Date.parse((await store.cursor("compra_agil"))!)).toBe(Date.parse("2026-06-11T12:00:00Z"));
+    expect(await store.cursor("compra_agil:pendientes")).toBe('{"R":1}');
+
+    caido = false;
+    const n = detalles();
+    const plan = await mp.sync.planificar(o);
+    expect(plan.desglose[0]!.nota).toMatch(/1 pendientes/);
+    const r2 = await mp.sync.ejecutar(plan);
+    expect(r2).toMatchObject({ nuevos: 1, errores: [] });
+    expect(detalles() - n).toBe(1); // R como pendiente; en el listado ya sale igual a lo guardado
+    expect((await store.obtener("R"))?.estado).toBe("publicada");
+    expect(await store.cursor("compra_agil:pendientes")).toBe("{}");
   });
 });
