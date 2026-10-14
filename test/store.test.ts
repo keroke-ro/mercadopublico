@@ -3,7 +3,8 @@ import { existsSync, mkdtempSync, readdirSync, readFileSync, utimesSync, writeFi
 import { hostname, tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { storeArchivo } from "../src/store.js";
+import { diaSantiago } from "../src/fecha.js";
+import { cuotaArchivo, storeArchivo } from "../src/store.js";
 import { parseLicitacion } from "../src/v1/parse.js";
 
 const lic = (codigo: string) => parseLicitacion({ CodigoExterno: codigo, Nombre: codigo, CodigoEstado: 5 });
@@ -98,5 +99,30 @@ describe("storeArchivo", () => {
 
     writeFileSync(ruta, "[]"); // JSON válido pero no es un store
     await expect(storeArchivo(ruta)).rejects.toThrow(/dañado/);
+  });
+});
+
+describe("cuotaArchivo", () => {
+  it("guarda tras cada consulta sumando a lo que diga el archivo, sin contar dos veces", async () => {
+    const ruta = join(dir(), "sub", "cuota.json");
+    const a = await cuotaArchivo(ruta);
+    expect(a.estado).toBeUndefined();
+    const consulta = { tipo: "consulta", fuente: "v1", url: "x", status: 200, ms: 1, intento: 1 } as const;
+    a.alEvento(consulta);
+    a.alEvento({ tipo: "ritmo", fuente: "v1", intervaloMs: 2000 }); // no cuenta
+    await a.guardar();
+    const dia = diaSantiago();
+    expect(JSON.parse(readFileSync(ruta, "utf8"))).toEqual({ dia, usadas: 1 });
+
+    writeFileSync(ruta, JSON.stringify({ dia, usadas: 10 })); // otro proceso sumó mientras tanto
+    a.alEvento(consulta);
+    a.alEvento(consulta);
+    await a.guardar();
+    await a.guardar();
+    expect(JSON.parse(readFileSync(ruta, "utf8"))).toEqual({ dia, usadas: 12 });
+    expect((await cuotaArchivo(ruta)).estado).toEqual({ dia, usadas: 12 });
+
+    writeFileSync(ruta, "{roto");
+    expect((await cuotaArchivo(ruta)).estado).toBeUndefined();
   });
 });

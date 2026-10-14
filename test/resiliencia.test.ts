@@ -122,6 +122,23 @@ describe("circuit breaker", () => {
     await expect(t.v1("x")).rejects.toMatchObject({ tipo: "circuito_abierto" });
   });
 
+  it("un 504 se reintenta una sola vez, no abre el circuito y no deja tomada la sonda", async () => {
+    const gateway = () => json({}, 504);
+    const { t, reloj, urls } = armar([gateway, gateway, gateway, gateway, caida, gateway], { intervaloMs: 0, circuito: { umbral: 1, enfriamientoMs: 1000 } });
+    const err = (await t.v2("compra-agil").catch((e: unknown) => e)) as MercadoPublicoError;
+    expect(err).toMatchObject({ tipo: "servidor", status: 504 });
+    expect(err.message).toMatch(/acótala/);
+    expect(urls).toHaveLength(2);
+    await expect(t.v2("compra-agil")).rejects.toMatchObject({ status: 504 });
+    expect(t.salud().v2.estado).toBe("cerrado");
+    await expect(t.v2("x")).rejects.toMatchObject({ tipo: "servidor", status: 503 });
+    expect(t.salud().v2.estado).toBe("abierto");
+    reloj.t += 1000;
+    await expect(t.v2("x")).rejects.toMatchObject({ status: 504 }); // la sonda no decide…
+    await t.v2("x"); // …y la siguiente vuelve a ser sonda
+    expect(t.salud().v2.estado).toBe("cerrado");
+  });
+
   it("si se abre a mitad de los reintentos entrega el error real", async () => {
     const { t, urls } = armar([caida, caida, caida, caida], { intervaloMs: 0, circuito: { umbral: 2 } });
     await expect(t.v1("x")).rejects.toMatchObject({ tipo: "servidor" });

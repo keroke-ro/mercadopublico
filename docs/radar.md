@@ -71,6 +71,8 @@ Devuelve `Oportunidad[]` (`{ proceso, puntaje, factores }`) ordenado por puntaje
 
 Pasa detalles, no listados: un listado no trae ítems, así que el rubro queda neutro.
 
+Los organismos no siempre clasifican igual. Para software, por ejemplo, además de `4323` (software) y `8111` (servicios informáticos) conviene sumar `801118` (contratistas en TI), que varios usan para el desarrollo a medida.
+
 ### La fórmula
 
 ```
@@ -123,7 +125,7 @@ for (const d of decidir(abiertas, perfil, { historial })) {
 2. **Puntaje.** Desde `umbralPostular` (0,7), postular; desde `umbralRevisar` (0,4), revisar; bajo eso, descartar.
 3. **Agenda.** Las no descartadas entran por puntaje hasta llenar `capacidad` (sin `capacidad`, entran todas) y se ordenan por fecha de cierre: `turno` 1 es lo que cierra antes. Las que no caben traen `turno: null` y lo dicen en `porque`.
 
-`porque`: para postular, los dos factores que más aportan; para revisar, el que más aporta y el que más resta ("Ojo: …"); para descartar, la regla dura o los dos que más restan. Devuelve `Decision[]` (`Oportunidad` + `accion`, `turno`, `porque`): primero la agenda, luego lo que no cupo y al final lo descartado. Lanza `RangeError` si los umbrales no cumplen `0 ≤ umbralRevisar ≤ umbralPostular ≤ 1`, si `capacidad` no es un entero ≥ 0 o si un veto no tiene un factor válido.
+`porque`: para postular, los dos factores que más aportan; para revisar, el que más aporta y el que más resta ("Ojo: …"); para descartar, la regla dura o los dos que más restan. Si postula o revisa una licitación cuyo organismo no publica el monto (`VisibilidadMonto: 0`) y el perfil pesa el monto, lo agrega al final ("Ojo: El organismo no publica el monto estimado…"). Devuelve `Decision[]` (`Oportunidad` + `accion`, `turno`, `porque`): primero la agenda, luego lo que no cupo y al final lo descartado. Lanza `RangeError` si los umbrales no cumplen `0 ≤ umbralRevisar ≤ umbralPostular ≤ 1`, si `capacidad` no es un entero ≥ 0 o si un veto no tiene un factor válido.
 
 ## `calibrar(procesos, perfil, decisiones, opciones?)`
 

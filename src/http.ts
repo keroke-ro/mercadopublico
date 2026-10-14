@@ -150,11 +150,14 @@ export class Circuito {
     }
   }
 
-  /** Anota el resultado de un intento. Un error que no es caída (parámetros, 404, 10500…) prueba que el servicio responde. */
+  /**
+   * Anota el resultado de un intento. Un error que no es caída (parámetros, 404, 10500…) prueba que el servicio responde.
+   * Un 504 no decide: suele ser una consulta demasiado cara para el gateway, no la fuente caída, y no debe bloquear al resto.
+   */
   anotar(e?: unknown): void {
     if (!(e instanceof MercadoPublicoError)) return e === undefined ? this.exito() : this.soltar();
-    if (CAIDAS.has(e.tipo)) this.falla();
-    else if (e.tipo === "cancelada" || e.tipo === "circuito_abierto") this.soltar();
+    if (e.tipo === "cancelada" || e.tipo === "circuito_abierto" || e.status === 504) this.soltar();
+    else if (CAIDAS.has(e.tipo)) this.falla();
     else this.exito();
   }
 
@@ -354,7 +357,9 @@ export class Transporte {
         circuito.anotar(e);
         if (e instanceof MercadoPublicoError && e.tipo === "simultaneas") this.ajustarRitmo(api, false);
         if (e instanceof MercadoPublicoError && e.tipo === "cuota_agotada") this.cuota.agotar();
-        if (!(e instanceof MercadoPublicoError) || !e.reintentable || intento > this.o.reintentos) throw e;
+        // Un 504 se reintenta una sola vez: si la consulta es demasiado cara, insistir solo gasta cuota y minutos.
+        const tope = e instanceof MercadoPublicoError && e.status === 504 ? Math.min(1, this.o.reintentos) : this.o.reintentos;
+        if (!(e instanceof MercadoPublicoError) || !e.reintentable || intento > tope) throw e;
         // Con el circuito recién abierto o sin presupuesto, se entrega el error real en vez de esperar para nada.
         if (circuito.estado === "abierto" || !this.hayPresupuesto()) throw e;
         // Backoff exponencial con jitter: entre la mitad y el total de base·2^(intento-1).
@@ -509,5 +514,6 @@ function clasificar(status: number, cuerpo: unknown, api: "v1" | "v2"): MercadoP
   else if (mensaje !== undefined || status === 400 || status === 422) tipo = "parametros";
   else tipo = "respuesta_invalida";
 
-  return new MercadoPublicoError(tipo, mensaje || `HTTP ${status}`, { status, codigo });
+  const sinMensaje = status === 504 ? "La API no respondió a tiempo (HTTP 504). Suele pasar con consultas amplias: acótala con región o fechas" : `HTTP ${status}`;
+  return new MercadoPublicoError(tipo, mensaje || sinMensaje, { status, codigo });
 }
