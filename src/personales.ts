@@ -4,7 +4,18 @@ import type { Proceso } from "./modelo.js";
 
 export const OCULTO = "[oculto]";
 
+// Los organismos escriben contactos en texto libre ("CONTACTO BODEGA: Nombre, 226126832, nombre@x.gob.cl").
+// ponytail: tapa correos y teléfonos chilenos de 9 dígitos (2… fijo, 9… móvil, con o sin +56); los nombres sueltos
+// en texto libre no se detectan.
+const CORREO = /[\w.+-]+@[\w-]+(\.[\w-]+)+/g;
+const FONO = /(\+?56[\s-]?)?(?<![\d-])[29](?:[\s-]?\d){8}(?![\d-])/g;
+
+export function taparTextoLibre(s: string): string {
+  return s.replace(CORREO, OCULTO).replace(FONO, OCULTO);
+}
+
 function limpiar(x: unknown, campos: ReadonlySet<string>): unknown {
+  if (typeof x === "string") return taparTextoLibre(x);
   if (Array.isArray(x)) return x.map((v) => limpiar(v, campos));
   if (x === null || typeof x !== "object") return x;
   const out: Record<string, unknown> = {};
@@ -21,11 +32,12 @@ function taparRuta(x: unknown, [k, ...resto]: string[]): void {
 }
 
 /**
- * Copia del proceso sin datos personales: `personales` en null y, dentro de `raw`, tapados los `campos` (por nombre
- * de clave, a cualquier profundidad) y cada ruta que el parser anotó en `personales` (relativa a `raw`).
+ * Copia del proceso sin datos personales: `personales` en null; los `campos` tapados por nombre de clave a cualquier
+ * profundidad; cada ruta que el parser anotó en `personales` tapada en `raw`; y correos y teléfonos tapados en todo
+ * texto (descripciones incluidas).
  */
 export function ocultarPersonales<T extends Proceso>(p: T, campos: ReadonlySet<string>): T {
-  const raw = limpiar(p.raw, campos); // copia nueva: se puede mutar
-  for (const ruta of Object.keys(p.personales ?? {})) taparRuta(raw, ruta.split("."));
-  return { ...p, personales: null, raw };
+  const copia = limpiar({ ...p, personales: null }, campos) as T; // copia nueva: se puede mutar
+  for (const ruta of Object.keys(p.personales ?? {})) taparRuta(copia.raw, ruta.split("."));
+  return copia;
 }

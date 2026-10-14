@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:10:46.7185432Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1002772-9905-AG26",
+      "Nombre": "APOSITO CARBON ACTIVO CON PLATA 10 X 10 CM (CENABAST),ID:1002772-2662-COT26,(AG,TRANSV,2204005003,APG)",
+      "CodigoEstado": 6,
+      "Estado": "Aceptada",
+      "CodigoLicitacion": "",
+      "Descripcion": "INSUMO TRANSVERSAL \t\t\t\t\t\t\t\t\t\r\n***DESPACHO PARCIALIZADO DE ACUERDO A REQUERIMIENTO DE BODEGA***\t\t\t\t\t\t\t\t\t\t\r\nDESPACHO SÓLO CON GUÍA DE DESPACHO Y ORDEN DE COMPRA ACEPTADA A: GALVARINO #1509, CERRO NAVIA, PISO -1, BODEGA DE ABASTECIMIENTO.\t\t\t\t\t\t\t\t\t\t\r\nENVIAR DOCUMENTOS TRIBUTARIOS ELECTRÓNICOS EN FORMATO XML A LA CASILLA [oculto] y CONDICION DE PAGO “CRÉDITO”\t\t\t\t\t\t\t\t\t\t\r\nCONTACTO BODEGA: [oculto]:  [oculto], [oculto] \t\t\t\t\t\t\t\t\t\t\r\nINSUMOS SERÁN REVISADOS POR UNIDAD DE BODEGA AL MOMENTO DE RECEPCIONAR.\t\t\t\t\t\t\t\t\t\t\r\n",
+      "CodigoTipo": "13",
+      "Tipo": "AG",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 4,
+      "EstadoProveedor": "Aceptada",
+      "Fechas": {
+        "FechaCreacion": "2026-10-08T14:29:01.61",
+        "FechaEnvio": "2026-10-09T14:10:44.113",
+        "FechaAceptacion": "2026-10-12T17:13:55.877",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-08T14:34:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 810000,
+      "PorcentajeIva": 19,
+      "Impuestos": 153900,
+      "Total": 963900,
+      "Financiamiento": "",
+      "Pais": "Other",
+      "TipoDespacho": "7",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7383",
+        "NombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+        "RutUnidad": "61.608.205-1",
+        "CodigoUnidad": "1002772",
+        "NombreUnidad": "INSUMOS CLINICOS",
+        "Actividad": "Hospital ",
+        "DireccionUnidad": "",
+        "ComunaUnidad": "Cerro Navia",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "1650441",
+        "Nombre": "INSUMEDICAL SPA",
+        "Actividad": "Compra, Venta, exportación e importación de insumos médicos ",
+        "CodigoSucursal": "1058297",
+        "NombreSucursal": "QGMEDIZIN ",
+        "RutSucursal": "76.965.892-0",
+        "Direccion": "LA CAPITANIA N° 80",
+        "Comuna": "Las Condes",
+        "Region": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 42311500,
+            "Categoria": "Equipamiento y suministros médicos / Productos para el cuidado de heridas / Vendas, vendajes y productos relacionados",
+            "CodigoProducto": 42311526,
+            "Producto": "Vendajes de apósitos",
+            "EspecificacionComprador": "318020005\tAPOSITO CARBON ACTIVO CON PLATA 10 X 10 CM  ",
+            "EspecificacionProveedor": "APOSITO CARBON ACTIVO CON PLATA 10 X 10 CM  ",
+            "Cantidad": 300,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 2700,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 0
+          }
+        ]
+      }
+    }
+  ]
+}

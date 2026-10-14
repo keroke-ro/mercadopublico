@@ -21,6 +21,16 @@ Marcas: **(V: clave)** = verificado en esa fuente. **(NV)** = no verificado. Los
 
 ---
 
+
+> **Verificado con ticket real el 2026-10-13** (13 consultas; fixtures en `test/fixtures/v1/*.real.json`):
+> - `licitaciones.json?estado=activas` y `ordenesdecompra.json?fecha=ddmmaaaa` responden con `Listado` de solo `CodigoExterno`/`Codigo`, `Nombre`, `CodigoEstado` (+ `FechaCierre` en licitaciones). `ordenesdecompra.json` es el nombre correcto.
+> - `Publico/Empresas/BuscarComprador` responde `{Cantidad, FechaCreacion, listaEmpresas:[{CodigoEmpresa, NombreEmpresa}]}`.
+> - Fechas de v1 sin offset (hora de Chile), a veces con milisegundos: `2026-10-06T17:51:21.567`.
+> - El detalle de licitación trae `FechaCierre: null` en la raíz; la fecha real está en `Fechas.FechaCierre`. `TipoPago` y `SubContratacion` llegan como string.
+> - En OC, `Items.Listado[].Total` llega en 0 aunque haya `PrecioNeto`; `Unidad` puede ser null; las OC de Compra Ágil (tipo AG) traen `CodigoLicitacion: ""` y el código `…-COT26` dentro de `Nombre`.
+> - Las descripciones traen datos de contacto en texto libre (nombre, teléfono, correo de funcionarios).
+> - v2 Compra Ágil respondió `500 {"codigo":"ERROR_INTERNO","mensaje":"Servicio no disponible…"}` esa noche: sin verificar aún.
+
 ## 1. API v1 (licitaciones, OC, empresas)
 
 **Base:** `https://api.mercadopublico.cl/servicios/v1/publico/` (V: W). Los PDF usan `http://` (V: PL, PO).

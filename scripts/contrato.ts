@@ -97,7 +97,11 @@ const fixture = (fix: string) => JSON.parse(readFileSync(existsSync(ruta(fix, tr
 
 // Mismos campos que CAMPOS_PERSONALES_V1 en src/v1/parse.ts: nunca se commitean datos de funcionarios.
 const PERSONALES = new Set(["RutUsuario", "CodigoUsuario", "NombreUsuario", "CargoUsuario", "NombreResponsablePago", "EmailResponsablePago", "NombreResponsableContrato", "EmailResponsableContrato", "FonoResponsableContrato", "NombreContacto", "CargoContacto", "FonoContacto", "MailContacto", "contactPoint", "rut_proveedor", "razon_social"]);
+// Igual que taparTextoLibre en src/personales.ts.
+const CORREO = /[\w.+-]+@[\w-]+(\.[\w-]+)+/g;
+const FONO = /(\+?56[\s-]?)?(?<![\d-])[29](?:[\s-]?\d){8}(?![\d-])/g;
 function anonimizar(x: unknown): unknown {
+  if (typeof x === "string") return x.replace(CORREO, "[oculto]").replace(FONO, "[oculto]");
   if (Array.isArray(x)) return x.slice(0, 3).map(anonimizar);
   if (x === null || typeof x !== "object") return x;
   return Object.fromEntries(Object.entries(x).map(([k, v]) => [k, PERSONALES.has(k) && v ? "[oculto]" : anonimizar(v)]));
@@ -169,6 +173,9 @@ const directo = (() => {
 })();
 
 if (directo) {
+  try {
+    process.loadEnvFile(); // .env local; en CI viene del secreto
+  } catch {}
   const ticket = process.env.MP_TICKET;
   if (!ticket) {
     console.error("Falta MP_TICKET");

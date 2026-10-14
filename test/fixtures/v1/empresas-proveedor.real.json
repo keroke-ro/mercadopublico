@@ -1,0 +1,19 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "Cantidad": 899,
+  "FechaCreacion": "2026-10-14T01:10:54.0310349Z",
+  "listaEmpresas": [
+    {
+      "CodigoEmpresa": "7086",
+      "NombreEmpresa": "AGENCIA CHILENA DE COOPERACION INTERNACIONAL PARA EL DESARROLLO"
+    },
+    {
+      "CodigoEmpresa": "1224636",
+      "NombreEmpresa": "AGENCIA CHILENA DE EFICIENCIA ENERGETICA"
+    },
+    {
+      "CodigoEmpresa": "7193",
+      "NombreEmpresa": "AGENCIA DE PROMOCION DE LA INVERSION EXTRANJERA"
+    }
+  ]
+}

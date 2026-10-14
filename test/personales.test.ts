@@ -43,3 +43,13 @@ describe("datos personales", () => {
     expect(texto).toContain("770000002"); // la empresa con sucursal a nombre de persona conserva su RUT
   });
 });
+
+describe("texto libre", () => {
+  it("tapa correos y teléfonos chilenos sin tocar códigos, montos ni fechas", async () => {
+    const { taparTextoLibre } = await import("../src/personales.js");
+    const t = "CONTACTO BODEGA: Fulana:  226126832, fulana.tal@redsalud.gob.cl / +56 9 8765 4321 / 912345678";
+    expect(taparTextoLibre(t)).toBe("CONTACTO BODEGA: Fulana:  [oculto], [oculto] / [oculto] / [oculto]");
+    const seguro = "ID:1002772-2662-COT26,(AG,TRANSV,2204005003,APG) monto 1200000 el 2026-10-14 RUT 61.608.205-1";
+    expect(taparTextoLibre(seguro)).toBe(seguro);
+  });
+});

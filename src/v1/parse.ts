@@ -149,7 +149,8 @@ export function parseOrdenCompra(raw: unknown): OrdenCompra {
       cantidad: num(i.Cantidad),
       unidad: str(i.Unidad),
       precioUnitario: monto(i.PrecioNeto, mon, d),
-      total: monto(i.Total, mon, d),
+      // La API real entrega Total 0 en el ítem aunque haya precio (visto en 2026-10): se calcula el neto.
+      total: num(i.Total) ? monto(i.Total, mon, d) : producto(num(i.PrecioNeto), num(i.Cantidad), mon, d),
       proveedor: null,
     };
   });
@@ -171,6 +172,7 @@ export function parseOrdenCompra(raw: unknown): OrdenCompra {
     raw,
     tipoOrden: str(r.Tipo) ?? tipoOC,
     proveedor: Object.keys(p).length ? { rut: str(p.RutSucursal), nombre: str(p.Nombre), codigo: str(p.Codigo) } : null,
-    procesoOrigen: str(r.CodigoLicitacion),
+    // Las OC de Compra Ágil vienen sin CodigoLicitacion pero con "ID:1002772-2662-COT26" en el nombre.
+    procesoOrigen: str(r.CodigoLicitacion) ?? /ID:\s*([\w-]+-COT\d{2})/.exec(String(r.Nombre ?? ""))?.[1] ?? null,
   };
 }

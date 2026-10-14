@@ -1,0 +1,23 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "Cantidad": 964,
+  "FechaCreacion": "2026-10-14T01:10:44.4841697Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1002772-9905-AG26",
+      "Nombre": "APOSITO CARBON ACTIVO CON PLATA 10 X 10 CM (CENABAST),ID:1002772-2662-COT26,(AG,TRANSV,2204005003,APG)",
+      "CodigoEstado": 6
+    },
+    {
+      "Codigo": "1049-1577-SE26",
+      "Nombre": "OC ERP 57581 SERVICIO DE LIMPIEZA Y MANTENCIÓN VALPARAISO Y SAN ANTONIO ",
+      "CodigoEstado": 6
+    },
+    {
+      "Codigo": "1057429-1907-SE26",
+      "Nombre": "PRE ELABORADOS (F) (ENTREGA PARCIALIZADA)",
+      "CodigoEstado": 12
+    }
+  ]
+}

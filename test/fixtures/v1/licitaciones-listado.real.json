@@ -1,0 +1,26 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "Cantidad": 4578,
+  "FechaCreacion": "2026-10-14T01:10:34.8904393Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "CodigoExterno": "1000-24-LE26",
+      "Nombre": "SUM. DE PIEZAS DE MADERA DE ROBLE O COIGÜE",
+      "CodigoEstado": 5,
+      "FechaCierre": "2026-10-16T15:10:00"
+    },
+    {
+      "CodigoExterno": "1001-14-LE26",
+      "Nombre": "SERVICIO DE IMPRESIÓN FOTOCOPIADO Y OTROS",
+      "CodigoEstado": 5,
+      "FechaCierre": "2026-10-16T15:00:00"
+    },
+    {
+      "CodigoExterno": "1001-15-LP26",
+      "Nombre": "SUMINISTRO MAT.GRANULAR CHANCADA Z.COSTA CORDILLER",
+      "CodigoEstado": 5,
+      "FechaCierre": "2026-10-19T15:00:00"
+    }
+  ]
+}

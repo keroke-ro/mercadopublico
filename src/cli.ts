@@ -317,4 +317,10 @@ const directo = (() => {
   }
 })();
 
-if (directo) process.exitCode = await main(process.argv.slice(2), { stdout: process.stdout, stderr: process.stderr, env: process.env });
+if (directo) {
+  // Lee MP_TICKET de un .env en la carpeta actual, si existe; lo que ya está en el entorno manda.
+  try {
+    process.loadEnvFile();
+  } catch {}
+  process.exitCode = await main(process.argv.slice(2), { stdout: process.stdout, stderr: process.stderr, env: process.env });
+}
