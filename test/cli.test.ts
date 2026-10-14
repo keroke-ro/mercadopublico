@@ -105,3 +105,50 @@ describe("cli", () => {
     expect(err.trim().split("\n")).toHaveLength(1);
   });
 });
+
+describe("cli radar", () => {
+  const dir = mkdtempSync(join(tmpdir(), "mp-radar-"));
+  const enDias = (d: number) => new Date(Date.now() + d * 86_400_000).toISOString();
+  const lic = (codigo: string, region: number, extra: object = {}) => ({
+    tipo: "licitacion",
+    codigo,
+    nombre: `Compra ${codigo}`,
+    descripcion: null,
+    estado: "publicada",
+    estadoGlosa: null,
+    comprador: { codigoOrganismo: "7248", nombreOrganismo: "Hospital X", rutUnidad: null, codigoUnidad: null, nombreUnidad: null, region, comuna: null },
+    fechas: { creacion: null, publicacion: null, cierre: enDias(5), adjudicacion: null, ultimoCambio: null },
+    monto: { valor: 1_000_000, moneda: "CLP", clp: 1_000_000, fechaValor: null, fuente: "identidad" },
+    items: [{ codigoProducto: 43211507, nombre: null, descripcion: null, cantidad: 1, unidad: null, precioUnitario: null, total: null, proveedor: null }],
+    oferentes: 0,
+    personales: { NombreUsuario: "Funcionaria Secreta" },
+    origen: "v1",
+    raw: { NombreUsuario: "Funcionaria Secreta" },
+    ...extra,
+  });
+  const store = join(dir, "mp.json");
+  writeFileSync(store, JSON.stringify({ procesos: { A: lic("A", 13), B: lic("B", 5), C: lic("C", 13, { nombre: "Arriendo de algo" }) }, cursores: {} }));
+  const perfil = join(dir, "perfil.json");
+  writeFileSync(perfil, JSON.stringify({ pesos: { rubro: 2, region: 1 }, rubros: ["4321"], regiones: [13], excluir: ["arriendo"] }));
+
+  it("decide desde el store sin ticket ni red, y no muestra datos personales", async () => {
+    const r = await correr(["radar", "--perfil", perfil, "--store", store, "--formato", "tabla"], { env: {} });
+    expect(r.codigo).toBe(0);
+    expect(r.urls).toEqual([]);
+    expect(r.out).toMatch(/1  POSTULA  1\.00  A/);
+    expect(r.out).toMatch(/2  REVISA   0\.67  B/);
+    expect(r.out).toContain("1 descartadas");
+    const json = await correr(["radar", "--perfil", perfil, "--store", store, "--formato", "json"], { env: {} });
+    const datos = JSON.parse(json.out);
+    expect(datos.decisiones.map((d: { codigo: string; accion: string }) => [d.codigo, d.accion])).toEqual([["A", "postular"], ["B", "revisar"], ["C", "descartar"]]);
+    expect(json.out).not.toContain("Funcionaria");
+  });
+
+  it("errores de uso: sin perfil, perfil que no es JSON, store vacío", async () => {
+    expect((await correr(["radar"], { env: {} })).codigo).toBe(2);
+    writeFileSync(join(dir, "malo.json"), "{");
+    expect((await correr(["radar", "--perfil", join(dir, "malo.json"), "--store", store], { env: {} })).err).toMatch(/--perfil: no se pudo leer/);
+    const vacio = await correr(["radar", "--perfil", perfil, "--store", join(dir, "nada.json")], { env: {} });
+    expect(vacio).toMatchObject({ codigo: 2, err: expect.stringMatching(/está vacío/) });
+  });
+});

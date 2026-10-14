@@ -19,6 +19,8 @@ Comandos:
   compradores                         Todos los organismos compradores
   ocds <archivo|url|año> [--max N]    Lee OCDS (.jsonl o .jsonl.gz); no pide ticket
   sync --desde AAAA-MM-DD             Actualiza un store local [--hasta] [--fuentes licitaciones,ordenes,compra_agil] [--store ./mp.json] [--plan]
+  radar --perfil perfil.json          Qué postular primero, a qué precio y qué viene, desde el store; no pide ticket
+                                      [--store ./mp.json] [--decisiones decisiones.json] [--max N (10)]
   cuota                               Consultas usadas hoy desde esta máquina
 
 Opciones:
@@ -55,6 +57,10 @@ npx mercadopublico compradores --formato csv > compradores.csv
 # OCDS, sin ticket: un año del espejo de Open Contracting, una URL o un archivo local
 npx mercadopublico ocds 2026 --max 10
 npx mercadopublico ocds ./2026.jsonl.gz --max 1000 --formato csv
+
+# Radar sobre lo sincronizado, sin ticket ni consultas (ver radar.md)
+npx mercadopublico radar --perfil perfil.json
+npx mercadopublico radar --perfil perfil.json --decisiones decisiones.json --formato csv > hoy.csv
 
 # Sync a un archivo JSON
 npx mercadopublico sync --desde 2026-10-01 --plan                # muestra el plan (gasta los listados)

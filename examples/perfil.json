@@ -1,0 +1,12 @@
+{
+  "pesos": { "rubro": 3, "region": 1, "monto": 2, "diasAlCierre": 2, "competencia": 1, "incumbente": 2 },
+  "rubros": ["4213"],
+  "regiones": [13, 5],
+  "montoMin": 200000,
+  "montoMax": 5000000,
+  "rut": "76.123.456-7",
+  "capacidad": 5,
+  "vetos": [{ "factor": "diasAlCierre", "minimo": 0.5 }],
+  "excluir": ["arriendo", "instalación"],
+  "costos": { "42132203": 3500 }
+}

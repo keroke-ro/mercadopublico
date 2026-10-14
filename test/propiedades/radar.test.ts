@@ -87,7 +87,7 @@ describe("priorizar", () => {
     expect(o!.factores.find((f) => f.nombre === "competencia")!.valor).toBe(0.5);
     expect(o!.puntaje).toBe(0.25);
     const [g] = priorizar([p], { pesos: { rubro: Number.MAX_VALUE, region: Number.MAX_VALUE } }, { ahora: AHORA });
-    expect(g!.factores.map((f) => f.peso)).toEqual([0.5, 0.5, 0, 0, 0]);
+    expect(g!.factores.map((f) => f.peso)).toEqual([0.5, 0.5, 0, 0, 0, 0]);
     // Pesos 7, 4, 2, 2, 3 normalizados suman 1,0000000000000002; con todo en 1 el puntaje no pasa de 1.
     const lleno = { ...p, monto: clp(5), oferentes: 0, fechas: { ...p.fechas, cierre: "2027-01-01T00:00:00-03:00" } } as Proceso;
     const [u] = priorizar([lleno], { pesos: { rubro: 7, region: 4, monto: 2, diasAlCierre: 2, competencia: 3 }, montoMin: 0, montoMax: 10, neutro: 1 }, { ahora: AHORA });

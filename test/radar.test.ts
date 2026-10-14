@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { CompraAgil, Cotizacion, Monto, Proceso } from "../src/modelo.js";
-import { AJUSTES, priorizar, rangoDePrecio, type Oportunidad, type Perfil } from "../src/radar/index.js";
+import type { CompraAgil, Cotizacion, Monto, OrdenCompra, Proceso, Proveedor } from "../src/modelo.js";
+import { AJUSTES, calibrar, competidores, decidir, precioSugerido, priorizar, proximasCompras, rangoDePrecio, type Oportunidad, type Perfil } from "../src/radar/index.js";
 
 const AHORA = new Date("2026-10-13T12:00:00-03:00");
 const enDias = (d: number) => new Date(AHORA.getTime() + d * 86_400_000).toISOString();
@@ -51,7 +51,7 @@ describe("priorizar", () => {
 
   it("normaliza los pesos; el que falta vale 0; todo en 0 o negativo lanza", () => {
     const [o] = priorizar([proceso()], { pesos: { rubro: 2, region: 6 } }, { ahora: AHORA });
-    expect(o!.factores.map((f) => f.peso)).toEqual([0.25, 0.75, 0, 0, 0]);
+    expect(o!.factores.map((f) => f.peso)).toEqual([0.25, 0.75, 0, 0, 0, 0]);
     expect(() => priorizar([], { pesos: {} })).toThrow(RangeError);
     expect(() => priorizar([], { pesos: { rubro: 0 } })).toThrow(RangeError);
     expect(() => priorizar([], { pesos: { rubro: 1, monto: -1 } })).toThrow(RangeError);
@@ -170,5 +170,167 @@ describe("rangoDePrecio", () => {
     expect(rangoDePrecio(COD, mezcla, { unidad: "Caja", minimo: 3 })).toMatchObject({ n: 3, p50: 2, unidad: "caja" });
     expect(rangoDePrecio(COD, mezcla, { unidad: "kilo" })).toMatchObject({ n: 0, insuficiente: true });
     expect(rangoDePrecio(COD, [], { minimo: 0 })).toMatchObject({ n: 0, insuficiente: true }); // no NaN
+  });
+});
+
+// ── Lo nuevo: historial, decidir, calibrar, precio sugerido, competidores, próximas compras ──
+
+const prov = (rut: string, nombre = rut): Proveedor => ({ rut, nombre, codigo: null });
+const enOrganismo = (p: Proceso, org: string, dia = "2026-01-01"): Proceso => ({
+  ...p,
+  comprador: { ...p.comprador!, codigoOrganismo: org, nombreOrganismo: `Org ${org}` },
+  fechas: { ...p.fechas, publicacion: `${dia}T10:00:00-03:00` },
+});
+/** OC adjudicada a `rut` en el organismo, con un ítem del producto. */
+const oc = (codigo: string, rut: string, org = "7248", producto = 43211507, dia = "2026-01-01", procesoOrigen: string | null = null): OrdenCompra => ({
+  ...(enOrganismo(proceso({ codigo, estado: "aceptada", productos: [producto], monto: enPesos(1000) }), org, dia) as Omit<OrdenCompra, "tipo" | "tipoOrden" | "proveedor" | "procesoOrigen">),
+  tipo: "orden_compra",
+  tipoOrden: null,
+  proveedor: prov(rut),
+  procesoOrigen,
+});
+
+describe("incumbente", () => {
+  const abierta = enOrganismo(proceso({ productos: [43211508] }), "7248");
+  const inc = (historial: Proceso[], rut?: string) =>
+    priorizar([abierta], { pesos: { incumbente: 1 }, rut }, { ahora: AHORA, historial })[0]!.factores.find((f) => f.nombre === "incumbente")!;
+
+  it("1 − cuota del proveedor ajeno que más gana en el organismo y la familia", () => {
+    const h = [oc("a", "1-9"), oc("b", "1-9"), oc("c", "1-9"), oc("d", "2-7")];
+    expect(inc(h)).toMatchObject({ valor: 0.25, razon: expect.stringContaining("1-9 se llevó 3 de 4") });
+    // Si el que más gana eres tú, cuenta el siguiente.
+    expect(inc(h, "1.9")).toMatchObject({ valor: 0.75, razon: expect.stringContaining("Tú, 3") });
+    expect(inc([oc("a", "1-9"), oc("b", "1-9"), oc("c", "1-9")], "1-9").valor).toBe(1);
+  });
+
+  it("neutro sin historial, con pocas victorias o en otro organismo o familia", () => {
+    expect(solo("incumbente", abierta).valor).toBe(AJUSTES.neutro);
+    expect(inc([oc("a", "1-9"), oc("b", "1-9")]).razon).toMatch(/Solo 2 adjudicaciones/);
+    expect(inc([oc("a", "1-9", "999"), oc("b", "1-9", "999"), oc("c", "1-9", "999")]).valor).toBe(AJUSTES.neutro);
+    expect(inc([oc("a", "1-9", "7248", 10101501), oc("b", "1-9", "7248", 10101501), oc("c", "1-9", "7248", 10101501)]).valor).toBe(AJUSTES.neutro);
+  });
+});
+
+describe("decidir", () => {
+  const perfil: Perfil = { pesos: { rubro: 1, region: 1 }, rubros: ["4321"], regiones: [13] };
+
+  it("postular, revisar o descartar según umbrales, con su porqué", () => {
+    const ds = decidir([proceso({ codigo: "si" }), proceso({ codigo: "medio", region: 5 }), proceso({ codigo: "no", region: 5, productos: [10101501] })], perfil, { ahora: AHORA });
+    expect(ds.map((d) => [d.proceso.codigo, d.accion])).toEqual([["si", "postular"], ["medio", "revisar"], ["no", "descartar"]]);
+    expect(ds[0]!.porque).toHaveLength(2);
+    expect(ds[1]!.porque[1]).toMatch(/^Ojo: .*región 5/);
+    expect(ds[2]!.turno).toBeNull();
+  });
+
+  it("vetos y palabras excluidas descartan aunque el puntaje sea alto", () => {
+    const p = { ...proceso({ codigo: "x", region: 5 }), nombre: "Instalación de equipos" };
+    const [v] = decidir([p], { ...perfil, pesos: { rubro: 1 }, vetos: [{ factor: "region", minimo: 1 }] }, { ahora: AHORA });
+    expect(v).toMatchObject({ accion: "descartar", porque: [expect.stringMatching(/^Veto de region/)] });
+    const [e] = decidir([p], { ...perfil, excluir: ["INSTALACION"] }, { ahora: AHORA });
+    expect(e).toMatchObject({ accion: "descartar", porque: ['Menciona "instalacion", que tu perfil excluye.'] });
+    expect(() => decidir([], { ...perfil, vetos: [{ factor: "nada" as "rubro", minimo: 1 }] })).toThrow(RangeError);
+    expect(() => decidir([], { ...perfil, umbralRevisar: 0.9 })).toThrow(RangeError);
+    expect(() => decidir([], { ...perfil, capacidad: 1.5 })).toThrow(RangeError);
+  });
+
+  it("agenda: las N de mejor puntaje, ordenadas por cierre; las que no caben lo dicen", () => {
+    const ps = [proceso({ codigo: "tarde", cierre: enDias(20) }), proceso({ codigo: "pronto", cierre: enDias(3) }), proceso({ codigo: "peor", region: 5, cierre: enDias(1) })];
+    const ds = decidir(ps, { ...perfil, capacidad: 2 }, { ahora: AHORA });
+    expect(ds.map((d) => [d.proceso.codigo, d.turno])).toEqual([["pronto", 1], ["tarde", 2], ["peor", null]]);
+    expect(ds[2]!.porque.at(-1)).toMatch(/capacidad de 2/);
+    // Sin capacidad, todas las no descartadas van a la agenda.
+    expect(decidir(ps, perfil, { ahora: AHORA }).map((d) => d.turno)).toEqual([1, 2, 3]);
+  });
+});
+
+describe("calibrar", () => {
+  // El equipo postula lo de pocos oferentes y descarta lo de muchos; el perfil solo mira la región (que no discrimina).
+  const ps = Array.from({ length: 12 }, (_, i) => proceso({ codigo: `p${i}`, oferentes: i < 6 ? 0 : 20, region: i % 2 ? 13 : 5 }));
+  const decisiones = ps.map((p, i) => ({ codigo: p.codigo, decision: i < 6 ? ("postular" as const) : ("descartar" as const) }));
+  const perfil: Perfil = { pesos: { region: 4, competencia: 0 }, regiones: [13] };
+
+  it("propone subir el peso que separa lo que el equipo postula de lo que descarta", () => {
+    const c = calibrar(ps, perfil, decisiones, { ahora: AHORA });
+    if ("insuficiente" in c) throw new Error("insuficiente");
+    expect(c.acuerdo).toBe(0.5);
+    expect(c.acuerdoSugerido).toBe(1);
+    expect(c.cambios.find((x) => x.factor === "competencia")).toMatchObject({ de: 0, razon: expect.stringMatching(/^Sube competencia/) });
+    expect(c.pesosSugeridos.competencia).toBeGreaterThan(0);
+    expect(Object.values(c.pesosSugeridos).reduce((s, x) => s + x, 0)).toBeCloseTo(4, 1);
+  });
+
+  it("sin cambios si ya calza, e insuficiente con pocas decisiones", () => {
+    const c = calibrar(ps, { pesos: { competencia: 1 } }, decisiones, { ahora: AHORA });
+    expect(c).toMatchObject({ acuerdo: 1, acuerdoSugerido: 1, cambios: [], desacuerdos: [] });
+    expect(calibrar(ps, perfil, decisiones.slice(0, 8), { ahora: AHORA })).toMatchObject({ insuficiente: true, postuladas: 6, descartadas: 2 });
+    expect(calibrar(ps, perfil, [...decisiones, { codigo: "fantasma", decision: "postular" }]).supuestos.join(" ")).toMatch(/1 decisiones sin su proceso/);
+  });
+});
+
+describe("precioSugerido", () => {
+  const COD = 44121701;
+  const compra = (precio: number): CompraAgil => ({
+    ...(proceso() as Omit<CompraAgil, "tipo" | "ordenCompra" | "cotizaciones">),
+    tipo: "compra_agil",
+    ordenCompra: null,
+    items: [{ codigoProducto: COD, nombre: null, descripcion: null, cantidad: 1, unidad: "caja", precioUnitario: null, total: null, proveedor: null }],
+    cotizaciones: [{ proveedor: null, monto: null, seleccionada: true, productos: [{ codigoProducto: COD, nombre: null, cantidad: 1, precioUnitario: enPesos(precio) }] }],
+  });
+  const ganadores = [100, 200, 300, 400, 500].map(compra);
+
+  it("maximiza P(ganar) × (precio − costo) sobre los precios ganadores", () => {
+    // costo 50: 100→1·50=50, 200→0,8·150=120, 300→0,6·250=150, 400→0,4·350=140, 500→0,2·450=90.
+    const r = precioSugerido(COD, ganadores, { costo: 50, minimo: 5 });
+    expect(r).toMatchObject({ n: 5, precio: 300, ganadas: 3, probabilidad: 0.6, ganancia: 150, margen: 250 / 300, unidad: "caja" });
+    if (!("insuficiente" in r)) expect(r.curva.map((c) => c.ganadas)).toEqual([5, 4, 3, 2, 1]);
+  });
+
+  it("insuficiente con poca muestra o costo sobre todo lo que ganó; costo inválido lanza", () => {
+    expect(precioSugerido(COD, ganadores, { costo: 50 })).toMatchObject({ insuficiente: true, motivo: "muestra insuficiente" });
+    expect(precioSugerido(COD, ganadores, { costo: 600, minimo: 5 })).toMatchObject({ insuficiente: true, motivo: "costo sobre los precios ganadores" });
+    expect(() => precioSugerido(COD, ganadores, { costo: -1 })).toThrow(RangeError);
+  });
+});
+
+describe("competidores", () => {
+  it("victorias, tasa, cuota y HHI; una OC no duplica la Compra Ágil de la que viene", () => {
+    const ca: CompraAgil = {
+      ...(enOrganismo(proceso({ codigo: "CA1", estado: "oc_emitida" }), "7248") as Omit<CompraAgil, "tipo" | "ordenCompra" | "cotizaciones">),
+      tipo: "compra_agil",
+      ordenCompra: null,
+      cotizaciones: [
+        { proveedor: prov("1-9", "Uno"), monto: null, seleccionada: false, productos: [] },
+        { proveedor: prov("2-7", "Dos"), monto: null, seleccionada: false, productos: [] },
+      ],
+    };
+    const h = [ca, oc("OC1", "1-9", "7248", 43211507, "2026-01-01", "CA1"), oc("OC2", "1-9"), oc("OC3", "2-7"), oc("OTRA", "3-5", "7248", 10101501)];
+    const r = competidores(h, { rubros: ["4321"], rut: "2.7" });
+    expect(r).toMatchObject({ procesos: 3, victorias: 3, lectura: expect.stringMatching(/^Concentrado/) });
+    expect(r.hhi).toBeCloseTo((200 / 3) ** 2 + (100 / 3) ** 2);
+    expect(r.competidores.map((c) => [c.proveedor.nombre, c.participaciones, c.victorias, c.eresTu])).toEqual([
+      ["Uno", 2, 2, false],
+      ["Dos", 2, 1, true],
+    ]);
+    expect(r.competidores[1]!.tasa).toBe(0.5);
+    expect(competidores([])).toMatchObject({ hhi: null, lectura: "Sin adjudicaciones registradas." });
+  });
+});
+
+describe("proximasCompras", () => {
+  const cada30 = ["2026-06-01", "2026-07-01", "2026-07-31", "2026-08-30"].map((d, i) => oc(`r${i}`, "1-9", "7248", 43211507, d));
+
+  it("patrón regular → ventana última + mín … última + máx", () => {
+    const [r, ...resto] = proximasCompras(cada30, { ahora: new Date("2026-09-15T12:00:00-03:00") });
+    expect(resto).toEqual([]);
+    expect(r).toMatchObject({ familia: "4321", veces: 4, cadaDias: 30, ultima: "2026-08-30", desde: "2026-09-29", hasta: "2026-09-29", organismo: { codigo: "7248" } });
+  });
+
+  it("descarta lo irregular, lo vencido, lo escaso y lo de otro rubro", () => {
+    const irregular = ["2026-01-01", "2026-01-05", "2026-06-01"].map((d, i) => oc(`i${i}`, "1-9", "1", 43211507, d));
+    expect(proximasCompras(irregular, { ahora: AHORA })).toEqual([]);
+    expect(proximasCompras(cada30, { ahora: AHORA })).toEqual([]); // la ventana fue el 29-09
+    expect(proximasCompras(cada30.slice(0, 2), { ahora: new Date("2026-07-02") })).toEqual([]);
+    expect(proximasCompras(cada30, { ahora: new Date("2026-09-15"), rubros: ["44"] })).toEqual([]);
+    expect(proximasCompras(cada30.slice(0, 2), { ahora: new Date("2026-07-02"), comprasMinimas: 2 })).toHaveLength(1);
   });
 });

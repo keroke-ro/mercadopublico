@@ -23,6 +23,7 @@ import {
   type EstadoCuota,
   type Proceso,
 } from "./index.js";
+import { calibrar, decidir, precioSugerido, proximasCompras, rangoDePrecio, type Decision, type DecisionEquipo, type Perfil } from "./radar/index.js";
 import type { FuenteSync } from "./sync.js";
 import { ESTADOS_FILTRO_LICITACION, ESTADO_FILTRO_OC, type EstadoFiltroLicitacion, type EstadoFiltroOC } from "./v1/codigos.js";
 import type { EstadoCompraAgil } from "./v2/parse.js";
@@ -52,6 +53,8 @@ Comandos:
   compradores                         Todos los organismos compradores
   ocds <archivo|url|año> [--max N]    Lee OCDS (.jsonl o .jsonl.gz); no pide ticket
   sync --desde AAAA-MM-DD             Actualiza un store local [--hasta] [--fuentes licitaciones,ordenes,compra_agil] [--store ./mp.json] [--plan]
+  radar --perfil perfil.json          Qué postular primero, a qué precio y qué viene, desde el store; no pide ticket
+                                      [--store ./mp.json] [--decisiones decisiones.json] [--max N (10)]
   cuota                               Consultas usadas hoy desde esta máquina
 
 Opciones:
@@ -82,6 +85,8 @@ const OPCIONES = {
   fuentes: { type: "string" },
   store: { type: "string" },
   plan: { type: "boolean" },
+  perfil: { type: "string" },
+  decisiones: { type: "string" },
 } as const;
 
 const COLUMNAS = [
@@ -202,6 +207,94 @@ async function guardarCuota(env: IO["env"], c: Cuota, inicial: EstadoCuota | und
 }
 
 
+async function leerJson<T>(ruta: string, flag: string): Promise<T> {
+  try {
+    return JSON.parse(await readFile(ruta, "utf8")) as T;
+  } catch (e) {
+    throw new ErrorUso(`${flag}: no se pudo leer ${ruta} como JSON (${(e as Error).message})`);
+  }
+}
+
+const pesos = (n: number) => `$${Math.round(n).toLocaleString("es-CL")}`;
+
+/** Une las piezas del radar sobre todo lo que hay en el store: lo abierto se decide, lo cerrado es historial. */
+function radar(todos: Proceso[], perfil: Perfil, decisiones: DecisionEquipo[] | undefined) {
+  const ahora = new Date();
+  const compras = todos.filter((p) => p.tipo === "compra_agil");
+  // Precio del primer ítem con datos: sugerido si el perfil trae su costo, si no el rango de lo que ganó.
+  const precio = (d: Decision) => {
+    if (d.accion === "descartar") return null;
+    for (const c of new Set(d.proceso.items.map((i) => i.codigoProducto).filter((c): c is number => c !== null))) {
+      const costo = perfil.costos?.[String(c)];
+      if (costo !== undefined) {
+        const s = precioSugerido(c, compras, { costo });
+        if (!("insuficiente" in s))
+          return { codigoProducto: c, texto: `${pesos(s.precio)} por ${s.unidad ?? "unidad"}: con ese precio habrías ganado ${s.ganadas} de ${s.n} compras parecidas, margen ${Math.round(s.margen * 100)} %`, detalle: s };
+      }
+      const r = rangoDePrecio(c, compras, { soloSeleccionadas: true });
+      if (!("insuficiente" in r))
+        return { codigoProducto: c, texto: `lo que ganó va de ${pesos(r.p25)} a ${pesos(r.p75)} por ${r.unidad ?? "unidad"} (mediana ${pesos(r.p50)}, n = ${r.n}); pon el costo en el perfil para un precio sugerido`, detalle: r };
+    }
+    return null;
+  };
+  return {
+    ahora: ahora.toISOString(),
+    procesos: todos.length,
+    // Un resumen sin `raw` ni `personales`: nada de datos de funcionarios en la salida.
+    decisiones: decidir(todos, perfil, { ahora, historial: todos }).map((d) => ({
+      turno: d.turno,
+      accion: d.accion,
+      puntaje: Math.round(d.puntaje * 100) / 100,
+      codigo: d.proceso.codigo,
+      nombre: d.proceso.nombre,
+      organismo: d.proceso.comprador?.nombreOrganismo ?? null,
+      region: d.proceso.comprador?.region ?? null,
+      montoClp: d.proceso.monto?.clp ?? null,
+      cierre: d.proceso.fechas.cierre,
+      porque: d.porque,
+      precio: precio(d),
+    })),
+    proximas: proximasCompras(todos, { ahora, rubros: perfil.rubros }).filter((x) => !perfil.regiones?.length || perfil.regiones.includes(x.region ?? -1)),
+    calibracion: decisiones && calibrar(todos, perfil, decisiones, { ahora, historial: todos }),
+  };
+}
+
+function informe(r: ReturnType<typeof radar>, ruta: string, max: number): string {
+  const agenda = r.decisiones.filter((d) => d.turno !== null);
+  const sinCupo = r.decisiones.filter((d) => d.turno === null && d.accion !== "descartar").length;
+  const descartadas = r.decisiones.filter((d) => d.accion === "descartar").length;
+  const l: string[] = [`Radar · ${r.ahora.slice(0, 10)} · ${r.decisiones.length} abiertas entre ${r.procesos} procesos de ${ruta}`, ""];
+  if (!agenda.length) l.push("Nada para postular ni revisar hoy.");
+  else l.push(`${agenda.length === 1 ? "Una vale" : `${agenda.length} valen`} la pena. En este orden:`, "");
+  for (const d of agenda.slice(0, max)) {
+    l.push(`${String(d.turno).padStart(3)}  ${d.accion === "postular" ? "POSTULA" : "REVISA "}  ${d.puntaje.toFixed(2)}  ${d.codigo}  ${d.nombre}`);
+    const dato = [d.organismo, d.region && `región ${d.region}`, d.montoClp !== null && pesos(d.montoClp), d.cierre && `cierra ${d.cierre.slice(0, 16).replace("T", " ")}`];
+    l.push(`     ${dato.filter(Boolean).join(" · ")}`);
+    for (const p of d.porque) l.push(`     · ${p}`);
+    if (d.precio) l.push(`     Cotiza: ${d.precio.texto}`);
+    l.push("");
+  }
+  const fuera = [agenda.length > max && `${agenda.length - max} más en la agenda (--max)`, sinCupo && `${sinCupo} sin capacidad`, descartadas && `${descartadas} descartadas`].filter(Boolean);
+  if (fuera.length) l.push(`Fuera de la vista: ${fuera.join(", ")}. Todo, con su porqué, en --formato json o csv.`, "");
+  if (r.proximas.length) {
+    l.push("Lo que viene:");
+    for (const x of r.proximas.slice(0, 5)) l.push(`  ${x.desde} … ${x.hasta}  ${x.razon}`);
+    l.push("");
+  }
+  const c = r.calibracion;
+  if (c && "insuficiente" in c) l.push(`Calibración: faltan decisiones (${c.postuladas} postuladas, ${c.descartadas} descartadas; se necesitan al menos 5 de cada una).`);
+  else if (c) {
+    const ac = (x: number) => x.toFixed(2).replace(".", ",");
+    l.push(`Calibración con ${c.postuladas} postuladas y ${c.descartadas} descartadas: el radar calza con tu equipo ${ac(c.acuerdo)}${c.cambios.length ? `; con estos pesos calzaría ${ac(c.acuerdoSugerido)}:` : ", y ningún cambio de pesos lo mejora lo suficiente."}`);
+    if (c.cambios.length) {
+      l.push(`  "pesos": ${JSON.stringify(c.pesosSugeridos)}`);
+      for (const x of c.cambios) l.push(`  · ${x.razon}`);
+    }
+    for (const x of c.desacuerdos.slice(0, 5)) l.push(`  ! ${x}`);
+  }
+  return `${l.join("\n").trimEnd()}\n`;
+}
+
 export async function main(argv: string[], io: IO): Promise<number> {
   let mp: MercadoPublico | undefined;
   let guardada: EstadoCuota | undefined;
@@ -248,6 +341,25 @@ export async function main(argv: string[], io: IO): Promise<number> {
       salir(ps);
       if (corte) throw new Error(`La lectura OCDS se cortó después de ${ps.length} procesos (${(corte as Error).message ?? corte}); lo leído quedó en la salida`);
       return 0;
+    }
+
+    if (comando === "radar") {
+      if (!o.perfil) throw new ErrorUso("radar necesita --perfil perfil.json");
+      const perfil = await leerJson<Perfil>(o.perfil, "--perfil");
+      const decisiones = o.decisiones ? await leerJson<DecisionEquipo[]>(o.decisiones, "--decisiones") : undefined;
+      const ruta = o.store ?? "./mp.json";
+      const store = await storeArchivo(ruta);
+      const todos: Proceso[] = [];
+      try {
+        for await (const p of store.todos()) todos.push(p);
+      } finally {
+        await store.cerrar?.();
+      }
+      if (!todos.length) throw new ErrorUso(`El store ${ruta} está vacío: corre primero mercadopublico sync`);
+      const r = radar(todos, perfil, decisiones);
+      if (formato === "json") return escribir(io, r, "json"), 0;
+      if (formato === "csv") return escribir(io, r.decisiones.map((d) => ({ ...d, porque: d.porque.join(" "), precio: d.precio?.texto ?? null })), "csv"), 0;
+      return io.stdout.write(informe(r, ruta, entero(o.max, 10, "max"))), 0;
     }
 
     guardada = await leerCuota(io.env);

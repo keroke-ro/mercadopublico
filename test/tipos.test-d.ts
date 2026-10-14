@@ -55,7 +55,7 @@ describe("radar", () => {
   test("priorizar y rangoDePrecio", () => {
     expectTypeOf(priorizar).returns.toEqualTypeOf<Oportunidad[]>();
     expectTypeOf<Oportunidad["proceso"]>().toEqualTypeOf<Proceso>();
-    expectTypeOf<NombreFactor>().toEqualTypeOf<"rubro" | "region" | "monto" | "diasAlCierre" | "competencia">();
+    expectTypeOf<NombreFactor>().toEqualTypeOf<"rubro" | "region" | "monto" | "diasAlCierre" | "competencia" | "incumbente">();
     expectTypeOf(rangoDePrecio).parameter(1).toEqualTypeOf<CompraAgil[]>();
     expectTypeOf(rangoDePrecio).returns.toEqualTypeOf<RangoDePrecio>();
     const r = {} as RangoDePrecio;

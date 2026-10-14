@@ -40,5 +40,5 @@ test("exportaciones de mercadopublico", () => {
 });
 
 test("exportaciones de mercadopublico/radar", () => {
-  expect(Object.keys(radar).sort()).toEqual(["AJUSTES", "MUESTRA_MINIMA", "priorizar", "rangoDePrecio"]);
+  expect(Object.keys(radar).sort()).toEqual(["AJUSTES", "MUESTRA_MINIMA", "calibrar", "competidores", "decidir", "precioSugerido", "priorizar", "proximasCompras", "rangoDePrecio"]);
 });
