@@ -120,4 +120,6 @@ Esta librería no está afiliada a la Dirección ChileCompra ni cuenta con su re
 
 ## Licencia
 
-MIT © [KeroKero](https://www.kerokero.cl)
+[PolyForm Noncommercial 1.0.0](LICENSE): libre para uso no comercial (personal, investigación, educación, organizaciones sin fines de lucro e instituciones públicas). Para uso comercial, escríbenos a [KeroKero](https://kerokero.cl).
+
+Required Notice: Copyright KeroKero (https://kerokero.cl)

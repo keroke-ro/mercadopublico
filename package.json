@@ -15,7 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/keroke-ro/mercadopublico.git"
   },
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "author": "KeroKero (https://www.kerokero.cl)",
   "type": "module",
   "engines": {

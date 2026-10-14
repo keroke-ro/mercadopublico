@@ -16,7 +16,7 @@ Más de 850 organismos del Estado compran en Mercado Público, y la mayoría de 
 - **Datos personales protegidos.** Los datos de funcionarios quedan ocultos por defecto.
 - **Vigilada todas las noches** contra la API real, para enterarnos antes que tú si algo cambia.
 
-Licencia MIT, sin dependencias, en npm como `mercadopublico`.
+Licencia PolyForm Noncommercial (uso comercial bajo acuerdo con KeroKero), sin dependencias, en npm como `mercadopublico`.
 
 ### ¿Para quién?
 
