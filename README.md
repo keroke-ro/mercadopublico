@@ -110,7 +110,7 @@ Todavía no se ha llamado a la API con un ticket real. Los fixtures de los tests
 - Detalles de forma: la ruta de OC (`ordenesdecompra.json` o `OrdenCompra.json`), si `Publico` en las rutas de Empresas distingue mayúsculas, si la lista viene en `listaEmpresas`, si el filtro `region` de la v2 va separado por comas o repetido, y con qué status HTTP llega el error 10300.
 - Si las fechas OCDS con sufijo `Z` son UTC reales o la hora de Santiago etiquetada como UTC. El SDK las lee como hora de Santiago.
 - En Compra Ágil, `codigo_orden_compra` viene en `null` aunque la OC exista (el SDK usa `id_orden_compra`), y `seleccion.proveedor_seleccionado` está documentado pero no confirmado.
-- mindicador.cl no respondía al investigar; si falla, el conversor usa el promedio mensual oficial de ChileCompra.
+- mindicador.cl no respondía al investigar; si falla, el conversor usa los valores diarios del Banco Central (sus páginas "Ver serie", no una API) y, si eso también falla, el promedio mensual oficial de ChileCompra.
 
 ## Fuente de los datos
 

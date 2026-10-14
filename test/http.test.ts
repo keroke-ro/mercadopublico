@@ -67,6 +67,7 @@ describe("Transporte", () => {
     let enVuelo = 0;
     let maximo = 0;
     const t = new Transporte({
+      intervaloMs: 0,
       ticket: "T",
       fetch: async () => {
         maximo = Math.max(maximo, ++enVuelo);
@@ -77,6 +78,15 @@ describe("Transporte", () => {
     });
     await Promise.all([t.v1("a"), t.v1("b"), t.v1("c").catch(() => {})]);
     expect(maximo).toBe(1);
+  });
+
+  it("deja un intervalo mínimo entre consultas (la API da 10500 a consultas seriales muy seguidas)", async () => {
+    const esperas: number[] = [];
+    const t = new Transporte({ ticket: "T", dormir: async (ms) => void esperas.push(ms), fetch: async () => json({ Listado: [] }) });
+    await t.v1("a");
+    await t.v1("b");
+    expect(esperas).toHaveLength(1);
+    expect(esperas[0]).toBeGreaterThan(900);
   });
 
   it("v2 manda el ticket en header y devuelve payload", async () => {
@@ -95,6 +105,8 @@ describe("Transporte", () => {
   it("v2 con success NOK es error tipado", async () => {
     const { t } = transporte([json({ success: "NOK", payload: null, errors: [{ codigo: "400", mensaje: "parámetro inválido", detalle: null }] }, 400)]);
     await expect(t.v2("x")).rejects.toMatchObject({ tipo: "parametros", message: "parámetro inválido" });
+    const { t: t3 } = transporte([json({ success: "ERROR", payload: null, errors: [{ codigo: "ERROR_INTERNO", mensaje: "Servicio no disponible, intente nuevamente más tarde", detalle: "" }] }, 500)], { reintentos: 0 });
+    await expect(t3.v2("x")).rejects.toMatchObject({ tipo: "servidor", message: "Servicio no disponible, intente nuevamente más tarde" });
     const { t: t2 } = transporte([json({ success: "NOK", payload: null, errors: [{ codigo: "429", mensaje: "Too many requests" }] }, 429)]);
     await expect(t2.v2("x")).rejects.toMatchObject({ tipo: "cuota_agotada" });
   });

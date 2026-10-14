@@ -266,7 +266,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
         if (arg) return salir((await mp.compraAgil.detalle(arg)) ?? noExiste("la Compra Ágil"));
         const max = entero(o.max, 100, "max");
         const region = lista(o.region)?.map(Number);
-        const filtros = { region, estado: lista(o.estado) as EstadoCompraAgil[] | undefined, q: o.q, publicadoDesde: o.desde, tamanoPagina: Math.min(50, max) };
+        const filtros = { region, estado: lista(o.estado) as EstadoCompraAgil[] | undefined, q: o.q, publicadoDesde: o.desde, tamanoPagina: Math.min(50, Math.max(10, max)) };
         return salir(await tomar(mp.compraAgil.listar(filtros), max));
       }
       case "proveedor":

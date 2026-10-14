@@ -68,6 +68,13 @@ export interface OpcionesTransporte {
   esperaBaseMs?: number;
   /** Timeout por consulta, en ms. Por defecto 30000. */
   timeoutMs?: number;
+  /**
+   * Mínimo entre el inicio de una consulta y la siguiente, en ms. Por defecto 1000. La API responde 10500
+   * ("peticiones simultáneas", con HTTP 429) también a consultas seriales, de forma intermitente. Medido el
+   * 2026-10-13: sin pausa fallan 4 de 10, con 1 s 3 de 11 y con 2 s 1 de 7. Los reintentos cubren el resto,
+   * pero cada uno se cuenta en la cuota.
+   */
+  intervaloMs?: number;
   limiteDiario?: number;
   /** Estado de cuota guardado de una ejecución anterior del mismo día. */
   cuota?: EstadoCuota;
@@ -84,6 +91,7 @@ type Params = Record<string, string | number | boolean | undefined | null | read
 export class Transporte {
   readonly cuota: Cuota;
   private cola: Promise<unknown> = Promise.resolve();
+  private ultima = 0;
   private readonly o: Required<Omit<OpcionesTransporte, "cuota" | "limiteDiario">>;
 
   constructor(opciones: OpcionesTransporte) {
@@ -94,6 +102,7 @@ export class Transporte {
       reintentos: opciones.reintentos ?? 4,
       esperaBaseMs: opciones.esperaBaseMs ?? 1000,
       timeoutMs: opciones.timeoutMs ?? 30_000,
+      intervaloMs: opciones.intervaloMs ?? 1000,
       baseV1: opciones.baseV1 ?? BASE_V1,
       baseV2: opciones.baseV2 ?? BASE_V2,
       ahora: opciones.ahora ?? (() => new Date()),
@@ -136,6 +145,9 @@ export class Transporte {
 
   private async unaVez(url: string, headers: Record<string, string>, api: "v1" | "v2"): Promise<unknown> {
     let res: Response;
+    const espera = this.ultima + this.o.intervaloMs - Date.now();
+    if (espera > 0) await this.o.dormir(espera);
+    this.ultima = Date.now();
     this.cuota.registrar();
     try {
       res = await this.o.fetch(url, { headers: { accept: "application/json", ...headers }, signal: AbortSignal.timeout(this.o.timeoutMs) });
@@ -187,7 +199,8 @@ function clasificar(status: number, cuerpo: unknown, api: "v1" | "v2"): MercadoP
   if (api === "v1" && c && "Codigo" in c && !("Listado" in c)) {
     codigo = c.Codigo as number | string;
     mensaje = String(c.Mensaje ?? "");
-  } else if (api === "v2" && c && (c.success === "NOK" || c.success === false)) {
+  } else if (api === "v2" && c && c.success !== "OK" && c.success !== true && c.errors) {
+    // success llega como "NOK" (error del pedido) o "ERROR" (falla interna, visto con HTTP 500).
     const errs = (Array.isArray(c.errors) ? c.errors : [c.errors]) as ({ codigo?: string; mensaje?: string } | string | null)[];
     codigo = typeof errs[0] === "object" ? errs[0]?.codigo : undefined;
     mensaje = errs.map((e) => (typeof e === "object" && e ? (e.mensaje ?? JSON.stringify(e)) : String(e))).join("; ");

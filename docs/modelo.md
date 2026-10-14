@@ -86,7 +86,7 @@ interface Monto {
   moneda: "CLP" | "CLF" | "UTM" | "USD" | "EUR"; // CLF = UF
   clp: number | null; // en pesos al día fechaValor; null si no se pudo convertir
   fechaValor: string | null; // "AAAA-MM-DD" del valor de UF/UTM/dólar/euro usado
-  fuente: string | null; // "mindicador.cl", "chilecompra:ParidadMoneda (mensual)", "identidad" para CLP
+  fuente: string | null; // "mindicador.cl", "bcentral.cl", "chilecompra:ParidadMoneda (mensual)", "identidad" para CLP
 }
 ```
 
@@ -104,9 +104,10 @@ Un `Conversor` es `(moneda, dia) => Promise<Paridad | null>`, con `Paridad = { v
 | Conversor | Qué hace |
 |---|---|
 | `conversorMindicador()` | Valores diarios de mindicador.cl, un request por moneda y año. Dólar y euro sin valor ese día: el último de los 7 días anteriores. UTM: el valor del mes. |
+| `conversorBancoCentral()` | Valores diarios oficiales del Banco Central, leídos de las páginas "Ver serie" de [Indicadores diarios](https://si3.bcentral.cl/Indicadoressiete/secure/Indicadoresdiarios.aspx): un request por moneda y año (la UTM trae todos los años en uno). Es HTML, no una API: si la página cambia o el antibots bloquea, devuelve `null` y la cadena sigue. |
 | `conversorParidadChileCompra()` | `ParidadMoneda.csv` oficial de ChileCompra: un promedio mensual, `fechaValor` es el día 1. El mes en curso no está hasta que termina. |
 | `conversorEncadenado(a, b, …)` | El primero que responda. |
-| `conversorPorDefecto` | `conversorEncadenado(conversorMindicador(), conversorParidadChileCompra())` |
+| `conversorPorDefecto` | `conversorEncadenado(conversorMindicador(), conversorBancoCentral(), conversorParidadChileCompra())` |
 
 ```ts
 import { MercadoPublico, convertirMontos, conversorEncadenado, conversorPorDefecto, type Conversor } from "mercadopublico";

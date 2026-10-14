@@ -138,14 +138,14 @@ describe("sync v1", () => {
     expect(plan).toMatchObject({ consultas: 5, gastadas: 3, listadas: 2, restante: 2, cabeHoy: false }); // faltan 3 detalles
   });
 
-  it("refresca licitaciones guardadas abiertas con cierre pasado, y se puede apagar", async () => {
+  it("con refrescar, vuelve a pedir licitaciones guardadas abiertas con cierre pasado (apagado por defecto)", async () => {
     const { mp, pedidos } = cliente(v1({}, { V: 8 }));
     const store = storeMemoria();
     const vieja = (codigo: string, FechaCierre: string, CodigoEstado = 5) => parseLicitacion({ CodigoExterno: codigo, Nombre: codigo, CodigoEstado, FechaCierre });
     await store.guardar([vieja("V", "2026-06-10T15:00:00"), vieja("F", "2026-06-25T15:00:00"), vieja("X", "2026-01-01T15:00:00"), vieja("Z", "2026-06-10T15:00:00", 8)]);
     await store.fijarCursor("licitaciones", "2026-06-19");
-    const o = { desde: "2026-06-01", fuentes: ["licitaciones" as const], store };
-    expect((await mp.sync.planificar({ ...o, refrescar: false })).consultas).toBe(1);
+    const o = { desde: "2026-06-01", fuentes: ["licitaciones" as const], store, refrescar: true };
+    expect((await mp.sync.planificar({ ...o, refrescar: undefined })).consultas).toBe(1);
     const plan = await mp.sync.planificar(o);
     expect(plan.consultas).toBe(1 + 1); // listado de hoy + V (F aún no cierra, X es muy vieja, Z es final)
     expect(plan.desglose[0]!.nota).toMatch(/1 abiertas cerradas en los últimos 90 días/);

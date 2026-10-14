@@ -13,8 +13,9 @@ const mp = new MercadoPublico({ ticket: process.env.MP_TICKET! });
 | Opción | Por defecto | Para qué |
 |---|---|---|
 | `ticket` | (obligatorio) | Tu ticket de la API. Va en la URL en la v1 y en un header en la v2. |
-| `conversor` | mindicador.cl y, si falla, la paridad mensual de ChileCompra | Cómo pasar UF, UTM, USD y EUR a pesos. `false` no convierte. Ver [Modelo](modelo.md#conversores). |
+| `conversor` | mindicador.cl; si falla, el Banco Central; y si no, la paridad mensual de ChileCompra | Cómo pasar UF, UTM, USD y EUR a pesos. `false` no convierte. Ver [Modelo](modelo.md#conversores). |
 | `reintentos` | `4` | Reintentos ante 10500, 5xx o corte de red. |
+| `intervaloMs` | `1000` | Pausa mínima entre consultas. La API da 10500 de forma intermitente aun con consultas seriales; con pausa pasa menos (medido: 4 de 10 sin pausa, 3 de 11 con 1 s). |
 | `esperaBaseMs` | `1000` | Base del backoff: cada espera es al azar entre la mitad y el total de `esperaBaseMs · 2^intento`. |
 | `timeoutMs` | `30000` | Timeout por consulta. |
 | `limiteDiario` | `10000` | Consultas por día del ticket. |

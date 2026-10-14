@@ -2,10 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CompraAgil, Licitacion, Monto } from "../src/modelo.js";
 import {
   type Conversor,
+  conversorBancoCentral,
   conversorEncadenado,
   conversorMindicador,
   conversorParidadChileCompra,
   convertirMontos,
+  leerSerieBancoCentral,
 } from "../src/monto.js";
 
 afterEach(() => vi.useRealTimers());
@@ -73,6 +75,66 @@ describe("conversorMindicador", () => {
     expect(await c("USD", "2026-10-13")).toMatchObject({ valor: 950 });
     expect(await c("USD", "2025-12-31")).toMatchObject({ valor: 900 }); // el año pasado no se vuelve a pedir
     expect(llamadas.filter((u) => u.endsWith("/2025"))).toHaveLength(1);
+  });
+});
+
+// HTML mínimo con la forma real de si3.bcentral.cl (verificada el 2026-10-13).
+const MESES_BC = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+function paginaSerie(anio: string, filas: Record<string, Record<number, string>>, extra = "") {
+  const tr = Object.entries(filas)
+    .map(([clave, meses], i) => `<tr class="GridNormal"><td align="center">${clave}</td>${MESES_BC.map((m, j) => `<td align="center"><span id="gr_ctl${String(i + 2).padStart(2, "0")}_${m}" class="obs">${meses[j + 1] ?? ""}</span></td>`).join("")}</tr>`)
+    .join("\n");
+  return `<select name="DrDwnFechas"><option selected="selected" value="${anio}">${anio}</option></select>
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="VS${anio}" />${extra}
+<table id="gr"><tr><th scope="col">Día</th>${MESES_BC.map((m) => `<th scope="col">${m}</th>`).join("")}</tr>${tr}</table>`;
+}
+const INDICADORES = `<a href="Serie.aspx?gcode=UF&amp;param=pUF">x</a><a href="Serie.aspx?gcode=PRE_TCO&amp;param=pTCO">x</a><a href="Serie.aspx?gcode=PRE_UTM&amp;param=pUTM">x</a>`;
+
+describe("conversorBancoCentral", () => {
+  it("lee la tabla: celdas vacías se saltan, miles con punto y decimales con coma", () => {
+    const d = leerSerieBancoCentral(paginaSerie("2026", { "9": { 10: "981,61" }, "10": { 9: "41.152,13" }, "11": {} }), "2026");
+    expect([...d]).toEqual([["2026-10-09", 981.61], ["2026-09-10", 41152.13]]);
+    expect([...leerSerieBancoCentral(paginaSerie("", { "2024": { 3: "64.793,00" } }), "")]).toEqual([["2024-03-01", 64793]]);
+  });
+
+  it("año en curso con un GET; año pasado con el postback del selector; fin de semana al día hábil anterior", async () => {
+    const pedidos: { url: string; metodo: string; cuerpo: string }[] = [];
+    const fetch: typeof globalThis.fetch = async (u, init) => {
+      const url = String(u);
+      const cuerpo = String(init?.body ?? "");
+      pedidos.push({ url, metodo: init?.method ?? "GET", cuerpo });
+      if (url.endsWith("Indicadoresdiarios.aspx")) return new Response(INDICADORES);
+      if (url.includes("gcode=PRE_TCO") && init?.method === "POST") {
+        return new Response(cuerpo.includes("DrDwnFechas=2024") ? paginaSerie("2024", { "30": { 12: "992,12" } }) : "");
+      }
+      if (url.includes("gcode=PRE_TCO")) return new Response(paginaSerie("2026", { "9": { 10: "981,61" } }), { headers: { "set-cookie": "s=1; path=/" } });
+      return new Response("", { status: 404 });
+    };
+    const c = conversorBancoCentral({ fetch });
+    expect(await c("USD", "2026-10-11")).toEqual({ valor: 981.61, fechaValor: "2026-10-09", fuente: "bcentral.cl" });
+    expect(await c("USD", "2025-01-01")).toEqual({ valor: 992.12, fechaValor: "2024-12-30", fuente: "bcentral.cl" });
+    const post = pedidos.find((p) => p.metodo === "POST")!;
+    expect(new URLSearchParams(post.cuerpo).get("__VIEWSTATE")).toBe("VS2026");
+    expect(pedidos.filter((p) => p.url.endsWith("Indicadoresdiarios.aspx"))).toHaveLength(1);
+  });
+
+  it("si el postback no cambia de año, no inventa valores con la tabla de otro año", async () => {
+    const fetch: typeof globalThis.fetch = async (u) =>
+      new Response(String(u).endsWith("Indicadoresdiarios.aspx") ? INDICADORES : paginaSerie("2026", { "1": { 1: "39.731,79" } }));
+    expect(await conversorBancoCentral({ fetch })("CLF", "2025-01-01")).toBeNull();
+  });
+
+  it("UTM: una sola página con todos los años, valor del mes", async () => {
+    const { fetch, llamadas } = falso({ "Indicadoresdiarios.aspx": INDICADORES, "gcode=PRE_UTM&param=pUTM": paginaSerie("", { "2024": { 3: "64.793,00" }, "2026": { 10: "72.151,00" } }) });
+    const c = conversorBancoCentral({ fetch });
+    expect(await c("UTM", "2026-10-13")).toEqual({ valor: 72151, fechaValor: "2026-10-01", fuente: "bcentral.cl" });
+    expect(await c("UTM", "2024-03-15")).toMatchObject({ valor: 64793, fechaValor: "2024-03-01" });
+    expect(llamadas).toHaveLength(2);
+  });
+
+  it("sin enlaces (página caída o cambiada) devuelve null", async () => {
+    const { fetch } = falso({});
+    expect(await conversorBancoCentral({ fetch })("CLF", "2026-10-13")).toBeNull();
   });
 });
 

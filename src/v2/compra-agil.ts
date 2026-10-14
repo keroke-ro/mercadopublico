@@ -22,7 +22,7 @@ export interface FiltrosCompraAgil {
   /** Código exacto. Excluyente con `q`. */
   id?: string;
   ordenarPor?: "FechaUltimaModificacion" | "FechaPublicacion";
-  /** 1 a 50. Por defecto 50 (menos consultas). */
+  /** 10 a 50 (la API real rechaza menos de 10, aunque la guía no lo dice). Por defecto 50 (menos consultas). */
   tamanoPagina?: number;
   /**
    * RUT de la institución (`institucion.rut`). La API no tiene este filtro: se aplica aquí,
@@ -57,7 +57,7 @@ function params(f: FiltrosCompraAgil, numero: number) {
   if (f.ttlCambioMs !== undefined && (f.cambioDesde !== undefined || f.cambioHasta !== undefined))
     throw fallo("`ttlCambioMs` y `cambioDesde`/`cambioHasta` son excluyentes");
   const tamano = f.tamanoPagina ?? 50;
-  if (!Number.isInteger(tamano) || tamano < 1 || tamano > 50) throw fallo("`tamanoPagina` va de 1 a 50");
+  if (!Number.isInteger(tamano) || tamano < 10 || tamano > 50) throw fallo("`tamanoPagina` va de 10 a 50");
   if (f.region?.some((r) => !Number.isInteger(r) || r < 1 || r > 16)) throw fallo("`region` va de 1 a 16");
   return {
     estado: f.estado,

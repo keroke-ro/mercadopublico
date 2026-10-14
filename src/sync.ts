@@ -17,8 +17,9 @@ export interface OpcionesSync {
   /** Pedir el detalle de cada proceso nuevo o cambiado (1 consulta c/u). Por defecto true. */
   detalle?: boolean;
   /**
-   * Volver a pedir el detalle de licitaciones y OC guardadas que siguen abiertas (1 consulta c/u), porque la v1 lista
-   * cada día una sola vez. Por defecto true; requiere `detalle`. Ver REFRESCO_DIAS.
+   * Volver a pedir el detalle de licitaciones y OC guardadas que siguen abiertas (1 consulta c/u). Por defecto false:
+   * el listado v1 por `fecha` trae lo que tuvo movimiento ese día (verificado: una OC creada el 8 y aceptada el 12
+   * aparece el 12), así que recorrer los días ya trae los cambios de estado. Requiere `detalle`. Ver REFRESCO_DIAS.
    */
   refrescar?: boolean;
   store: Store;
@@ -101,7 +102,7 @@ export class Sync {
 
   async planificar(opciones: OpcionesSync): Promise<PlanSync> {
     const dia = this.hoy();
-    const { store, desde, hasta = dia, fuentes = ["licitaciones", "ordenes", "compra_agil"], detalle = true, refrescar = true } = opciones;
+    const { store, desde, hasta = dia, fuentes = ["licitaciones", "ordenes", "compra_agil"], detalle = true, refrescar = false } = opciones;
     const cuota = this.mp.cuota;
     const antes = cuota.usadas;
     const dias = new Map<FuenteSync, string[]>();

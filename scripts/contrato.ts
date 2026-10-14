@@ -2,7 +2,9 @@
 // de las respuestas contra test/fixtures. Autocontenido (solo fetch) para correr sin build:
 //   MP_TICKET=… node --experimental-strip-types scripts/contrato.ts
 // Imprime un reporte markdown y sale con 1 si algo cambió o falló.
-import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /** Ruta → tipos JSON vistos. Los arreglos se colapsan en `ruta[]` (unión de sus elementos). */
@@ -172,6 +174,19 @@ const directo = (() => {
   }
 })();
 
+/** Suma las consultas al mismo archivo de cuota que usa la CLI (~/.mercadopublico/cuota.json), para que la cuenta del día sea una. */
+function sumarCuota(n: number) {
+  try {
+    const ruta = join(process.env.MERCADOPUBLICO_HOME ?? join(homedir(), ".mercadopublico"), "cuota.json");
+    const dia = new Date().toLocaleDateString("en-CA", { timeZone: "America/Santiago" });
+    const previa = existsSync(ruta) ? (JSON.parse(readFileSync(ruta, "utf8")) as { dia?: string; usadas?: number }) : {};
+    mkdirSync(join(ruta, ".."), { recursive: true });
+    writeFileSync(ruta, JSON.stringify({ dia, usadas: (previa.dia === dia ? (previa.usadas ?? 0) : 0) + n }));
+  } catch {
+    // sin cuenta persistente no se rompe el contrato
+  }
+}
+
 if (directo) {
   try {
     process.loadEnvFile(); // .env local; en CI viene del secreto
@@ -182,6 +197,7 @@ if (directo) {
     process.exit(2);
   }
   const resultados = await contrato(ticket);
+  sumarCuota(consultas);
   console.log(reporte(resultados));
   console.log(`\n_${consultas} consultas._`);
   process.exitCode = resultados.some((r) => r.error || r.d!.agregados.length || r.d!.eliminados.length || r.d!.cambiados.length) ? 1 : 0;

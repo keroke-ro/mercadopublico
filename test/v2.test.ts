@@ -88,6 +88,7 @@ describe("CompraAgilApi.listar", () => {
     ["id y q", { id: "1-1-COT26", q: "papel" }],
     ["ttl y cambio_*", { ttlCambioMs: 1000, cambioDesde: "2026-01-01" }],
     ["tamaño > 50", { tamanoPagina: 51 }],
+    ["tamaño < 10 (verificado en la API real)", { tamanoPagina: 9 }],
     ["región 17", { region: [17] }],
     ["fecha inválida", { publicadoDesde: "ayer" }],
   ])("rechaza %s antes de consultar", async (_, filtros) => {

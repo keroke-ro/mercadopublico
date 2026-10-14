@@ -28,6 +28,10 @@ Marcas: **(V: clave)** = verificado en esa fuente. **(NV)** = no verificado. Los
 > - Fechas de v1 sin offset (hora de Chile), a veces con milisegundos: `2026-10-06T17:51:21.567`.
 > - El detalle de licitación trae `FechaCierre: null` en la raíz; la fecha real está en `Fechas.FechaCierre`. `TipoPago` y `SubContratacion` llegan como string.
 > - En OC, `Items.Listado[].Total` llega en 0 aunque haya `PrecioNeto`; `Unidad` puede ser null; las OC de Compra Ágil (tipo AG) traen `CodigoLicitacion: ""` y el código `…-COT26` dentro de `Nombre`.
+> - **`fecha` en los listados v1 filtra por día de último movimiento**, no de creación: la OC `1002772-9905-AG26` (creada el 08-10, enviada el 09-10, aceptada el 12-10) no aparece con `CodigoProveedor` y fecha 08 ni 09, sí con 12. El listado de licitaciones de un día también trae adjudicadas. Filtros `estado`+`fecha`, `CodigoOrganismo`+`fecha` y `CodigoProveedor`+`fecha` responden bien.
+> - Ticket inválido: `{"Codigo":…, "Mensaje":"Ticket no válido."}`.
+> - **10500 llega con HTTP 429** y aparece también con consultas estrictamente seriales, de forma intermitente: sin pausa 4 de 10, con 500 ms 4 de 12, con 1 s 3 de 11, con 2 s 1 de 7. El SDK espera 1 s entre consultas y reintenta con backoff. No se sabe si esos rechazos cuentan para la cuota diaria (el SDK los cuenta).
+> - v2: `tamano_pagina` debe estar entre **10** y 50 (la guía no dice el mínimo).
 > - Las descripciones traen datos de contacto en texto libre (nombre, teléfono, correo de funcionarios).
 > - v2 Compra Ágil respondió `500 {"codigo":"ERROR_INTERNO","mensaje":"Servicio no disponible…"}` esa noche: sin verificar aún.
 
@@ -496,6 +500,11 @@ Otras observaciones:
 - **mindicador.cl**: `https://mindicador.cl/api/{uf|utm|dolar|euro}/{dd-mm-aaaa}` (NV).
   - El 2026-10-13 el server no respondió: respuesta vacía por HTTPS y timeouts. **No es una fuente confiable para un SDK.**
   - Forma conocida de la respuesta (NV): `{version, autor, codigo, nombre, unidad_medida, serie:[{fecha, valor}]}`, con `serie` vacía en días sin dato (por ejemplo, fines de semana para dólar y euro).
+- **Banco Central, páginas "Ver serie"** (verificado el 2026-10-13, usado como respaldo diario):
+  - `https://si3.bcentral.cl/Indicadoressiete/secure/Indicadoresdiarios.aspx` trae los enlaces `Serie.aspx?gcode={UF|PRE_TCO|PRE_EUR|PRE_UTM}&param={token}` (el token sale de esa página).
+  - `Serie.aspx` devuelve la tabla del año en curso (`table#gr`: una fila por día, `span#gr_ctlNN_{Mes}` por mes, decimales con coma). Otro año: postback con `__EVENTTARGET=DrDwnFechas`, `DrDwnFechas={AAAA}` y el `__VIEWSTATE` de la página.
+  - `PRE_UTM` es mensual y trae todos los años desde 1990 en una sola página.
+  - El sitio tiene antibots (Incapsula); `fetch` de Node pasó sin problemas. La API SIETE es la vía estable, pero pide usuario y clave.
 - **Recomendado: [PAR] ParidadMoneda.csv** (oficial de ChileCompra, sin key, unos 100 KB) (V: PAR).
   - Formato: separador `;`, decimal con coma, CRLF, valores mensuales desde 2007-01. Cabecera: `"YEAR";"MONTH";"MONEDA";"VMUSD";"VMUTM";"VMCLP";"VMCLF";"VMEUR"`.
   - `VMCLP` = CLP por 1 unidad de `MONEDA`. Ejemplo: `2026;9;"UTM";…;71721;…` → UTM de septiembre de 2026 = 71.721.

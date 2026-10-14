@@ -30,7 +30,7 @@ if (plan.cabeHoy) {
 | `hasta` | hoy en Santiago | Último día, incluido. |
 | `fuentes` | las tres | `"licitaciones"`, `"ordenes"`, `"compra_agil"` |
 | `detalle` | `true` | Pedir el detalle de cada proceso nuevo o cambiado (1 consulta c/u). Con `false` se guarda lo que trae el listado. |
-| `refrescar` | `true` | Volver a pedir el detalle de licitaciones y OC guardadas que siguen abiertas: licitaciones con cierre pasado y OC creadas antes de hoy, dentro de los últimos 90 días. La v1 lista cada día una sola vez, así que sin esto una licitación `publicada` nunca pasaría a `adjudicada`. Requiere `detalle`. |
+| `refrescar` | `false` | Volver a pedir el detalle de licitaciones y OC guardadas que siguen abiertas: licitaciones con cierre pasado y OC creadas antes de hoy, dentro de los últimos 90 días. Normalmente no hace falta: el listado v1 de un día trae lo que tuvo movimiento ese día (una OC creada el 8 y aceptada el 12 aparece el 12), así que recorrer los días ya trae los cambios de estado. Úsalo si ves que algo se queda atrás. Requiere `detalle`. |
 | `store` | (obligatorio) | Dónde se guarda. |
 
 ## Lo que cuesta
@@ -51,7 +51,7 @@ Con `Dₗ` y `Dₒ` = días por recorrer de licitaciones y de órdenes (desde el
 - `P` = páginas del listado de Compra Ágil y `R` = resultados totales. Es cota superior porque al ejecutar se saltan los que no cambiaron y los cerrados. Sin detalle, `R` no se suma.
 - `plan.consultas` = suma de las fuentes, incluidas las que ya gastó `planificar` (`plan.gastadas`).
 - `plan.cabeHoy` = `consultas − listadas ≤ restante`, donde `listadas` son las consultas de listado previstas (sin contar reintentos). `ejecutar` vuelve a exigirlo y, si no cabe, falla con `cuota_insuficiente` antes de empezar.
-- Los reintentos también gastan cuota y no están en el plan.
+- Los reintentos también gastan cuota y no están en el plan. En la práctica la API rechaza con 10500 entre 15% y 30% de las consultas aunque vayan de a una (medido el 2026-10-13), así que deja ese margen. Con la pausa de 1 s, 10.000 consultas toman unas 3 horas.
 
 ## Cursores
 
