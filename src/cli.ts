@@ -4,6 +4,7 @@ import { createReadStream, realpathSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { createInterface } from "node:readline";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -24,7 +25,7 @@ import {
   type CuotaArchivo,
   type Proceso,
 } from "./index.js";
-import { servir } from "./mcp.js";
+import { crearServidorMcp } from "./mcp.js";
 import { pesos, resumenRadar, type DecisionEquipo, type Perfil, type ResumenRadar } from "./radar/index.js";
 import type { FuenteSync } from "./sync.js";
 import { ESTADOS_FILTRO_LICITACION, ESTADO_FILTRO_OC, type EstadoFiltroLicitacion, type EstadoFiltroOC } from "./v1/codigos.js";
@@ -58,7 +59,7 @@ Comandos:
   radar --perfil perfil.json          Qué postular primero, a qué precio y qué viene, desde el store; no pide ticket
                                       [--store ./mp.json] [--decisiones decisiones.json] [--max N (10)]
   cuota                               Consultas usadas hoy desde esta máquina
-  mcp                                 Servidor MCP por stdio para agentes (Claude, Cursor…); usa MP_TICKET
+  mcp                                 Servidor MCP por stdio para agentes (Claude, Cursor…); usa MP_TICKET, MP_STORE y MP_MCP_TOPE (tope diario, 1000)
 
 Opciones:
   --formato json|csv|tabla            Por defecto tabla en terminal y json si no
@@ -69,6 +70,10 @@ Opciones:
 `;
 
 class ErrorUso extends Error {}
+
+declare const __VERSION__: string | undefined;
+// La inyecta tsup al compilar; leer package.json en runtime falla dentro del .mcpb.
+const VERSION = typeof __VERSION__ === "string" ? __VERSION__ : "dev";
 
 const OPCIONES = {
   formato: { type: "string" },
@@ -217,6 +222,32 @@ function informe(r: ResumenRadar, ruta: string, max: number): string {
   return `${l.join("\n").trimEnd()}\n`;
 }
 
+/**
+ * Bucle stdio del MCP: un JSON-RPC por línea. Cada línea se atiende sin esperar a la anterior, así `cuota` y `ping`
+ * responden mientras una búsqueda espera su turno en la cola de la API. Termina cuando se cierra la entrada y ya se
+ * escribieron todas las respuestas. Por `salida` solo sale JSON-RPC.
+ */
+export async function servirStdio(servidor: { manejar(msg: unknown): Promise<object | null> }, entrada: NodeJS.ReadableStream, salida: Salida): Promise<void> {
+  const enviar = (m: unknown) => salida.write(`${JSON.stringify(m)}\n`);
+  const pendientes = new Set<Promise<void>>();
+  for await (const linea of createInterface({ input: entrada, crlfDelay: Infinity })) {
+    if (!linea.trim()) continue;
+    let msg: unknown;
+    try {
+      msg = JSON.parse(linea);
+    } catch {
+      enviar({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "JSON inválido" } });
+      continue;
+    }
+    const p: Promise<void> = servidor.manejar(msg).then(
+      (r) => void (r && enviar(r)),
+      (e: unknown) => void enviar({ jsonrpc: "2.0", id: null, error: { code: -32603, message: String((e as Error)?.message ?? e) } }),
+    ).finally(() => pendientes.delete(p));
+    pendientes.add(p);
+  }
+  await Promise.all(pendientes);
+}
+
 export async function main(argv: string[], io: IO): Promise<number> {
   let mp: MercadoPublico | undefined;
   let cuota: CuotaArchivo | undefined;
@@ -225,7 +256,6 @@ export async function main(argv: string[], io: IO): Promise<number> {
     const [comando, arg, ...sobra] = positionals;
     if (o.ayuda) return io.stdout.write(AYUDA), 0;
     if (!comando) throw new ErrorUso("Falta el comando");
-    if (comando === "mcp") return await servir(main, io, process.stdin);
     if (sobra.length) throw new ErrorUso(`Sobran argumentos: ${sobra.join(" ")}`);
     const formato = o.formato ?? (io.stdout.isTTY ? "tabla" : "json");
     uno(formato, ["json", "csv", "tabla"], "formato");
@@ -331,6 +361,15 @@ export async function main(argv: string[], io: IO): Promise<number> {
         const region = lista(o.region)?.map(Number);
         const filtros = { region, estado: lista(o.estado) as Exclude<EstadoCompraAgil, "oc_emitida">[] | undefined, q: o.q, publicadoDesde: o.desde ?? (region || o.estado || o.q ? undefined : diaSantiago()), tamanoPagina: Math.min(50, Math.max(10, max)) };
         return salir(await tomar(mp.compraAgil.listar(filtros), max));
+      }
+      case "mcp": {
+        // Vacías cuentan como no definidas: Claude Desktop manda "" por las opciones que el usuario dejó en blanco.
+        const tope = Number(io.env.MP_MCP_TOPE || 1000);
+        if (!Number.isInteger(tope) || tope < 1) throw new ErrorUso("MP_MCP_TOPE debe ser un entero positivo");
+        // El directorio de trabajo de un cliente MCP es incierto (Claude Desktop): por defecto el store vive junto a la cuota.
+        const ruta = io.env.MP_STORE || join(io.env.MERCADOPUBLICO_HOME || join(homedir(), ".mercadopublico"), "mp.json");
+        await servirStdio(crearServidorMcp({ mp, abrirStore: () => storeArchivo(ruta), tope, version: VERSION }), process.stdin, io.stdout);
+        return 0;
       }
       case "proveedor":
         return salir((await mp.empresas.buscarProveedor(falta("el RUT"))) ?? noExiste("el proveedor con RUT"));

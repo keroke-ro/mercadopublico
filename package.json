@@ -16,6 +16,7 @@
     "url": "git+https://github.com/keroke-ro/mercadopublico.git"
   },
   "license": "PolyForm-Noncommercial-1.0.0",
+  "mcpName": "io.github.keroke-ro/mercadopublico",
   "author": "KeroKero (https://www.kerokero.cl)",
   "type": "module",
   "engines": {
@@ -60,6 +61,7 @@
     "cobertura": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "paquete": "node scripts/paquete.mjs",
+    "mcpb": "npm run build && node scripts/mcpb.mjs",
     "mutacion": "stryker run",
     "smoke": "node --experimental-strip-types scripts/smoke.ts",
     "contrato": "node --experimental-strip-types scripts/contrato.ts",
@@ -69,6 +71,7 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "@anthropic-ai/mcpb": "^2.1.2",
     "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^3.0.3",
     "@stryker-mutator/core": "^10.0.0",

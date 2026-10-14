@@ -1,0 +1,21 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.keroke-ro/mercadopublico",
+  "description": "Consulta licitaciones y Compra Ágil de Mercado Público desde un agente MCP.",
+  "repository": { "url": "https://github.com/keroke-ro/mercadopublico", "source": "github" },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "mercadopublico",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "packageArguments": [{ "type": "positional", "value": "mcp" }],
+      "environmentVariables": [
+        { "name": "MP_TICKET", "description": "Ticket de la API de ChileCompra (chilecompra.cl/api)", "isRequired": true, "isSecret": true, "format": "string" },
+        { "name": "MP_STORE", "description": "Ruta del archivo del store local (por defecto ./mp.json)", "format": "filepath" },
+        { "name": "MP_MCP_TOPE", "description": "Máximo de consultas diarias del agente (por defecto 1000)", "format": "number" }
+      ]
+    }
+  ]
+}

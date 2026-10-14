@@ -69,3 +69,12 @@ Seguimos [semver](https://semver.org/lang/es/). Lo que más protegemos es el mod
 - Cambios en `raw`: refleja la API tal cual y no tiene garantías.
 
 Mientras estemos en 0.x, un cambio que rompe sube la versión menor (0.1 → 0.2) y el changeset lo dice en la primera línea. Desde la 1.0, semver estricto.
+
+### Publicar el servidor MCP
+
+`mercadopublico mcp` sale en npm, en el MCP Registry y como extensión de Claude Desktop (`mercadopublico.mcpb`). Al hacer la release:
+
+1. Sube `version` en `server.json` (la de arriba y la de `packages[0]`) a la de `package.json`. Changesets solo toca `package.json`, así que es un paso manual. `npm run mcpb` falla si no coinciden.
+2. Publica en npm (`npm run release`).
+3. `npm run mcpb` y adjunta `mercadopublico.mcpb` al GitHub Release.
+4. `mcp-publisher login github` y `mcp-publisher publish` desde la raíz. El registry exige que la versión ya esté en npm con el mismo `mcpName`.

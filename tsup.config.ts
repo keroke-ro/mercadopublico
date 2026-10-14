@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs";
 import { defineConfig } from "tsup";
+
+const { version } = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
 
 // removeNodeProtocol: false deja `node:fs/promises` tal cual en el import diferido de storeArchivo: Deno y los
 // runtimes edge con compatibilidad Node solo resuelven los builtins con el prefijo.
@@ -14,6 +17,7 @@ export default defineConfig([
   {
     entry: { cli: "src/cli.ts" },
     format: ["esm"],
+    define: { __VERSION__: JSON.stringify(version) },
     target: "node20",
     removeNodeProtocol: false,
   },
