@@ -1,7 +1,7 @@
 {
   "name": "mercadopublico",
   "version": "0.0.2",
-  "description": "SDK TypeScript para la API de Mercado Público (ChileCompra). En construcción.",
+  "description": "SDK TypeScript para la API de Mercado Público (ChileCompra): v1, Compra Ágil v2 y OCDS en un solo modelo, con control de cuota.",
   "keywords": [
     "mercadopublico",
     "chilecompra",
@@ -17,8 +17,46 @@
   },
   "license": "MIT",
   "author": "KeroKero (https://www.kerokero.cl)",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./radar": {
+      "import": "./dist/radar.js",
+      "require": "./dist/radar.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "mercadopublico": "./dist/cli.js"
+  },
   "files": [
+    "dist",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "contrato": "node --experimental-strip-types scripts/contrato.ts",
+    "changeset": "changeset",
+    "release": "npm run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "@types/node": "^20.19.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.0",
+    "vitest": "^4.0.0"
+  }
 }
