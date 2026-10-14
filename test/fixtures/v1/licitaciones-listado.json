@@ -1,0 +1,10 @@
+{
+  "_fixture": "reconstruido desde docs/api-notes.md; regrabar con ticket real",
+  "Cantidad": 2,
+  "FechaCreacion": "2026-06-12T10:15:30.123",
+  "Version": "v1",
+  "Listado": [
+    { "CodigoExterno": "1509-5-L114", "Nombre": "Adquisición de insumos", "CodigoEstado": 5, "FechaCierre": "2026-06-20T15:00:00" },
+    { "CodigoExterno": "6945-12-LE26", "Nombre": "Servicio de aseo", "CodigoEstado": 8, "FechaCierre": null }
+  ]
+}

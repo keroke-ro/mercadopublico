@@ -109,3 +109,6 @@ export interface CompraAgil extends Base {
 }
 
 export type Proceso = Licitacion | OrdenCompra | CompraAgil;
+
+/** Paso que se aplica a cada detalle antes de devolverlo (p. ej. convertir montos a CLP). */
+export type Enriquecer = <T extends Proceso>(p: T) => Promise<T>;

@@ -1,0 +1,7 @@
+{
+  "_fixture": "reconstruido desde docs/api-notes.md; regrabar con ticket real",
+  "success": "NOK",
+  "trace": null,
+  "payload": null,
+  "errors": [{ "codigo": "429", "mensaje": "Se ha alcanzado el límite de solicitudes permitido. Intente nuevamente más tarde.", "detalle": null }]
+}

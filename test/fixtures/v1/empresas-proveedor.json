@@ -1,0 +1,6 @@
+{
+  "_fixture": "reconstruido desde docs/api-notes.md; regrabar con ticket real",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-06-12T10:15:30",
+  "listaEmpresas": [{ "CodigoEmpresa": "17793", "NombreEmpresa": "Cámara de Comercio de Santiago A.G. (CCS)" }]
+}

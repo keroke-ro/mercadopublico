@@ -1,0 +1,51 @@
+{
+  "_fixture": "reconstruido desde docs/api-notes.md; regrabar con ticket real",
+  "success": "OK",
+  "trace": null,
+  "errors": null,
+  "payload": {
+    "codigo": "1195-39-COT26",
+    "nombre": "Insumos de aseo",
+    "descripcion": "Compra de insumos de aseo para el segundo trimestre",
+    "estado": { "id_estado": 5, "codigo": "proveedor_seleccionado", "glosa": "Proveedor seleccionado" },
+    "convocatoria": { "estado_convocatoria": 1, "descripcion": "Primer llamado", "fecha_cierre_primer_llamado": "2026-04-03T12:00:00Z", "fecha_cierre_segundo_llamado": null },
+    "fechas": { "fecha_publicacion": "2026-04-01T12:00:00Z", "fecha_cierre": "2026-04-03T12:00:00Z", "fecha_ultimo_cambio": "2026-04-06T15:30:00Z", "fecha_cancelacion": null },
+    "entrega": { "direccion_entrega": "Av. Siempre Viva 742, Santiago", "plazo_entrega_dias": 5 },
+    "documentos": [],
+    "presupuesto": { "tipo_presupuesto": "Disponible", "moneda": "CLP", "presupuesto_estimado": null, "monto_disponible": 500000, "monto_disponible_clp": 500000, "valor_cambio_moneda": null, "fecha_cambio_moneda": null },
+    "orden_compra": { "id_orden_compra": 123456789, "id_oc": 123456789, "codigo_orden_compra": null, "estado_orden_compra": null },
+    "institucion": { "organismo_comprador": "Servicio de Salud de Ejemplo", "rut": "61.608.000-5", "unidad_compra": "Abastecimiento", "region": 13, "nombre_region": "Metropolitana" },
+    "productos_solicitados": [
+      { "codigo_producto": 47131800, "nombre": "Detergente", "descripcion": null, "cantidad": 10, "unidad_medida": "EA" },
+      { "codigo_producto": "53131608", "nombre": "Jabón líquido", "descripcion": "Bidón 5 L", "cantidad": "20", "unidad_medida": "EA" }
+    ],
+    "proveedores_cotizando": [
+      {
+        "rut_proveedor": "76.000.000-0", "razon_social": "Limpieza SpA", "es_emt": true, "id_cotizacion": 1,
+        "codigo_empresa": "1234", "codigo_sucursal_empresa": "1", "estado_por_comprador": null, "activo": true,
+        "fecha_creacion": "2026-04-02T10:00:00Z", "fecha_vigencia": null,
+        "valor_neto": 400000, "total_impuesto": 76000, "monto_despacho": 0, "monto_total": 476000, "nombre_impuesto": "IVA", "porcentaje_impuesto": 19,
+        "descripcion_cotizacion": null, "descripcion": null, "justificacion_inadmisibilidad": null,
+        "productos_cotizados": [
+          { "codigo_producto": 47131800, "nombre_producto": "Detergente", "descripcion": null, "cantidad": 10, "precio_unitario": 20000, "monto_total_producto": 200000 },
+          { "codigo_producto": "53131608", "nombre_producto": "Jabón líquido", "descripcion": null, "cantidad": 20, "precio_unitario": 10000, "monto_total_producto": 200000 }
+        ],
+        "seleccion": { "proveedor_seleccionado": true, "motivo_seleccion": "Mejor precio", "criterio_seleccion": "precio" }
+      },
+      {
+        "rut_proveedor": "12.345.678-5", "razon_social": "Juan Pérez", "es_emt": true, "id_cotizacion": 2,
+        "codigo_empresa": "5678", "codigo_sucursal_empresa": "1", "estado_por_comprador": null, "activo": true,
+        "fecha_creacion": "2026-04-02T11:00:00Z", "fecha_vigencia": null,
+        "valor_neto": 450000, "total_impuesto": 85500, "monto_despacho": 0, "monto_total": 535500, "nombre_impuesto": "IVA", "porcentaje_impuesto": 19,
+        "descripcion_cotizacion": null, "descripcion": null, "justificacion_inadmisibilidad": null,
+        "productos_cotizados": [
+          { "codigo_producto": 47131800, "nombre_producto": "Detergente", "descripcion": null, "cantidad": 10, "precio_unitario": null, "monto_total_producto": null }
+        ],
+        "seleccion": { "proveedor_seleccionado": false, "motivo_seleccion": null, "criterio_seleccion": null }
+      }
+    ],
+    "resumen": { "multa_sancion": null, "total_ofertas_recibidas": 2, "total_demandas": 0 },
+    "motivos": { "motivo_cancelacion": null, "motivo_desierta": null },
+    "flags": { "considera_requisitos_medioambientales": false, "considera_requisitos_impacto_social_economico": false }
+  }
+}

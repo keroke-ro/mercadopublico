@@ -1,0 +1,92 @@
+{
+  "_fixture": "reconstruido desde docs/api-notes.md; regrabar con ticket real",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-06-12T10:15:30",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "2097-241-SE26",
+      "Nombre": "OC insumos de oficina",
+      "CodigoEstado": 6,
+      "CodigoLicitacion": "1509-5-LE26",
+      "Descripcion": "Orden por licitación 1509-5-LE26",
+      "CodigoTipo": "8",
+      "Tipo": "SE",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 3,
+      "EstadoProveedor": "Aceptada",
+      "Fechas": {
+        "FechaCreacion": "2026-06-11T12:00:00",
+        "FechaEnvio": "2026-06-11T12:05:00",
+        "FechaAceptacion": "2026-06-12T09:00:00",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-06-12T09:00:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 25000,
+      "PorcentajeIva": 19,
+      "Impuestos": 4750,
+      "Total": 29750,
+      "Financiamiento": "Presupuesto propio",
+      "Pais": "CL",
+      "TipoDespacho": "7",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "6945",
+        "NombreOrganismo": "Dirección de Compras y Contratación Pública",
+        "RutUnidad": "60.808.000-7",
+        "CodigoUnidad": "1509",
+        "NombreUnidad": "Unidad de compras",
+        "Actividad": "Administración pública",
+        "DireccionUnidad": "Monjitas 392",
+        "ComunaUnidad": "Santiago",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "Pais": "CL",
+        "NombreContacto": "Compradora De Prueba",
+        "CargoContacto": "Jefa Ficticia",
+        "FonoContacto": "56-2-11111111",
+        "MailContacto": "compras@ejemplo.invalid"
+      },
+      "Proveedor": {
+        "Codigo": "17793",
+        "Nombre": "Proveedor Ficticio SpA",
+        "Actividad": "Venta de artículos de oficina",
+        "CodigoSucursal": "17794",
+        "NombreSucursal": "Casa matriz",
+        "RutSucursal": "76.000.000-0",
+        "Direccion": "Calle Falsa 123",
+        "Comuna": "Concepción",
+        "Region": "Región del Biobío",
+        "Pais": "CL",
+        "NombreContacto": "Vendedor De Prueba",
+        "CargoContacto": "Ejecutivo Ficticio",
+        "FonoContacto": "56-41-2222222",
+        "MailContacto": "ventas@ejemplo.invalid"
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 44121700,
+            "Categoria": "Artículos de oficina / Instrumentos de escritura",
+            "CodigoProducto": 44121701,
+            "EspecificacionComprador": "Bolígrafo azul punta fina",
+            "EspecificacionProveedor": "Bolígrafo marca genérica",
+            "Cantidad": 100,
+            "Moneda": "CLP",
+            "PrecioNeto": 250,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 4750,
+            "Total": 25000
+          }
+        ]
+      }
+    }
+  ]
+}

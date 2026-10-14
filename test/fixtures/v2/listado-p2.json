@@ -1,0 +1,25 @@
+{
+  "_fixture": "reconstruido desde docs/api-notes.md; regrabar con ticket real",
+  "success": "OK",
+  "trace": null,
+  "errors": null,
+  "payload": {
+    "items": [
+      {
+        "codigo": "1057539-240-COT26",
+        "nombre": "Cables y conectores",
+        "estado": { "id_estado": 5, "codigo": "proveedor_seleccionado", "glosa": "Proveedor seleccionado" },
+        "convocatoria": { "estado_convocatoria": 1, "descripcion": "Primer llamado" },
+        "documentos": [],
+        "fechas": { "fecha_publicacion": "2026-03-20T13:00:00Z", "fecha_cierre": "2026-03-23T13:00:00Z", "fecha_ultimo_cambio": "2026-03-25T18:45:00Z", "fecha_cancelacion": null },
+        "montos": { "moneda": "CLP", "monto_disponible": "250000", "monto_disponible_clp": 250000 },
+        "institucion": { "organismo_comprador": "Hospital de Ejemplo", "rut": "61608000-5", "unidad_compra": "Abastecimiento", "region": 13, "nombre_region": "Metropolitana" },
+        "resumen": { "total_ofertas_recibidas": 2 },
+        "motivos": { "motivo_cancelacion": null, "motivo_desierta": null, "motivo_seleccion": "Mejor precio" },
+        "links": { "detalle": "/v2/compra-agil/1057539-240-COT26" },
+        "campo_nuevo_no_documentado": { "x": 1 }
+      }
+    ],
+    "paginacion": { "total_paginas": 2, "numero_pagina": 2, "tamano_pagina": 50, "total_resultados": 3 }
+  }
+}
