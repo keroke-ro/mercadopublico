@@ -3,8 +3,11 @@
 // y a los stateless de 2026-07-28 (con `server/discover` y `_meta`). El bucle stdio vive en cli.ts.
 import { MercadoPublicoError } from "./errores.js";
 import { diaSantiago, sumarDias } from "./fecha.js";
-import { ocultarPersonales, type MercadoPublico, type Proceso, type Store } from "./index.js";
-import { resumenRadar, pesos, type Perfil } from "./radar/index.js";
+import { ocultarPersonales, type CompraAgil, type MercadoPublico, type Proceso, type Proveedor, type Store } from "./index.js";
+import { MUESTRA_MINIMA, competidores, precioSugerido, proximasCompras, rangoDePrecio, resumenRadar, pesos, type Perfil } from "./radar/index.js";
+import { leerOcds, urlOcds } from "./ocds.js";
+import { PROMPTS, obtenerPrompt } from "./mcp-prompts.js";
+import { OCULTO } from "./personales.js";
 import { ESTADOS_FILTRO_LICITACION, ESTADO_FILTRO_OC, REGION, familiaDesdeCodigo, urlPublica } from "./v1/codigos.js";
 import type { FuenteSync } from "./sync.js";
 import type { EstadoCompraAgil } from "./v2/parse.js";
@@ -14,13 +17,16 @@ const LEGADAS = VERSIONES.slice(1);
 const META_VERSION = "io.modelcontextprotocol/protocolVersion";
 const META_INFO = "io.modelcontextprotocol/serverInfo";
 const TTL_LISTA_MS = 3_600_000;
+const CAPACIDADES = { tools: {}, prompts: {} };
 
 const INSTRUCCIONES =
   "Mercado Público de Chile. Busca con `search` y después trae el detalle con `fetch`. Las órdenes de compra se ven con `listar` " +
   "o, si hay store local, con `search`. Cada herramienta informa en `costo` cuántas consultas a la API gastó: la API permite " +
   "10.000 al día y este servidor corta al llegar a su tope diario. Los datos personales de funcionarios vienen ocultos. " +
   "Con store local, `sync` baja datos en segundo plano (un solo trabajo a la vez): responde al tiro y avanza solo; consulta el avance con `trabajo_estado` y " +
-  "no lo pidas de nuevo mientras corre. `trabajo_cancelar` lo detiene guardando lo hecho.";
+  "no lo pidas de nuevo mientras corre. `trabajo_cancelar` lo detiene guardando lo hecho. " +
+  "Para el historial (quién ganó, a qué precio, cada cuánto compra un organismo): `ocds_importar` trae al store licitaciones y órdenes de compra de un año desde OCDS, filtradas (0 consultas, mismo espacio de trabajo que `sync`), " +
+  "y `competidores`, `proximas_compras` y `precios` lo analizan en local (0 consultas). Los precios salen de Compra Ágil, que solo llega con `sync`.";
 
 type Args = Record<string, unknown>;
 type Objeto = Record<string, unknown>;
@@ -36,6 +42,7 @@ class ErrorUso extends Error {}
 interface Ctx {
   mp: MercadoPublico;
   abrirStore?: () => Promise<Store>;
+  fetch?: typeof fetch;
   /** ponytail: caché por proceso, sin LRU; las claves son pocas (activas, compradores y los detalles pedidos). */
   cacheado<T>(clave: string, ttlMs: number, f: () => Promise<T>): Promise<T>;
   topeAgente(): { limite: number; usadas: number };
@@ -48,7 +55,7 @@ interface Ctx {
 
 type EstadoTrabajo = "planificando" | "ejecutando" | "terminado" | "detenido" | "cancelado" | "error";
 /**
- * Un solo espacio para trabajos en segundo plano (hoy `sync`; la fase 5 suma el import OCDS). Vive en memoria del servidor.
+ * Un solo espacio para trabajos en segundo plano (`sync` y `ocds_importar`). Vive en memoria del servidor.
  * `store` es el handle que el trabajo tiene tomado (y con él el lock) hasta que termina.
  */
 interface Trabajo {
@@ -79,6 +86,8 @@ interface Herramienta {
   outputSchema?: Objeto;
   annotations: { readOnlyHint: boolean; destructiveHint?: false; idempotentHint: true; openWorldHint: boolean };
   requiereStore?: true;
+  /** Abierta al mundo pero sin gastar cuota (descarga de OCDS): ni cuenta para el tope del agente ni va en la cola de la API. */
+  sinCuota?: true;
   ejecutar(a: Args, c: Ctx): Promise<Objeto>;
 }
 
@@ -102,11 +111,34 @@ function entero(a: Args, k: string, defecto: number, tope: number): number {
   return v;
 }
 
-function regiones(a: Args): number[] | undefined {
-  const v = a.region;
+function regiones(a: Args, k = "region"): number[] | undefined {
+  const v = a[k];
   if (v === undefined || v === null) return undefined;
-  if (!Array.isArray(v) || !v.length || v.some((r) => !Number.isInteger(r) || r < 1 || r > 16)) throw new ErrorUso("`region` es una lista de códigos del 1 al 16 (13 = Metropolitana)");
+  if (!Array.isArray(v) || !v.length || v.some((r) => !Number.isInteger(r) || r < 1 || r > 16)) throw new ErrorUso(`\`${k}\` es una lista de códigos del 1 al 16 (13 = Metropolitana)`);
   return v as number[];
+}
+
+/** Rubros UNSPSC (2, 4, 6 u 8 dígitos); el formato lo valida el radar y su RangeError vuelve como error de uso. */
+function rubros(a: Args): (string | number)[] | undefined {
+  const v = a.rubros;
+  if (v === undefined || v === null) return undefined;
+  if (!Array.isArray(v) || v.some((r) => typeof r !== "string" && typeof r !== "number")) throw new ErrorUso("`rubros` es una lista de códigos UNSPSC (2, 4, 6 u 8 dígitos)");
+  return v as (string | number)[];
+}
+
+/** Persona natural: RUT bajo 50 millones (el mismo criterio del parser OCDS). Sin RUT no se puede saber y se deja. */
+function sinPersona(p: Proveedor): Proveedor {
+  const n = parseInt((p.rut ?? "").replace(/[^0-9kK]/g, "").slice(0, -1), 10);
+  return n > 0 && n < 50_000_000 ? { rut: OCULTO, nombre: OCULTO, codigo: p.codigo } : p;
+}
+
+/** Las funciones del radar lanzan RangeError con mensajes que el agente puede corregir. */
+function delRadar<T>(f: () => T): T {
+  try {
+    return f();
+  } catch (e) {
+    throw e instanceof RangeError ? new ErrorUso(e.message) : e;
+  }
 }
 
 // --- búsqueda por palabras ---
@@ -121,6 +153,10 @@ const calza = (ps: string[], s: string | null) => {
 const ESTADOS_LISTADO = [...new Set([...ESTADOS_FILTRO_LICITACION, ...Object.keys(ESTADO_FILTRO_OC)])];
 const ETIQUETA = { licitacion: "Licitación", orden_compra: "Orden de compra", compra_agil: "Compra Ágil" } as const;
 const FUENTES: string[] = ["licitaciones", "ordenes", "compra_agil"];
+// ponytail: `max` protege a `storeArchivo`, que reescribe el JSON entero en cada lote y aguanta decenas de miles de procesos; más allá, el store de Postgres.
+const MAX_OCDS_DEFECTO = 5000;
+const MAX_OCDS = 20_000;
+const LOTE_OCDS = 500;
 const MS_ACTIVAS = 600_000;
 const MS_COMPRADORES = 86_400_000;
 const activas = (c: Ctx) => c.cacheado("activas", MS_ACTIVAS, () => c.mp.licitaciones.activas());
@@ -148,6 +184,16 @@ function porCierre(a: Fila, b: Fila) {
   };
   const [x, y] = [clave(a), clave(b)];
   return x[0]! - y[0]! || x[1]! - y[1]!;
+}
+
+async function historial(c: Ctx): Promise<Proceso[]> {
+  const todos = await enStore(c, async (s) => {
+    const r: Proceso[] = [];
+    for await (const p of s.todos()) r.push(p);
+    return r;
+  });
+  if (!todos.length) throw new ErrorUso("el store está vacío: trae datos con `ocds_importar` (licitaciones y órdenes de compra) o corre `npx mercadopublico sync --desde AAAA-MM-DD` (Compra Ágil y lo reciente)");
+  return todos;
 }
 
 async function enStore<T>(c: Ctx, f: (s: Store) => Promise<T>): Promise<T> {
@@ -458,12 +504,7 @@ const HERRAMIENTAS: Herramienta[] = [
       if (!perfil || typeof perfil !== "object" || Array.isArray(perfil) || !perfil.pesos || typeof perfil.pesos !== "object") throw new ErrorUso("`perfil` debe ser un objeto con `pesos`");
       if (a.decisiones !== undefined && !Array.isArray(a.decisiones)) throw new ErrorUso("`decisiones` debe ser una lista");
       const max = entero(a, "max", 10, 100);
-      const todos = await enStore(c, async (s) => {
-        const r: Proceso[] = [];
-        for await (const p of s.todos()) r.push(p);
-        return r;
-      });
-      if (!todos.length) throw new ErrorUso("el store está vacío: corre `npx mercadopublico sync --desde AAAA-MM-DD`");
+      const todos = await historial(c);
       const r = resumenRadar(todos, perfil, { decisiones: a.decisiones as never });
       const agenda = r.decisiones.filter((d) => d.turno !== null);
       const conteo = {
@@ -473,6 +514,95 @@ const HERRAMIENTAS: Herramienta[] = [
         descartadas: r.decisiones.filter((d) => d.accion === "descartar").length,
       };
       return { ...r, decisiones: agenda.slice(0, max), proximas: r.proximas.slice(0, max), conteo };
+    },
+  },
+  {
+    name: "competidores",
+    title: "Quién gana en un rubro u organismo",
+    description:
+      "Quién gana, cuánto y con qué concentración (HHI), a partir del store local. Los datos vienen de OCDS (licitaciones y órdenes de compra, que se traen con `ocds_importar`; ahí solo se ve a quien ganó) y de Compra Ágil (solo si se trajo con `sync`; ahí se ven también los que cotizaron). " +
+      "Cuesta 0 consultas. El filtro `organismos` usa el código de organismo, que OCDS no trae: solo calza procesos traídos con `sync`. Los proveedores que parecen persona natural (RUT bajo 50 millones) salen ocultos, salvo el del `rut` pedido.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        rubros: { type: "array", items: { type: ["string", "integer"] }, description: "Códigos UNSPSC por prefijo (2, 4, 6 u 8 dígitos), p. ej. 4410" },
+        organismos: { type: "array", items: { type: "string" }, description: "Códigos de organismo comprador (ver `organismos`); solo calza procesos traídos con `sync`" },
+        regiones: { type: "array", items: { type: "integer", minimum: 1, maximum: 16 }, description: "Regiones (13 = Metropolitana)" },
+        rut: { type: "string", description: "RUT de tu empresa, para marcarla en la lista (`eresTu`)" },
+        max: { type: "integer", minimum: 1, maximum: 100, description: "Máximo de competidores (20 por defecto)" },
+      },
+    },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    requiereStore: true,
+    async ejecutar(a, c) {
+      const rut = texto(a, "rut");
+      const organismos = a.organismos;
+      if (organismos !== undefined && (!Array.isArray(organismos) || organismos.some((o) => typeof o !== "string"))) throw new ErrorUso("`organismos` es una lista de códigos de organismo");
+      const max = entero(a, "max", 20, 100);
+      const filtro = { rubros: rubros(a), organismos: organismos as string[] | undefined, regiones: regiones(a, "regiones"), rut };
+      const todos = await historial(c);
+      const r = delRadar(() => competidores(todos, filtro));
+      return { ...r, competidores: r.competidores.slice(0, max).map((x) => ({ ...x, proveedor: x.eresTu ? x.proveedor : sinPersona(x.proveedor) })), totalCompetidores: r.competidores.length, truncado: r.competidores.length > max };
+    },
+  },
+  {
+    name: "proximas_compras",
+    title: "Qué compras se repiten y cuándo vuelven",
+    description:
+      "Compras que un organismo repite en una familia UNSPSC y la ventana en que debería salir la próxima, a partir del historial del store local. Cuesta 0 consultas. " +
+      "Necesita el código de organismo, que OCDS no trae: solo cuenta lo traído con `sync` (licitaciones, órdenes de compra y Compra Ágil); lo de `ocds_importar` no aparece aquí.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        rubros: { type: "array", items: { type: ["string", "integer"] }, description: "Códigos UNSPSC por prefijo (2, 4, 6 u 8 dígitos)" },
+        regiones: { type: "array", items: { type: "integer", minimum: 1, maximum: 16 }, description: "Regiones (13 = Metropolitana)" },
+        max: { type: "integer", minimum: 1, maximum: 100, description: "Máximo de ventanas (20 por defecto)" },
+      },
+    },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    requiereStore: true,
+    async ejecutar(a, c) {
+      const reg = regiones(a, "regiones");
+      const max = entero(a, "max", 20, 100);
+      const todos = await historial(c);
+      const todas = delRadar(() => proximasCompras(todos, { ahora: new Date(), rubros: rubros(a) })).filter((x) => !reg || reg.includes(x.region ?? -1));
+      return { proximas: todas.slice(0, max), total: todas.length, truncado: todas.length > max };
+    },
+  },
+  {
+    name: "precios",
+    title: "Rango de precios y precio sugerido",
+    description:
+      "Qué precio unitario ha ganado un producto (`codigoProducto` UNSPSC) en Compra Ágil: percentiles de lo adjudicado y, con `costo`, el precio que maximiza la ganancia esperada. Cuesta 0 consultas. " +
+      "Usa solo las Compras Ágiles del store, que llegan únicamente con `sync` (fuentes [\"compra_agil\"]): OCDS no trae Compra Ágil, así que `ocds_importar` no alimenta esta herramienta. Con menos de 10 precios devuelve `insuficiente` y una `pista`.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        codigoProducto: { type: "integer", minimum: 1, description: "Código UNSPSC del producto (8 dígitos), p. ej. 44121701" },
+        costo: { type: "number", minimum: 0, description: "Tu costo por unidad en CLP: devuelve el precio sugerido en vez del rango" },
+        unidad: { type: "string", description: "Unidad de medida; por defecto la más frecuente" },
+      },
+      required: ["codigoProducto"],
+    },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    requiereStore: true,
+    async ejecutar(a, c) {
+      const codigo = a.codigoProducto;
+      if (typeof codigo !== "number" || !Number.isInteger(codigo) || codigo < 1) throw new ErrorUso("`codigoProducto` debe ser un entero (código UNSPSC)");
+      const unidad = texto(a, "unidad");
+      if (a.costo !== undefined && (typeof a.costo !== "number" || !Number.isFinite(a.costo) || a.costo < 0)) throw new ErrorUso("`costo` debe ser un número ≥ 0");
+      const compras = (await historial(c)).filter((p): p is CompraAgil => p.tipo === "compra_agil");
+      const r = a.costo !== undefined ? precioSugerido(codigo, compras, { costo: a.costo, unidad }) : rangoDePrecio(codigo, compras, { soloSeleccionadas: true, unidad });
+      if (!("insuficiente" in r)) {
+        // Sin la curva (un punto por precio ganador distinto): `precio`, `ganadas` y `probabilidad` ya dicen lo que importa.
+        // `costo` es el sobre de cada respuesta (consultas gastadas): el del usuario sale como `costoUnitario`.
+        const { curva, costo, ...resto } = r as typeof r & { curva?: unknown[]; costo?: number };
+        return { ...resto, ...(costo !== undefined && { costoUnitario: costo }), ...(curva && { puntosDeCurva: curva.length }), comprasAgiles: compras.length };
+      }
+      const pista = r.motivo === "muestra insuficiente"
+        ? `Hay ${r.n} precios ganadores de este producto en ${compras.length} Compras Ágiles del store; se necesitan al menos ${MUESTRA_MINIMA}. Trae más con \`sync\` y fuentes ["compra_agil"] (OCDS no trae Compra Ágil), o prueba otra \`unidad\`.`
+        : "Tu costo está sobre los precios que ganaron: con ese costo no hay un precio que gane con ganancia.";
+      return { ...r, pista, comprasAgiles: compras.length };
     },
   },
   {
@@ -504,8 +634,7 @@ const HERRAMIENTAS: Herramienta[] = [
       const f = a.fuentes ?? FUENTES;
       if (!Array.isArray(f) || !f.length || f.some((x) => !FUENTES.includes(x))) throw new ErrorUso(`\`fuentes\` es una lista con ${FUENTES.join(", ")}`);
       const fuentes = [...new Set(f as FuenteSync[])];
-      const actual = c.trabajo();
-      if (enCurso(actual)) throw new ErrorUso(`Ya hay un trabajo en curso (${actual.tipo}, ${actual.estado}). Consulta \`trabajo_estado\` o detenlo con \`trabajo_cancelar\`.`);
+      libre(c);
 
       const store = await c.abrirStore!();
       let lanzado = false;
@@ -537,9 +666,60 @@ const HERRAMIENTAS: Herramienta[] = [
     },
   },
   {
+    name: "ocds_importar",
+    title: "Importar historial OCDS al store (trabajo en segundo plano)",
+    description:
+      "Trae al store local licitaciones y órdenes de compra de un año desde los datos abiertos OCDS (data.open-contracting.org; el archivo anual pesa unos 186 MB y se lee en streaming), solo los que pasan tus filtros: " +
+      "para `competidores` y `search`. Es un trabajo en segundo plano, del mismo espacio que `sync` (uno a la vez): responde al tiro y avanza solo; usa `trabajo_estado` y `trabajo_cancelar` (guarda lo aceptado). " +
+      "Cuesta 0 consultas a la API y no cuenta para el tope del agente. Exige al menos uno de `q`, `comprador` o `rubro`. No pisa lo que el store ya tiene de la API (`sync`), que es más fresco. " +
+      "OCDS no trae Compra Ágil (para `precios` usa `sync`) ni el código de organismo (`proximas_compras` y el filtro `organismos` no lo ven).",
+    inputSchema: {
+      type: "object",
+      properties: {
+        anio: { type: "integer", minimum: 2010, description: "Año del archivo OCDS, desde 2010 hasta el actual" },
+        q: { type: "string", description: "Palabras del nombre o la descripción; se exigen todas" },
+        comprador: { type: "string", description: "Palabras del nombre del organismo o la unidad compradora" },
+        rubro: { type: "string", description: "Prefijo de código UNSPSC (solo dígitos), p. ej. 4410" },
+        desde: { type: "string", description: "Publicación desde AAAA-MM-DD" },
+        hasta: { type: "string", description: "Publicación hasta AAAA-MM-DD" },
+        max: { type: "integer", minimum: 1, maximum: MAX_OCDS, description: `Máximo de procesos a guardar (${MAX_OCDS_DEFECTO} por defecto)` },
+      },
+      required: ["anio"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    requiereStore: true,
+    sinCuota: true,
+    async ejecutar(a, c) {
+      const anio = a.anio;
+      const actual = Number(c.mp.cuota.toJSON().dia.slice(0, 4));
+      if (typeof anio !== "number" || !Number.isInteger(anio) || anio < 2010 || anio > actual) throw new ErrorUso(`\`anio\` debe ser un entero entre 2010 y ${actual}`);
+      const q = texto(a, "q");
+      const comprador = texto(a, "comprador");
+      const rubro = texto(a, "rubro");
+      if (!q && !comprador && !rubro) throw new ErrorUso("Falta al menos un filtro (`q`, `comprador` o `rubro`): el archivo del año pesa unos 186 MB y traerlo entero no cabe en el store");
+      const p: ParamsOcds = { anio, q: q ? palabras(q) : undefined, comprador: comprador ? palabras(comprador) : undefined, rubro, desde: diaArg(a, "desde"), hasta: diaArg(a, "hasta"), max: entero(a, "max", MAX_OCDS_DEFECTO, MAX_OCDS) };
+      if (q && !p.q!.length) throw new ErrorUso("`q` necesita al menos una palabra de 2 letras o más");
+      if (comprador && !p.comprador!.length) throw new ErrorUso("`comprador` necesita al menos una palabra de 2 letras o más");
+      if (rubro && !/^\d{1,8}$/.test(rubro)) throw new ErrorUso("`rubro` es un prefijo de código UNSPSC: solo dígitos (hasta 8)");
+      if (p.desde && p.hasta && p.desde > p.hasta) throw new ErrorUso("`desde` no puede ser posterior a `hasta`");
+      libre(c);
+
+      const store = await c.abrirStore!();
+      let lanzado = false;
+      try {
+        const parametros = Object.fromEntries(Object.entries({ anio, q, comprador, rubro, desde: p.desde, hasta: p.hasta, max: p.max }).filter(([, v]) => v !== undefined));
+        const t = c.lanzar({ tipo: "ocds", parametros, store }, (j) => correrOcds(c, j, p));
+        lanzado = true;
+        return { trabajo: vista(t) };
+      } finally {
+        if (!lanzado) await store.cerrar?.();
+      }
+    },
+  },
+  {
     name: "trabajo_estado",
     title: "Ver el trabajo en segundo plano",
-    description: "Estado del último trabajo en segundo plano (`sync`): plan, avance (fuente, hechas/total), resultado o motivo por el que se detuvo. `trabajo` es null si no ha habido ninguno. Cuesta 0 consultas.",
+    description: "Estado del último trabajo en segundo plano (`sync` u `ocds_importar`): plan, avance (`sync`: fuente, hechas/total; `ocds_importar`: leidos, aceptados, guardados…), resultado o motivo por el que se detuvo. `trabajo` es null si no ha habido ninguno. Cuesta 0 consultas.",
     inputSchema: { type: "object", properties: {} },
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
     requiereStore: true,
@@ -568,7 +748,13 @@ const HERRAMIENTAS: Herramienta[] = [
   },
 ];
 
-// --- trabajo `sync` ---
+// --- trabajos ---
+
+/** Un solo trabajo a la vez, de cualquier tipo. */
+function libre(c: Ctx) {
+  const actual = c.trabajo();
+  if (enCurso(actual)) throw new ErrorUso(`Ya hay un trabajo en curso (${actual.tipo}, ${actual.estado}). Consulta \`trabajo_estado\` o detenlo con \`trabajo_cancelar\`.`);
+}
 
 function diaArg(a: Args, k: string, obligatorio?: true): string;
 function diaArg(a: Args, k: string): string | undefined;
@@ -625,13 +811,80 @@ async function correrSync(c: Ctx, j: Trabajo, p: { desde: string; hasta: string;
 }
 
 
+interface ParamsOcds {
+  anio: number;
+  q?: string[];
+  comprador?: string[];
+  rubro?: string;
+  desde?: string;
+  hasta?: string;
+  max: number;
+}
+
+/** El cuerpo del trabajo `ocds_importar`: lee el archivo del año en streaming y guarda en lotes lo que pasa todos los filtros. */
+async function correrOcds(c: Ctx, j: Trabajo, p: ParamsOcds): Promise<Salida> {
+  const { signal } = j.abort;
+  const avance = { leidos: 0, aceptados: 0, guardados: 0, omitidos: 0, lineasMalas: 0 };
+  j.avance = avance;
+  j.estado = "ejecutando";
+  const pasa = (x: Proceso) => {
+    const dia = (x.fechas.publicacion ?? x.fechas.creacion)?.slice(0, 10);
+    return (
+      (!p.q || calza(p.q, `${x.nombre} ${x.descripcion ?? ""}`)) &&
+      (!p.comprador || calza(p.comprador, `${x.comprador?.nombreOrganismo ?? ""} ${x.comprador?.nombreUnidad ?? ""}`)) &&
+      (!p.rubro || x.items.some((i) => i.codigoProducto !== null && String(i.codigoProducto).startsWith(p.rubro!))) &&
+      (!(p.desde || p.hasta) || (!!dia && (!p.desde || dia >= p.desde) && (!p.hasta || dia <= p.hasta)))
+    );
+  };
+  let lote: Proceso[] = [];
+  const volcar = async () => {
+    const nuevos: Proceso[] = [];
+    for (const x of lote) {
+      const previo = await j.store.obtener(x.codigo);
+      if (previo && previo.origen !== "ocds") avance.omitidos++; // lo de la API es más rico y más fresco
+      else nuevos.push(x);
+    }
+    if (nuevos.length) await j.store.guardar(nuevos);
+    avance.guardados += nuevos.length;
+    lote = [];
+  };
+
+  let fallo: unknown;
+  let cortado = false;
+  try {
+    for await (const x of leerOcds(urlOcds(p.anio), { fetch: c.fetch, signal, alError: () => avance.lineasMalas++ })) {
+      if (signal.aborted) break;
+      avance.leidos++;
+      if (!pasa(x)) continue;
+      avance.aceptados++;
+      lote.push(x);
+      if (lote.length >= LOTE_OCDS) await volcar();
+      if (avance.aceptados >= p.max) {
+        cortado = true;
+        break;
+      }
+    }
+  } catch (e) {
+    fallo = e;
+  }
+  await volcar().catch((e) => (fallo ??= e)); // también al cancelar o fallar: lo aceptado queda guardado
+  const resultado = { ...avance };
+  if (signal.aborted) return { estado: "cancelado", resultado, mensaje: "Cancelado; lo aceptado quedó guardado." };
+  if (fallo) return { estado: "error", resultado, mensaje: `${fallo instanceof Error ? fallo.message : String(fallo)}. Lo aceptado hasta ahí quedó guardado.` };
+  if (cortado) return { estado: "terminado", resultado, mensaje: `Se detuvo al llegar a max (${p.max}): puede haber más procesos que calzan; sube max (hasta ${MAX_OCDS}) o afina los filtros.` };
+  return { estado: "terminado", resultado };
+}
+
+
 // --- servidor ---
 
-export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Promise<Store>; tope?: number; version?: string }): { manejar(msg: unknown): Promise<object | null> } {
+export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Promise<Store>; fetch?: typeof fetch; tope?: number; version?: string }): { manejar(msg: unknown): Promise<object | null> } {
   const { mp, abrirStore } = op;
   const limite = op.tope ?? 1000;
   const info = { name: "mercadopublico", version: op.version ?? "0.1.0" };
   const herramientas = HERRAMIENTAS.filter((h) => !h.requiereStore || abrirStore);
+  // radar-diario usa `radar`, que necesita store.
+  const prompts = PROMPTS.filter((p) => p.name !== "radar-diario" || abrirStore);
 
   const cache = new Map<string, { vence: number; v: Promise<unknown> }>();
   const cacheado = <T>(clave: string, ttlMs: number, f: () => Promise<T>): Promise<T> => {
@@ -675,7 +928,7 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
     );
     return j;
   };
-  const ctx: Ctx = { mp, abrirStore, cacheado, topeAgente, trabajo: () => trabajo, storeTrabajo: () => (enCurso(trabajo) ? trabajo.store : undefined), lanzar };
+  const ctx: Ctx = { mp, abrirStore, fetch: op.fetch, cacheado, topeAgente, trabajo: () => trabajo, storeTrabajo: () => (enCurso(trabajo) ? trabajo.store : undefined), lanzar };
 
   // Las herramientas que consultan la API van de a una: así el delta de `mp.cuota.usadas` es de esa llamada y no de otra.
   let cola: Promise<unknown> = Promise.resolve();
@@ -689,9 +942,9 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
   const fallo = (m: string) => ({ content: [{ type: "text", text: m }], isError: true });
 
   async function ejecutar(h: Herramienta, args: Args) {
-    const abierta = h.annotations.openWorldHint;
+    const abierta = h.annotations.openWorldHint && !h.sinCuota;
     const antes = mp.cuota.usadas;
-    const conTrabajo = enCurso(trabajo); // sus consultas se mezclan con las de esta llamada en el delta
+    const conTrabajo = enCurso(trabajo) && trabajo.tipo === "sync"; // sus consultas se mezclan con las de esta llamada en el delta
     let datos: Objeto;
     let consultas = 0;
     try {
@@ -715,10 +968,10 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
     switch (method) {
       case "initialize": {
         const pedida = params.protocolVersion;
-        return { protocolVersion: LEGADAS.includes(pedida as string) ? pedida : LEGADAS[0], capabilities: { tools: {} }, serverInfo: info, instructions: INSTRUCCIONES };
+        return { protocolVersion: LEGADAS.includes(pedida as string) ? pedida : LEGADAS[0], capabilities: CAPACIDADES, serverInfo: info, instructions: INSTRUCCIONES };
       }
       case "server/discover":
-        return { supportedVersions: VERSIONES, capabilities: { tools: {} }, instructions: INSTRUCCIONES, ttlMs: TTL_LISTA_MS, cacheScope: "private" };
+        return { supportedVersions: VERSIONES, capabilities: CAPACIDADES, instructions: INSTRUCCIONES, ttlMs: TTL_LISTA_MS, cacheScope: "private" };
       case "ping":
         return {};
       case "tools/list":
@@ -727,12 +980,24 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
           ttlMs: TTL_LISTA_MS,
           cacheScope: "private",
         };
+      case "prompts/list":
+        return { prompts: prompts.map(({ name, title, description, arguments: a }) => ({ name, title, description, arguments: a })), ttlMs: TTL_LISTA_MS, cacheScope: "private" };
+      case "prompts/get": {
+        const a = params.arguments ?? {};
+        if (typeof a !== "object" || a === null || Array.isArray(a)) throw new ErrorRpc(-32602, "`arguments` debe ser un objeto");
+        if (!prompts.some((x) => x.name === params.name)) throw new ErrorRpc(-32602, `Prompt desconocido: ${String(params.name)}`);
+        try {
+          return obtenerPrompt(params.name as string, a as Args);
+        } catch (e) {
+          throw new ErrorRpc(-32602, (e as Error).message);
+        }
+      }
       case "tools/call": {
         const h = herramientas.find((x) => x.name === params.name);
         if (!h) throw new ErrorRpc(-32602, `Herramienta desconocida: ${String(params.name)}`);
         const args = params.arguments ?? {};
         if (typeof args !== "object" || args === null || Array.isArray(args)) throw new ErrorRpc(-32602, "`arguments` debe ser un objeto");
-        return h.annotations.openWorldHint ? enCola(() => ejecutar(h, args as Args)) : ejecutar(h, args as Args);
+        return h.annotations.openWorldHint && !h.sinCuota ? enCola(() => ejecutar(h, args as Args)) : ejecutar(h, args as Args);
       }
       default:
         throw new ErrorRpc(-32601, `Método no soportado: ${method}`);

@@ -405,7 +405,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
         if (!Number.isInteger(tope) || tope < 1) throw new ErrorUso("MP_MCP_TOPE debe ser un entero positivo");
         // El directorio de trabajo de un cliente MCP es incierto (Claude Desktop): por defecto el store vive junto a la cuota.
         const ruta = io.env.MP_STORE || join(io.env.MERCADOPUBLICO_HOME || join(homedir(), ".mercadopublico"), "mp.json");
-        const servidor = crearServidorMcp({ mp, abrirStore: () => storeArchivo(ruta), tope, version: VERSION });
+        const servidor = crearServidorMcp({ mp, abrirStore: () => storeArchivo(ruta), fetch: io.fetch, tope, version: VERSION });
         if (!o.http) {
           if (o.puerto || o.host || o["sin-clave"]) throw new ErrorUso("--puerto, --host y --sin-clave son de --http");
           await servirStdio(servidor, process.stdin, io.stdout);
