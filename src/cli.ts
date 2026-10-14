@@ -24,6 +24,7 @@ import {
   type CuotaArchivo,
   type Proceso,
 } from "./index.js";
+import { servir } from "./mcp.js";
 import { calibrar, decidir, precioSugerido, proximasCompras, rangoDePrecio, type Decision, type DecisionEquipo, type Perfil } from "./radar/index.js";
 import type { FuenteSync } from "./sync.js";
 import { ESTADOS_FILTRO_LICITACION, ESTADO_FILTRO_OC, type EstadoFiltroLicitacion, type EstadoFiltroOC } from "./v1/codigos.js";
@@ -57,6 +58,7 @@ Comandos:
   radar --perfil perfil.json          Qué postular primero, a qué precio y qué viene, desde el store; no pide ticket
                                       [--store ./mp.json] [--decisiones decisiones.json] [--max N (10)]
   cuota                               Consultas usadas hoy desde esta máquina
+  mcp                                 Servidor MCP por stdio para agentes (Claude, Cursor…); usa MP_TICKET
 
 Opciones:
   --formato json|csv|tabla            Por defecto tabla en terminal y json si no
@@ -267,6 +269,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
     const [comando, arg, ...sobra] = positionals;
     if (o.ayuda) return io.stdout.write(AYUDA), 0;
     if (!comando) throw new ErrorUso("Falta el comando");
+    if (comando === "mcp") return await servir(main, io, process.stdin);
     if (sobra.length) throw new ErrorUso(`Sobran argumentos: ${sobra.join(" ")}`);
     const formato = o.formato ?? (io.stdout.isTTY ? "tabla" : "json");
     uno(formato, ["json", "csv", "tabla"], "formato");

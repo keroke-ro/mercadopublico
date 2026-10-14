@@ -120,6 +120,14 @@ npx mercadopublico cuota
 
 Salida en tabla si es una terminal y JSON si no; `--formato json|csv|tabla` para elegir. Referencia completa en [docs/cli.md](docs/cli.md).
 
+## MCP
+
+`npx mercadopublico mcp` levanta un servidor MCP por stdio para que un agente (Claude, Cursor, etc.) consulte la API. Tiene herramientas para licitaciones, órdenes de compra, Compra Ágil, proveedores, compradores, cuota y radar, y usa la misma cola, cuota en disco y conversión de montos que la CLI. Los datos personales se ocultan siempre, `raw` no se manda y las listas se recortan a `max` (50 por defecto). Por ejemplo, en Claude Code:
+
+```sh
+claude mcp add mercadopublico -e MP_TICKET=tu-ticket -- npx -y mercadopublico mcp
+```
+
 ## Documentación
 
 - [Guía](docs/guia.md): cliente, licitaciones, órdenes de compra, empresas, Compra Ágil y errores.
