@@ -49,6 +49,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "contrato": "node --experimental-strip-types scripts/contrato.ts",
+    "fixtures:grabar": "node --experimental-strip-types scripts/contrato.ts --grabar",
     "changeset": "changeset",
     "release": "npm run build && changeset publish"
   },

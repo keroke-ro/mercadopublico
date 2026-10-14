@@ -60,7 +60,7 @@ export type * from "./modelo.js";
 export { convertirMontos, conversorEncadenado, conversorMindicador, conversorParidadChileCompra, conversorPorDefecto, type Conversor, type Paridad } from "./monto.js";
 export { desdeOcds, leerOcds, urlOcds, type OpcionesOcds } from "./ocds.js";
 export { storeArchivo, storeMemoria, type Store } from "./store.js";
-export type { PlanSync, ResultadoSync } from "./sync.js";
+export type { FuenteSync, ListadoSync, OpcionesSync, PlanSync, ResultadoSync } from "./sync.js";
 export * as codigos from "./v1/codigos.js";
 export type { EstadoFiltroLicitacion, EstadoFiltroOC } from "./v1/codigos.js";
 export { formatearRut, type Empresa } from "./v1/empresas.js";

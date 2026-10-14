@@ -1,0 +1,41 @@
+name: contrato
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+permissions:
+  issues: write
+  contents: read
+concurrency: contrato
+jobs:
+  contrato:
+    runs-on: ubuntu-latest
+    env:
+      MP_TICKET: ${{ secrets.MP_TICKET }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - if: env.MP_TICKET == ''
+        run: echo "::notice::Sin secreto MP_TICKET, no se revisa el contrato."
+      - if: env.MP_TICKET != ''
+        uses: actions/checkout@v4
+      - if: env.MP_TICKET != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: contrato
+        if: env.MP_TICKET != ''
+        run: |
+          set +e
+          node --experimental-strip-types scripts/contrato.ts > reporte.md
+          echo "codigo=$?" >> "$GITHUB_OUTPUT"
+          cat reporte.md >> "$GITHUB_STEP_SUMMARY"
+      - if: steps.contrato.outputs.codigo != '' && steps.contrato.outputs.codigo != '0'
+        run: |
+          gh label create contrato --color B60205 --description "La API cambió respecto de los fixtures" 2>/dev/null || true
+          abierto=$(gh issue list --label contrato --state open --limit 1 --json number --jq '.[0].number')
+          if [ -n "$abierto" ]; then
+            gh issue comment "$abierto" --body-file reporte.md
+          else
+            gh issue create --title "Contrato: la API cambió ($(date -u +%F))" --label contrato --body-file reporte.md
+          fi
+          exit 1

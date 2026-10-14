@@ -1,5 +1,8 @@
-// CONTRATO (lo implementa el agente de sync): firmas estables, cuerpo por hacer.
+// Sync incremental (PRD §3.3) con planificación de cuota (§3.2). Firmas estables: se pueden agregar campos, no quitar.
+import { MercadoPublicoError } from "./errores.js";
+import { sumarDias } from "./fecha.js";
 import type { MercadoPublico } from "./index.js";
+import type { Proceso } from "./modelo.js";
 import type { Store } from "./store.js";
 
 export type FuenteSync = "licitaciones" | "ordenes" | "compra_agil";
@@ -16,6 +19,17 @@ export interface OpcionesSync {
   store: Store;
 }
 
+/** Un listado que ya bajó `planificar` y que `ejecutar` reutiliza sin volver a pedirlo. */
+export interface ListadoSync {
+  fuente: FuenteSync;
+  /** v1: el día listado. v2: el `cambio_desde` usado. */
+  desde: string;
+  /** v1: el día completo. v2: solo la página 1. */
+  items: Proceso[];
+  /** Páginas del listado (v2); 1 en la v1. */
+  paginas: number;
+}
+
 export interface PlanSync {
   opciones: OpcionesSync;
   /** Consultas estimadas en total (incluye las que ya gastó planificar). */
@@ -25,26 +39,176 @@ export interface PlanSync {
   desglose: { fuente: FuenteSync; consultas: number; nota: string }[];
   cabeHoy: boolean;
   restante: number;
+  listados: ListadoSync[];
 }
 
 export interface ResultadoSync {
   consultas: number;
   nuevos: number;
   actualizados: number;
-  /** Procesos en estado final que no se volvieron a consultar. */
+  /** Procesos ya guardados que no se volvieron a consultar: en estado final o (v2) sin cambios desde la última vez. */
   omitidos: number;
   errores: { codigo: string; error: string }[];
+  /** Si se detuvo antes de terminar porque se acabó la cuota local; lo hecho quedó guardado. */
+  detenido?: string;
 }
+
+/**
+ * Estados que ya no cambian, con los slugs de v1/codigos.ts y v2/parse.ts. Quedan fuera a propósito:
+ * licitación cerrada/suspendida (aún se adjudica o revoca), OC recepcion_parcial/recepcion_conforme_incompleta
+ * (puede faltar recepcionar), Compra Ágil proveedor_seleccionado (la v2 casi nunca pasa a oc_emitida, pero la OC
+ * aparece después en el detalle) y cerrada.
+ */
+const FINALES: ReadonlySet<string> = new Set(["adjudicada", "desierta", "revocada", "cancelada", "recepcion_conforme", "oc_emitida"]);
+const ABORTAN: ReadonlySet<string> = new Set(["cuota_agotada", "cuota_insuficiente", "ticket_invalido"]);
+
+/** ¿Hay que pedir (o, sin detalle, volver a guardar) este proceso? */
+function necesita(s: Proceso | undefined, item: Proceso, detalle: boolean): boolean {
+  if (!s) return true;
+  if (FINALES.has(s.estado)) return false;
+  if (item.tipo === "compra_agil") return s.fechas.ultimoCambio !== item.fechas.ultimoCambio;
+  return detalle || s.estado !== item.estado; // sin detalle, no se pisa lo guardado si nada cambió
+}
+
+const filtrosCA = (cambioDesde: string, hasta: string) => ({ cambioDesde, cambioHasta: sumarDias(hasta, 1) });
 
 export class Sync {
   constructor(private readonly mp: MercadoPublico) {}
 
-  planificar(_opciones: OpcionesSync): Promise<PlanSync> {
-    void this.mp;
-    throw new Error("por implementar");
+  private hoy(): string {
+    return this.mp.cuota.toJSON().dia; // respeta el reloj inyectado al cliente
   }
 
-  ejecutar(_plan: PlanSync, _o: { store?: Store; alAvanzar?: (p: { fuente: FuenteSync; hechas: number; total: number }) => void } = {}): Promise<ResultadoSync> {
-    throw new Error("por implementar");
+  async planificar(opciones: OpcionesSync): Promise<PlanSync> {
+    const { store, desde, hasta = this.hoy(), fuentes = ["licitaciones", "ordenes", "compra_agil"], detalle = true } = opciones;
+    const cuota = this.mp.cuota;
+    const antes = cuota.usadas;
+    const dias = new Map<FuenteSync, string[]>();
+    for (const f of fuentes) {
+      if (f === "compra_agil") continue;
+      const c = await store.cursor(f);
+      const lista: string[] = [];
+      for (let d = c && c >= desde ? sumarDias(c, 1) : desde; d <= hasta; d = sumarDias(d, 1)) lista.push(d);
+      dias.set(f, lista);
+    }
+    // Los listados se gastan aquí mismo: si ni eso cabe, falla antes de pedir nada.
+    cuota.exigir([...dias.values()].flat().length + (fuentes.includes("compra_agil") ? 1 : 0), "planificar el sync");
+
+    const listados: ListadoSync[] = [];
+    const desglose: PlanSync["desglose"] = [];
+    for (const f of fuentes) {
+      if (f === "compra_agil") {
+        const cambioDesde = (await store.cursor(f)) ?? desde;
+        const p = await this.mp.compraAgil.pagina(filtrosCA(cambioDesde, hasta), 1);
+        listados.push({ fuente: f, desde: cambioDesde, items: p.items, paginas: p.totalPaginas });
+        const det = detalle ? ` + hasta ${p.totalResultados} detalles (se saltan los sin cambios y los cerrados)` : "";
+        desglose.push({ fuente: f, consultas: Math.max(1, p.totalPaginas) + (detalle ? p.totalResultados : 0), nota: `cota superior: ${p.totalPaginas} páginas${det}, cambios desde ${cambioDesde}` });
+        continue;
+      }
+      let pedir = 0;
+      let omitidos = 0;
+      const ds = dias.get(f)!;
+      for (const dia of ds) {
+        const items: Proceso[] = await (f === "licitaciones" ? this.mp.licitaciones : this.mp.ordenes).delDia(dia);
+        listados.push({ fuente: f, desde: dia, items, paginas: 1 });
+        for (const it of items) (necesita(await store.obtener(it.codigo), it, detalle) ? pedir++ : omitidos++);
+      }
+      const rango = ds.length ? `${ds[0]} a ${ds.at(-1)}` : "sin días nuevos";
+      desglose.push({ fuente: f, consultas: ds.length + (detalle ? pedir : 0), nota: `exacto: ${ds.length} días (${rango}) + ${detalle ? pedir : 0} detalles; ${omitidos} ya guardados se omiten` });
+    }
+    const consultas = desglose.reduce((a, d) => a + d.consultas, 0);
+    const gastadas = cuota.usadas - antes;
+    return { opciones, consultas, gastadas, desglose, cabeHoy: consultas - gastadas <= cuota.restante, restante: cuota.restante, listados };
+  }
+
+  async ejecutar(plan: PlanSync, o: { store?: Store; alAvanzar?: (p: { fuente: FuenteSync; hechas: number; total: number }) => void } = {}): Promise<ResultadoSync> {
+    const store = o.store ?? plan.opciones.store;
+    const { detalle = true, hasta = this.hoy() } = plan.opciones;
+    const cuota = this.mp.cuota;
+    cuota.exigir(plan.consultas - plan.gastadas, "el sync");
+    const antes = cuota.usadas;
+    const r: ResultadoSync = { consultas: 0, nuevos: 0, actualizados: 0, omitidos: 0, errores: [] };
+    const fin = () => ({ ...r, consultas: plan.gastadas + cuota.usadas - antes });
+    const sinCuota = () => {
+      if (cuota.restante >= 1) return false;
+      r.detenido = `se acabó la cuota del día (se reinicia ${cuota.reinicia}); lo hecho quedó guardado`;
+      return true;
+    };
+
+    let actual: FuenteSync | undefined;
+    let base = 0;
+    let inicio = 0;
+    const avanzar = () =>
+      o.alAvanzar?.({ fuente: actual!, hechas: base + cuota.usadas - inicio, total: plan.desglose.find((d) => d.fuente === actual)?.consultas ?? 0 });
+
+    /** Procesa y guarda un lote (un día o una página). false = hay que parar. */
+    const lote = async (items: Proceso[]): Promise<boolean> => {
+      const listos: Proceso[] = [];
+      try {
+        for (const it of items) {
+          const s = await store.obtener(it.codigo);
+          if (!necesita(s, it, detalle)) {
+            r.omitidos++;
+            continue;
+          }
+          if (detalle && sinCuota()) return false;
+          try {
+            listos.push(detalle ? await this.detalle(actual!, it.codigo) : it);
+            if (s) r.actualizados++;
+            else r.nuevos++;
+          } catch (e) {
+            if (e instanceof MercadoPublicoError && ABORTAN.has(e.tipo)) throw e;
+            r.errores.push({ codigo: it.codigo, error: e instanceof Error ? e.message : String(e) });
+          }
+          if (detalle) avanzar();
+        }
+        return true;
+      } finally {
+        await store.guardar(listos); // también si se aborta: lo pedido no se pierde
+      }
+    };
+
+    // Un cursor solo avanza mientras todo lo anterior de su fuente salió sin errores, para reintentarlos la próxima vez.
+    const conErrores = new Set<FuenteSync>();
+    for (const l of plan.listados) {
+      if (l.fuente !== actual) {
+        actual = l.fuente;
+        base = plan.listados.filter((x) => x.fuente === actual).length;
+        inicio = cuota.usadas;
+      }
+      const e0 = r.errores.length;
+      if (l.fuente !== "compra_agil") {
+        if (!(await lote(l.items))) return fin();
+        if (r.errores.length > e0) conErrores.add(l.fuente);
+        // Hoy no está completo: no se marca, la próxima vez se vuelve a listar.
+        if (!conErrores.has(l.fuente) && l.desde < this.hoy()) await store.fijarCursor(l.fuente, l.desde);
+        avanzar();
+        continue;
+      }
+      // ponytail: la v2 ordena por último cambio descendente, así que el cursor recién puede avanzar al terminar
+      // todas las páginas. Si se corta, la próxima vez se re-listan las páginas, pero los detalles ya guardados se
+      // saltan (mismo fecha_ultimo_cambio). Para reanudar sin re-listar haría falta un segundo cursor con cambio_hasta.
+      let max = await store.cursor(l.fuente);
+      for (let n = 1, items = l.items, total = l.paginas; ; ) {
+        if (!(await lote(items))) return fin();
+        for (const it of items) {
+          const u = it.fechas.ultimoCambio;
+          if (u && (!max || Date.parse(u) > Date.parse(max))) max = u;
+        }
+        if (++n > total) break;
+        if (sinCuota()) return fin();
+        ({ items, totalPaginas: total } = await this.mp.compraAgil.pagina(filtrosCA(l.desde, hasta), n));
+        avanzar();
+      }
+      if (r.errores.length === e0 && max) await store.fijarCursor(l.fuente, max);
+      avanzar();
+    }
+    return fin();
+  }
+
+  private async detalle(f: FuenteSync, codigo: string): Promise<Proceso> {
+    const p = f === "compra_agil" ? await this.mp.compraAgil.detalle(codigo) : await (f === "licitaciones" ? this.mp.licitaciones : this.mp.ordenes).porCodigo(codigo);
+    if (!p) throw new MercadoPublicoError("no_encontrado", `${codigo} no tiene detalle`);
+    return p;
   }
 }
