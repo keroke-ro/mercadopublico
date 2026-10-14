@@ -43,7 +43,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "mercadopublico": "./dist/cli.js"
+    "mercadopublico": "dist/cli.js"
   },
   "files": [
     "dist",
