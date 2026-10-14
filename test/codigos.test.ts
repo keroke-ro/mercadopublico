@@ -1,4 +1,5 @@
 // Cada corrección a la documentación oficial (src/v1/codigos.ts) tiene aquí su test.
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   CONTRATO,
@@ -14,9 +15,11 @@ import {
   TIPO_LICITACION,
   TIPO_OC,
   estado,
+  familiaDesdeCodigo,
   glosa,
   regionCodigo,
   tipoDesdeCodigo,
+  urlPublica,
 } from "../src/v1/codigos.js";
 
 describe("correcciones a la documentación", () => {
@@ -106,5 +109,33 @@ describe("enums abiertos", () => {
     expect(
       ["Región Metropolitana de Santiago", "Región del Bío-Bío", "Región de Ñuble", "Región del Libertador General Bernardo O´Higgins", "Región de Los Ríos", "13", "99", "Marte", null].map(regionCodigo),
     ).toEqual([13, 8, 16, 6, 14, 13, null, null, null]);
+  });
+});
+
+describe("familia y URL del proceso", () => {
+  it("familiaDesdeCodigo: null si no es un código; COT y FTD son compra ágil", () => {
+    expect(["basura", "", "1509-5-L1", "COT26"].map(familiaDesdeCodigo)).toEqual([null, null, null, null]);
+    expect(["1057539-228-COT26", "1016414-13-FTD26"].map(familiaDesdeCodigo)).toEqual(["compra_agil", "compra_agil"]);
+  });
+
+  it("familiaDesdeCodigo acierta con todas las muestras reales (test/__snapshots__/muestras)", () => {
+    const dir = new URL("./__snapshots__/muestras/", import.meta.url);
+    const muestras = readdirSync(dir).filter((f) => f.endsWith(".json"));
+    expect(muestras.length).toBeGreaterThan(0);
+    const malas = muestras
+      .map((f) => ({ codigo: f.replace(/\.json$/, ""), tipo: JSON.parse(readFileSync(new URL(f, dir), "utf8")).tipo as string }))
+      .filter(({ codigo, tipo }) => familiaDesdeCodigo(codigo) !== tipo)
+      .map(({ codigo, tipo }) => `${codigo}: ${tipo} != ${familiaDesdeCodigo(codigo)}`);
+    expect(malas).toEqual([]);
+  });
+
+  it("familiaDesdeCodigo: SE es orden de compra aunque esté en TIPO_LICITACION; R1 y DC caen en licitación", () => {
+    expect(["1024-236-SE26", "1469-227-R126", "500977-115-DC26"].map(familiaDesdeCodigo)).toEqual(["orden_compra", "licitacion", "licitacion"]);
+  });
+
+  it("urlPublica: ficha de licitación y de OC; null en compra ágil", () => {
+    expect(urlPublica("licitacion", "1509-5-L114")).toBe("https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=1509-5-L114");
+    expect(urlPublica("orden_compra", "1002584-335-AG26")).toBe("https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=1002584-335-AG26");
+    expect(urlPublica("compra_agil", "1057539-228-COT26")).toBeNull();
   });
 });

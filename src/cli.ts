@@ -25,7 +25,7 @@ import {
   type Proceso,
 } from "./index.js";
 import { servir } from "./mcp.js";
-import { calibrar, decidir, precioSugerido, proximasCompras, rangoDePrecio, type Decision, type DecisionEquipo, type Perfil } from "./radar/index.js";
+import { pesos, resumenRadar, type DecisionEquipo, type Perfil, type ResumenRadar } from "./radar/index.js";
 import type { FuenteSync } from "./sync.js";
 import { ESTADOS_FILTRO_LICITACION, ESTADO_FILTRO_OC, type EstadoFiltroLicitacion, type EstadoFiltroOC } from "./v1/codigos.js";
 import type { EstadoCompraAgil } from "./v2/parse.js";
@@ -181,51 +181,7 @@ async function leerJson<T>(ruta: string, flag: string): Promise<T> {
   }
 }
 
-const pesos = (n: number) => `$${Math.round(n).toLocaleString("es-CL")}`;
-
-/** Une las piezas del radar sobre todo lo que hay en el store: lo abierto se decide, lo cerrado es historial. */
-function radar(todos: Proceso[], perfil: Perfil, decisiones: DecisionEquipo[] | undefined) {
-  const ahora = new Date();
-  const compras = todos.filter((p) => p.tipo === "compra_agil");
-  // Precio del primer ítem con datos: sugerido si el perfil trae su costo, si no el rango de lo que ganó.
-  const precio = (d: Decision) => {
-    if (d.accion === "descartar") return null;
-    for (const c of new Set(d.proceso.items.map((i) => i.codigoProducto).filter((c): c is number => c !== null))) {
-      const costo = perfil.costos?.[String(c)];
-      if (costo !== undefined) {
-        const s = precioSugerido(c, compras, { costo });
-        if (!("insuficiente" in s))
-          return { codigoProducto: c, texto: `${pesos(s.precio)} por ${s.unidad ?? "unidad"}: con ese precio habrías ganado ${s.ganadas} de ${s.n} compras parecidas, margen ${Math.round(s.margen * 100)} %`, detalle: s };
-      }
-      const r = rangoDePrecio(c, compras, { soloSeleccionadas: true });
-      if (!("insuficiente" in r))
-        return { codigoProducto: c, texto: `lo que ganó va de ${pesos(r.p25)} a ${pesos(r.p75)} por ${r.unidad ?? "unidad"} (mediana ${pesos(r.p50)}, n = ${r.n}); pon el costo en el perfil para un precio sugerido`, detalle: r };
-    }
-    return null;
-  };
-  return {
-    ahora: ahora.toISOString(),
-    procesos: todos.length,
-    // Un resumen sin `raw` ni `personales`: nada de datos de funcionarios en la salida.
-    decisiones: decidir(todos, perfil, { ahora, historial: todos }).map((d) => ({
-      turno: d.turno,
-      accion: d.accion,
-      puntaje: Math.round(d.puntaje * 100) / 100,
-      codigo: d.proceso.codigo,
-      nombre: d.proceso.nombre,
-      organismo: d.proceso.comprador?.nombreOrganismo ?? null,
-      region: d.proceso.comprador?.region ?? null,
-      montoClp: d.proceso.monto?.clp ?? null,
-      cierre: d.proceso.fechas.cierre,
-      porque: d.porque,
-      precio: precio(d),
-    })),
-    proximas: proximasCompras(todos, { ahora, rubros: perfil.rubros }).filter((x) => !perfil.regiones?.length || perfil.regiones.includes(x.region ?? -1)),
-    calibracion: decisiones && calibrar(todos, perfil, decisiones, { ahora, historial: todos }),
-  };
-}
-
-function informe(r: ReturnType<typeof radar>, ruta: string, max: number): string {
+function informe(r: ResumenRadar, ruta: string, max: number): string {
   const agenda = r.decisiones.filter((d) => d.turno !== null);
   const sinCupo = r.decisiones.filter((d) => d.turno === null && d.accion !== "descartar").length;
   const descartadas = r.decisiones.filter((d) => d.accion === "descartar").length;
@@ -322,7 +278,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
         await store.cerrar?.();
       }
       if (!todos.length) throw new ErrorUso(`El store ${ruta} está vacío: corre primero mercadopublico sync`);
-      const r = radar(todos, perfil, decisiones);
+      const r = resumenRadar(todos, perfil, { decisiones });
       if (formato === "json") return escribir(io, r, "json"), 0;
       if (formato === "csv") return escribir(io, r.decisiones.map((d) => ({ ...d, porque: d.porque.join(" "), precio: d.precio?.texto ?? null })), "csv"), 0;
       return io.stdout.write(informe(r, ruta, entero(o.max, 10, "max"))), 0;

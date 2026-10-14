@@ -779,3 +779,51 @@ export function proximasCompras(
   }
   return r.sort((x, y) => x.desde.localeCompare(y.desde) || x.organismo.codigo.localeCompare(y.organismo.codigo) || x.familia.localeCompare(y.familia));
 }
+
+/** Dinero en pesos chilenos para los textos del radar: `$1.234.567`. */
+export const pesos = (n: number) => `$${Math.round(n).toLocaleString("es-CL")}`;
+
+/**
+ * Resumen del radar sobre todo lo que hay en un store: lo abierto se decide, lo cerrado es historial.
+ * Sin `raw` ni `personales`: nada de datos de funcionarios en la salida.
+ */
+export function resumenRadar(todos: Proceso[], perfil: Perfil, opciones: { decisiones?: DecisionEquipo[]; ahora?: Date } = {}) {
+  const ahora = opciones.ahora ?? new Date();
+  const compras = todos.filter((p) => p.tipo === "compra_agil");
+  // Precio del primer ítem con datos: sugerido si el perfil trae su costo, si no el rango de lo que ganó.
+  const precio = (d: Decision) => {
+    if (d.accion === "descartar") return null;
+    for (const c of new Set(d.proceso.items.map((i) => i.codigoProducto).filter((c): c is number => c !== null))) {
+      const costo = perfil.costos?.[String(c)];
+      if (costo !== undefined) {
+        const s = precioSugerido(c, compras, { costo });
+        if (!("insuficiente" in s))
+          return { codigoProducto: c, texto: `${pesos(s.precio)} por ${s.unidad ?? "unidad"}: con ese precio habrías ganado ${s.ganadas} de ${s.n} compras parecidas, margen ${Math.round(s.margen * 100)} %`, detalle: s };
+      }
+      const r = rangoDePrecio(c, compras, { soloSeleccionadas: true });
+      if (!("insuficiente" in r))
+        return { codigoProducto: c, texto: `lo que ganó va de ${pesos(r.p25)} a ${pesos(r.p75)} por ${r.unidad ?? "unidad"} (mediana ${pesos(r.p50)}, n = ${r.n}); pon el costo en el perfil para un precio sugerido`, detalle: r };
+    }
+    return null;
+  };
+  return {
+    ahora: ahora.toISOString(),
+    procesos: todos.length,
+    decisiones: decidir(todos, perfil, { ahora, historial: todos }).map((d) => ({
+      turno: d.turno,
+      accion: d.accion,
+      puntaje: Math.round(d.puntaje * 100) / 100,
+      codigo: d.proceso.codigo,
+      nombre: d.proceso.nombre,
+      organismo: d.proceso.comprador?.nombreOrganismo ?? null,
+      region: d.proceso.comprador?.region ?? null,
+      montoClp: d.proceso.monto?.clp ?? null,
+      cierre: d.proceso.fechas.cierre,
+      porque: d.porque,
+      precio: precio(d),
+    })),
+    proximas: proximasCompras(todos, { ahora, rubros: perfil.rubros }).filter((x) => !perfil.regiones?.length || perfil.regiones.includes(x.region ?? -1)),
+    calibracion: opciones.decisiones && calibrar(todos, perfil, opciones.decisiones, { ahora, historial: todos }),
+  };
+}
+export type ResumenRadar = ReturnType<typeof resumenRadar>;
