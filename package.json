@@ -1,6 +1,6 @@
 {
   "name": "mercadopublico",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "SDK TypeScript para la API de Mercado Público (ChileCompra): v1, Compra Ágil v2 y OCDS en un solo modelo, con control de cuota.",
   "keywords": [
     "mercadopublico",
@@ -47,8 +47,10 @@
   },
   "files": [
     "dist",
+    "docs/assets/readme",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "sideEffects": false,
   "scripts": {
@@ -63,7 +65,8 @@
     "contrato": "node --experimental-strip-types scripts/contrato.ts",
     "fixtures:grabar": "node --experimental-strip-types scripts/contrato.ts --grabar",
     "changeset": "changeset",
-    "release": "npm run build && changeset publish"
+    "release": "npm run build && changeset publish",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",

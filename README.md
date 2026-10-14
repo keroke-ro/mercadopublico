@@ -1,4 +1,4 @@
-![mercadopublico: la API de Mercado Público, bien usada. SDK en TypeScript por KeroKero.](docs/assets/readme/portada.png)
+![mercadopublico: la API de Mercado Público, bien usada. SDK en TypeScript por KeroKero.](https://unpkg.com/mercadopublico/docs/assets/readme/portada.png)
 
 [![ci](https://img.shields.io/github/actions/workflow/status/keroke-ro/mercadopublico/ci.yml?branch=main&label=ci&style=flat-square&labelColor=171A17)](https://github.com/keroke-ro/mercadopublico/actions/workflows/ci.yml)
 [![contrato](https://img.shields.io/github/actions/workflow/status/keroke-ro/mercadopublico/contrato.yml?branch=main&label=contrato&style=flat-square&labelColor=171A17)](https://github.com/keroke-ro/mercadopublico/actions/workflows/contrato.yml)
@@ -8,7 +8,7 @@
 
 SDK en TypeScript para la [API de Mercado Público](https://www.chilecompra.cl/api/) de ChileCompra. Junta la API v1 (licitaciones, órdenes de compra y empresas), la v2 de Compra Ágil y las descargas OCDS en un solo modelo, `Proceso`, para que tu código no dependa de cuál de las tres trajo el dato. Se hace cargo de lo que cuesta usar bien la API: manda las consultas de a una para no gatillar el error 10500, reintenta solo cuando sirve, lleva la cuenta de las 10.000 consultas diarias del ticket, convierte los montos a pesos con el valor del día del documento y oculta los datos personales de funcionarios en la CLI. No tiene dependencias en runtime.
 
-![Las tres APIs (v1, Compra Ágil y OCDS) se traducen a un solo tipo, Proceso: con tipo y origen, montos en pesos al valor del día, fechas ISO con offset de Santiago, datos de funcionarios aparte y lo desconocido en raw.](docs/assets/readme/modelo.png)
+![Las tres APIs (v1, Compra Ágil y OCDS) se traducen a un solo tipo, Proceso: con tipo y origen, montos en pesos al valor del día, fechas ISO con offset de Santiago, datos de funcionarios aparte y lo desconocido en raw.](https://unpkg.com/mercadopublico/docs/assets/readme/modelo.png)
 
 > No oficial: no está afiliado a la Dirección ChileCompra.
 
@@ -75,7 +75,7 @@ const mp = new MercadoPublico({
 mp.salud(); // { v1: { estado: "cerrado", fallas: 0, intervaloMs: 1000 }, v2: { … }, … }
 ```
 
-![Cada falla y su respuesta: 10500, ritmo adaptativo; 5xx, timeout o red, reintentos con backoff y jitter; 5 caídas seguidas, circuito abierto 60 s; sync cortado, reanuda sin huecos; la API cambia, parsea igual y avisa; conversor caído, pasa al siguiente.](docs/assets/readme/resiliencia.png)
+![Cada falla y su respuesta: 10500, ritmo adaptativo; 5xx, timeout o red, reintentos con backoff y jitter; 5 caídas seguidas, circuito abierto 60 s; sync cortado, reanuda sin huecos; la API cambia, parsea igual y avisa; conversor caído, pasa al siguiente.](https://unpkg.com/mercadopublico/docs/assets/readme/resiliencia.png)
 
 Qué pasa en cada falla, en [docs/resiliencia.md](docs/resiliencia.md).
 
@@ -98,7 +98,7 @@ No se tapan el RUT ni la razón social de los proveedores: son datos de empresas
 
 `mercadopublico/radar` responde lo que se pregunta cada mañana un equipo que le vende al Estado: qué postular primero, a qué precio, contra quién compite y qué viene. Son fórmulas a la vista, sin machine learning: cada número trae su porqué en texto, y tu criterio (pesos, rubros, costos, vetos) entra en un `Perfil`.
 
-![El puntaje es una suma ponderada de seis factores. decidir lo pasa por reglas duras, umbrales (0,7 postular, 0,4 revisar), capacidad y orden por cierre.](docs/assets/readme/radar.png)
+![El puntaje es una suma ponderada de seis factores. decidir lo pasa por reglas duras, umbrales (0,7 postular, 0,4 revisar), capacidad y orden por cierre.](https://unpkg.com/mercadopublico/docs/assets/readme/radar.png)
 
 ```sh
 npx mercadopublico radar --perfil perfil.json --decisiones decisiones.json
@@ -164,4 +164,4 @@ Required Notice: Copyright KeroKero (https://kerokero.cl)
 
 ---
 
-<img src="docs/assets/readme/kerokero.svg" width="18" height="18" alt=""> Hecho por [KeroKero](https://kerokero.cl): sistemas de decisión para tu operación.
+<img src="https://unpkg.com/mercadopublico/docs/assets/readme/kerokero.svg" width="18" height="18" alt=""> Hecho por [KeroKero](https://kerokero.cl): sistemas de decisión para tu operación.
