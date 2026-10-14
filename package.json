@@ -61,8 +61,14 @@
     "release": "npm run build && changeset publish"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^3.0.3",
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/vitest-runner": "^10.0.0",
     "@types/node": "^20.19.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "fast-check": "^4.10.2",
+    "publint": "^0.3.25",
     "tsup": "^8.5.1",
     "typescript": "^5.9.0",
     "vitest": "^4.0.0"
