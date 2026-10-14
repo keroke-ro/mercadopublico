@@ -29,6 +29,9 @@
     "*": {
       "radar": [
         "./dist/radar.d.ts"
+      ],
+      "mcp": [
+        "./dist/mcp.d.ts"
       ]
     }
   },
@@ -40,6 +43,10 @@
     "./radar": {
       "import": "./dist/radar.js",
       "require": "./dist/radar.cjs"
+    },
+    "./mcp": {
+      "import": "./dist/mcp.js",
+      "require": "./dist/mcp.cjs"
     },
     "./package.json": "./package.json"
   },

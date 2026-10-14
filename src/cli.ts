@@ -2,6 +2,7 @@
 // CLI: `npx mercadopublico <comando>`. Salida json, csv o tabla; datos personales ocultos salvo --incluir-personales.
 import { createReadStream, realpathSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import { createServer, type Server } from "node:http";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
@@ -26,6 +27,7 @@ import {
   type Proceso,
 } from "./index.js";
 import { crearServidorMcp } from "./mcp.js";
+import { manejadorHttp } from "./mcp-http.js";
 import { pesos, resumenRadar, type DecisionEquipo, type Perfil, type ResumenRadar } from "./radar/index.js";
 import type { FuenteSync } from "./sync.js";
 import { ESTADOS_FILTRO_LICITACION, ESTADO_FILTRO_OC, type EstadoFiltroLicitacion, type EstadoFiltroOC } from "./v1/codigos.js";
@@ -60,6 +62,8 @@ Comandos:
                                       [--store ./mp.json] [--decisiones decisiones.json] [--max N (10)]
   cuota                               Consultas usadas hoy desde esta máquina
   mcp                                 Servidor MCP por stdio para agentes (Claude, Cursor…); usa MP_TICKET, MP_STORE y MP_MCP_TOPE (tope diario, 1000)
+                                      --http [--puerto 8787] [--host 127.0.0.1]: por HTTP, para claude.ai y ChatGPT detrás de HTTPS;
+                                      exige MP_MCP_CLAVE (URL /mcp/<clave> o Bearer), o --sin-clave solo en localhost
 
 Opciones:
   --formato json|csv|tabla            Por defecto tabla en terminal y json si no
@@ -95,6 +99,10 @@ const OPCIONES = {
   plan: { type: "boolean" },
   perfil: { type: "string" },
   decisiones: { type: "string" },
+  http: { type: "boolean" },
+  puerto: { type: "string" },
+  host: { type: "string" },
+  "sin-clave": { type: "boolean" },
 } as const;
 
 const COLUMNAS = [
@@ -248,6 +256,35 @@ export async function servirStdio(servidor: { manejar(msg: unknown): Promise<obj
   await Promise.all(pendientes);
 }
 
+const MAX_CUERPO = 1_000_000;
+
+/** Adaptador `node:http` ↔ `Request`/`Response`: lee el cuerpo entero (máx. 1 MB, si no 413) y escribe la respuesta. */
+export function servirHttp(manejar: (req: Request) => Promise<Response>, puerto: number, host: string): Promise<Server> {
+  const srv = createServer(async (req, res) => {
+    try {
+      const trozos: Buffer[] = [];
+      let n = 0;
+      const completo = await new Promise<boolean>((ok) => {
+        req.on("data", (t: Buffer) => (n += t.length) > MAX_CUERPO ? ok(false) : trozos.push(t));
+        req.on("end", () => ok(true));
+        req.on("error", () => ok(false));
+      });
+      if (!completo) return void res.writeHead(413, { connection: "close" }).end(() => req.destroy());
+      const headers = new Headers();
+      for (const [k, v] of Object.entries(req.headers)) if (v !== undefined) headers.set(k, Array.isArray(v) ? v.join(", ") : v);
+      const hayCuerpo = req.method !== "GET" && req.method !== "HEAD";
+      const r = await manejar(new Request(`http://${req.headers.host ?? host}${req.url}`, { method: req.method, headers, body: hayCuerpo ? Buffer.concat(trozos) : undefined }));
+      const salida: Record<string, string> = {};
+      r.headers.forEach((v, k) => (salida[k] = v));
+      res.writeHead(r.status, salida).end(Buffer.from(await r.arrayBuffer()));
+    } catch {
+      if (!res.headersSent) res.writeHead(500);
+      res.end();
+    }
+  });
+  return new Promise((ok, mal) => srv.once("error", mal).listen(puerto, host, () => ok(srv)));
+}
+
 export async function main(argv: string[], io: IO): Promise<number> {
   let mp: MercadoPublico | undefined;
   let cuota: CuotaArchivo | undefined;
@@ -368,7 +405,25 @@ export async function main(argv: string[], io: IO): Promise<number> {
         if (!Number.isInteger(tope) || tope < 1) throw new ErrorUso("MP_MCP_TOPE debe ser un entero positivo");
         // El directorio de trabajo de un cliente MCP es incierto (Claude Desktop): por defecto el store vive junto a la cuota.
         const ruta = io.env.MP_STORE || join(io.env.MERCADOPUBLICO_HOME || join(homedir(), ".mercadopublico"), "mp.json");
-        await servirStdio(crearServidorMcp({ mp, abrirStore: () => storeArchivo(ruta), tope, version: VERSION }), process.stdin, io.stdout);
+        const servidor = crearServidorMcp({ mp, abrirStore: () => storeArchivo(ruta), tope, version: VERSION });
+        if (!o.http) {
+          if (o.puerto || o.host || o["sin-clave"]) throw new ErrorUso("--puerto, --host y --sin-clave son de --http");
+          await servirStdio(servidor, process.stdin, io.stdout);
+          return 0;
+        }
+        const clave = io.env.MP_MCP_CLAVE || undefined;
+        const host = o.host ?? "127.0.0.1";
+        const puerto = entero(o.puerto, 8787, "puerto");
+        if (!clave && !(o["sin-clave"] && ["127.0.0.1", "localhost", "::1", "[::1]"].includes(host)))
+          throw new ErrorUso("--http exige la variable MP_MCP_CLAVE (--sin-clave solo vale con --host 127.0.0.1, localhost o ::1)");
+        const srv = await servirHttp(manejadorHttp(servidor, { clave }), puerto, host);
+        // Sin la clave: la URL completa la arma quien la configuró.
+        io.stderr.write(`MCP escuchando en http://${host.includes(":") && !host.startsWith("[") ? `[${host}]` : host}:${(srv.address() as { port: number }).port}/mcp${clave ? "/<MP_MCP_CLAVE>" : ""}\n`);
+        await new Promise<void>((fin) => {
+          const parar = () => (srv.close(() => fin()), srv.closeAllConnections());
+          process.once("SIGINT", parar);
+          process.once("SIGTERM", parar);
+        });
         return 0;
       }
       case "proveedor":

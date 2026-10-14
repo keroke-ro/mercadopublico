@@ -2,13 +2,14 @@
 // mensaje JSON-RPC ya parseado y devuelve la respuesta. "Dual-era": atiende a clientes 2025-11-25 (con `initialize`)
 // y a los stateless de 2026-07-28 (con `server/discover` y `_meta`). El bucle stdio vive en cli.ts.
 import { MercadoPublicoError } from "./errores.js";
-import { diaSantiago } from "./fecha.js";
+import { diaSantiago, sumarDias } from "./fecha.js";
 import { ocultarPersonales, type MercadoPublico, type Proceso, type Store } from "./index.js";
 import { resumenRadar, pesos, type Perfil } from "./radar/index.js";
 import { ESTADOS_FILTRO_LICITACION, ESTADO_FILTRO_OC, REGION, familiaDesdeCodigo, urlPublica } from "./v1/codigos.js";
+import type { FuenteSync } from "./sync.js";
 import type { EstadoCompraAgil } from "./v2/parse.js";
 
-const VERSIONES = ["2026-07-28", "2025-11-25", "2025-06-18", "2025-03-26"];
+export const VERSIONES = ["2026-07-28", "2025-11-25", "2025-06-18", "2025-03-26"];
 const LEGADAS = VERSIONES.slice(1);
 const META_VERSION = "io.modelcontextprotocol/protocolVersion";
 const META_INFO = "io.modelcontextprotocol/serverInfo";
@@ -17,7 +18,9 @@ const TTL_LISTA_MS = 3_600_000;
 const INSTRUCCIONES =
   "Mercado Público de Chile. Busca con `search` y después trae el detalle con `fetch`. Las órdenes de compra se ven con `listar` " +
   "o, si hay store local, con `search`. Cada herramienta informa en `costo` cuántas consultas a la API gastó: la API permite " +
-  "10.000 al día y este servidor corta al llegar a su tope diario. Los datos personales de funcionarios vienen ocultos.";
+  "10.000 al día y este servidor corta al llegar a su tope diario. Los datos personales de funcionarios vienen ocultos. " +
+  "Con store local, `sync` baja datos en segundo plano (un solo trabajo a la vez): responde al tiro y avanza solo; consulta el avance con `trabajo_estado` y " +
+  "no lo pidas de nuevo mientras corre. `trabajo_cancelar` lo detiene guardando lo hecho.";
 
 type Args = Record<string, unknown>;
 type Objeto = Record<string, unknown>;
@@ -36,7 +39,37 @@ interface Ctx {
   /** ponytail: caché por proceso, sin LRU; las claves son pocas (activas, compradores y los detalles pedidos). */
   cacheado<T>(clave: string, ttlMs: number, f: () => Promise<T>): Promise<T>;
   topeAgente(): { limite: number; usadas: number };
+  /** Último trabajo en segundo plano (en curso o ya terminado). */
+  trabajo(): Trabajo | undefined;
+  /** Handle del store que tiene tomado el trabajo en curso, si lo hay. */
+  storeTrabajo(): Store | undefined;
+  lanzar(t: Pick<Trabajo, "tipo" | "parametros" | "store">, correr: (t: Trabajo) => Promise<Salida>): Trabajo;
 }
+
+type EstadoTrabajo = "planificando" | "ejecutando" | "terminado" | "detenido" | "cancelado" | "error";
+/**
+ * Un solo espacio para trabajos en segundo plano (hoy `sync`; la fase 5 suma el import OCDS). Vive en memoria del servidor.
+ * `store` es el handle que el trabajo tiene tomado (y con él el lock) hasta que termina.
+ */
+interface Trabajo {
+  tipo: string;
+  estado: EstadoTrabajo;
+  parametros: Objeto;
+  plan?: Objeto;
+  avance?: Objeto;
+  resultado?: Objeto;
+  mensaje?: string;
+  inicio: string;
+  fin?: string;
+  abort: AbortController;
+  store: Store;
+  listo: Promise<void>;
+}
+/** Cómo terminó un trabajo. */
+type Salida = Pick<Trabajo, "estado"> & Partial<Pick<Trabajo, "mensaje" | "resultado">>;
+
+const enCurso = (t: Trabajo | undefined): t is Trabajo => t?.estado === "planificando" || t?.estado === "ejecutando";
+const vista = ({ abort: _a, store: _s, listo: _l, ...t }: Trabajo) => t;
 
 interface Herramienta {
   name: string;
@@ -44,7 +77,7 @@ interface Herramienta {
   description: string;
   inputSchema: Objeto;
   outputSchema?: Objeto;
-  annotations: { readOnlyHint: true; idempotentHint: true; openWorldHint: boolean };
+  annotations: { readOnlyHint: boolean; destructiveHint?: false; idempotentHint: true; openWorldHint: boolean };
   requiereStore?: true;
   ejecutar(a: Args, c: Ctx): Promise<Objeto>;
 }
@@ -87,6 +120,7 @@ const calza = (ps: string[], s: string | null) => {
 
 const ESTADOS_LISTADO = [...new Set([...ESTADOS_FILTRO_LICITACION, ...Object.keys(ESTADO_FILTRO_OC)])];
 const ETIQUETA = { licitacion: "Licitación", orden_compra: "Orden de compra", compra_agil: "Compra Ágil" } as const;
+const FUENTES: string[] = ["licitaciones", "ordenes", "compra_agil"];
 const MS_ACTIVAS = 600_000;
 const MS_COMPRADORES = 86_400_000;
 const activas = (c: Ctx) => c.cacheado("activas", MS_ACTIVAS, () => c.mp.licitaciones.activas());
@@ -117,6 +151,8 @@ function porCierre(a: Fila, b: Fila) {
 }
 
 async function enStore<T>(c: Ctx, f: (s: Store) => Promise<T>): Promise<T> {
+  const t = c.storeTrabajo();
+  if (t) return f(t); // el trabajo en curso tiene el lock: se lee por su handle y no se cierra
   const s = await c.abrirStore!();
   try {
     return await f(s);
@@ -439,7 +475,155 @@ const HERRAMIENTAS: Herramienta[] = [
       return { ...r, decisiones: agenda.slice(0, max), proximas: r.proximas.slice(0, max), conteo };
     },
   },
+  {
+    name: "sync",
+    title: "Sincronizar el store local (trabajo en segundo plano)",
+    description:
+      "Baja al store local lo ocurrido entre `desde` y `hasta` (licitaciones, órdenes de compra y Compra Ágil) para `search` y `radar`. Es un trabajo en segundo plano: responde al tiro con estado planificando " +
+      "y sigue solo (la API va a ~1 consulta por segundo, un día de datos toma minutos). Consulta el avance con `trabajo_estado`; `trabajo_cancelar` lo detiene guardando lo hecho. " +
+      "Gasta consultas de la cuota: `maxConsultas` es el máximo que se permite gastar (planificación incluida); si el listado o el plan lo pasan, se niega o se detiene sin ejecutar. " +
+      "Solo un trabajo a la vez. Repetirlo con el mismo `desde` retoma desde donde quedó. Para rangos grandes usa `npx mercadopublico sync` en una terminal.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        desde: { type: "string", description: "Primer día, AAAA-MM-DD (si el store ya tiene avance de una fuente, se parte desde ahí)" },
+        hasta: { type: "string", description: "Último día, AAAA-MM-DD; por defecto hoy" },
+        fuentes: { type: "array", items: { type: "string", enum: FUENTES }, description: "Por defecto las tres" },
+        maxConsultas: { type: "integer", minimum: 1, description: "Máximo de consultas a la API que este sync puede gastar; obligatorio" },
+      },
+      required: ["desde", "maxConsultas"],
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    requiereStore: true,
+    async ejecutar(a, c) {
+      const desde = diaArg(a, "desde", true);
+      const hasta = diaArg(a, "hasta") ?? c.mp.cuota.toJSON().dia;
+      if (desde > hasta) throw new ErrorUso("`desde` no puede ser posterior a `hasta`");
+      if (a.maxConsultas === undefined) throw new ErrorUso("Falta `maxConsultas`");
+      const maxConsultas = entero(a, "maxConsultas", 1, Number.MAX_SAFE_INTEGER);
+      const f = a.fuentes ?? FUENTES;
+      if (!Array.isArray(f) || !f.length || f.some((x) => !FUENTES.includes(x))) throw new ErrorUso(`\`fuentes\` es una lista con ${FUENTES.join(", ")}`);
+      const fuentes = [...new Set(f as FuenteSync[])];
+      const actual = c.trabajo();
+      if (enCurso(actual)) throw new ErrorUso(`Ya hay un trabajo en curso (${actual.tipo}, ${actual.estado}). Consulta \`trabajo_estado\` o detenlo con \`trabajo_cancelar\`.`);
+
+      const store = await c.abrirStore!();
+      let lanzado = false;
+      try {
+        // Lo que cuestan solo los listados, sin pedir nada: un día por fuente v1 desde su cursor, más 1 de Compra Ágil (como Sync.planificar).
+        const dias: Record<string, number> = {};
+        for (const x of fuentes) {
+          if (x === "compra_agil") continue;
+          const cur = await store.cursor(x);
+          let n = 0;
+          for (let d = cur && cur >= desde ? sumarDias(cur, 1) : desde; d <= hasta; d = sumarDias(d, 1)) n++;
+          dias[x] = n;
+        }
+        const listado = Object.values(dias).reduce((s, n) => s + n, 0) + (fuentes.includes("compra_agil") ? 1 : 0);
+        const tope = c.topeAgente();
+        const permitido = Math.min(maxConsultas, tope.limite - tope.usadas, c.mp.cuota.restante);
+        if (listado > permitido)
+          throw new ErrorUso(
+            `Solo listar ${desde} a ${hasta} cuesta ${listado} consultas (${dias.licitaciones ?? 0} días de licitaciones + ${dias.ordenes ?? 0} de órdenes + ${fuentes.includes("compra_agil") ? 1 : 0} de Compra Ágil) ` +
+              `y hay ${permitido} disponibles (maxConsultas ${maxConsultas}, tope del agente ${tope.limite - tope.usadas}, ticket ${c.mp.cuota.restante}). ` +
+              "Prueba un rango más corto o corre `npx mercadopublico sync` en una terminal.",
+          );
+        const t = c.lanzar({ tipo: "sync", parametros: { desde, hasta, fuentes, maxConsultas }, store }, (j) => correrSync(c, j, { desde, hasta, fuentes, maxConsultas }));
+        lanzado = true;
+        return { trabajo: vista(t) };
+      } finally {
+        if (!lanzado) await store.cerrar?.();
+      }
+    },
+  },
+  {
+    name: "trabajo_estado",
+    title: "Ver el trabajo en segundo plano",
+    description: "Estado del último trabajo en segundo plano (`sync`): plan, avance (fuente, hechas/total), resultado o motivo por el que se detuvo. `trabajo` es null si no ha habido ninguno. Cuesta 0 consultas.",
+    inputSchema: { type: "object", properties: {} },
+    annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    requiereStore: true,
+    async ejecutar(_, c) {
+      const t = c.trabajo();
+      return { trabajo: t ? vista(t) : null };
+    },
+  },
+  {
+    name: "trabajo_cancelar",
+    title: "Cancelar el trabajo en segundo plano",
+    description: "Detiene el trabajo en curso: lo ya pedido queda guardado en el store, el lock se libera y el estado pasa a cancelado (un `sync` posterior retoma). Cuesta 0 consultas.",
+    inputSchema: { type: "object", properties: {} },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    requiereStore: true,
+    async ejecutar(_, c) {
+      const t = c.trabajo();
+      if (!enCurso(t)) throw new ErrorUso("No hay ningún trabajo en curso");
+      t.abort.abort();
+      // Corta la consulta en vuelo; si algo se cuelga, no se espera más de 5 s y queda cancelándose (ver `trabajo_estado`).
+      let fin: ReturnType<typeof setTimeout>;
+      await Promise.race([t.listo, new Promise((r) => (fin = setTimeout(r, 5000)))]);
+      clearTimeout(fin!);
+      return { trabajo: vista(t) };
+    },
+  },
 ];
+
+// --- trabajo `sync` ---
+
+function diaArg(a: Args, k: string, obligatorio?: true): string;
+function diaArg(a: Args, k: string): string | undefined;
+function diaArg(a: Args, k: string, obligatorio = false) {
+  const v = obligatorio ? texto(a, k, true) : texto(a, k);
+  if (v === undefined) return v;
+  const ok = /^\d{4}-\d{2}-\d{2}$/.test(v) && (() => { try { return sumarDias(v, 0) === v; } catch { return false; } })();
+  if (!ok) throw new ErrorUso(`\`${k}\` debe ser un día AAAA-MM-DD válido`);
+  return v;
+}
+
+/** El cuerpo del trabajo `sync`: planifica, revisa que el plan quepa y ejecuta. Nunca corre dentro de `enCola`. */
+async function correrSync(c: Ctx, j: Trabajo, p: { desde: string; hasta: string; fuentes: FuenteSync[]; maxConsultas: number }): Promise<Salida> {
+  const { mp } = c;
+  const inicio = mp.cuota.usadas;
+  const gastadas = () => Math.max(0, mp.cuota.usadas - inicio);
+  const topes = () => {
+    const t = c.topeAgente();
+    return { maxConsultas: p.maxConsultas - gastadas(), agente: t.limite - t.usadas, ticket: mp.cuota.restante };
+  };
+  const { signal } = j.abort;
+
+  const plan = await mp.sync.planificar({ desde: p.desde, hasta: p.hasta, fuentes: p.fuentes, store: j.store, signal });
+  const { consultas, gastadas: delPlan, margenReintentos, cabeHoy, desglose } = plan;
+  j.plan = { consultas, gastadas: delPlan, margenReintentos, cabeHoy, desglose };
+  const falta = consultas - delPlan + (margenReintentos ?? 0);
+  const t = topes();
+  if (falta > Math.min(...Object.values(t)))
+    return {
+      estado: "detenido",
+      mensaje:
+        `El plan necesita unas ${falta} consultas más (incluye ${margenReintentos ?? 0} de margen para reintentos) y quedan ${t.maxConsultas} de maxConsultas, ${t.agente} del tope del agente y ${t.ticket} del ticket. ` +
+        "No se ejecutó nada. Acorta el rango, sube maxConsultas o corre `npx mercadopublico sync` en una terminal.",
+    };
+
+  let razon: string | undefined;
+  j.estado = "ejecutando";
+  const r = await mp.sync.ejecutar(plan, {
+    signal,
+    alAvanzar(a) {
+      j.avance = a;
+      const tope = topes();
+      razon ??= tope.agente <= 0 ? `se alcanzó el tope diario del agente (${c.topeAgente().limite} consultas)` : tope.maxConsultas <= 0 ? `se alcanzó maxConsultas (${p.maxConsultas})` : undefined;
+      if (razon) j.abort.abort();
+    },
+  });
+  const { errores, abandonados, ...resto } = r;
+  // Sin lo voluminoso: los primeros errores bastan, el total dice cuántos son.
+  const resultado = { ...resto, errores: errores.slice(0, 20), totalErrores: errores.length, ...(abandonados && { abandonados: abandonados.slice(0, 20) }) };
+  if (razon) return { estado: "detenido", resultado, mensaje: `Detenido: ${razon}. Lo hecho quedó guardado; un nuevo \`sync\` retoma.` };
+  if (r.detenido === "cancelado") return { estado: "cancelado", resultado, mensaje: "Cancelado; lo hecho quedó guardado." };
+  if (r.detenido) return { estado: "detenido", resultado, mensaje: r.detenido };
+  return { estado: "terminado", resultado };
+}
+
 
 // --- servidor ---
 
@@ -459,15 +643,39 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
     return v;
   };
 
-  // ponytail: el gasto del agente vive en memoria y se reinicia con el servidor; el de la CLI no se descuenta aquí (la cuota
-  // real del ticket sí es compartida vía cuotaArchivo).
-  const gasto = { dia: diaSantiago(), usadas: 0 };
+  // El gasto del agente es todo lo que este servidor consultó hoy (herramientas y trabajo en segundo plano): el delta global de
+  // `mp.cuota.usadas` desde que arrancó, que se reinicia con el día. ponytail: vive en memoria y se reinicia con el servidor; lo
+  // de la CLI no se descuenta aquí (la cuota real del ticket sí es compartida vía cuotaArchivo).
+  const gasto = { dia: mp.cuota.toJSON().dia, base: mp.cuota.usadas };
   const topeAgente = () => {
-    const hoy = diaSantiago();
-    if (gasto.dia !== hoy) Object.assign(gasto, { dia: hoy, usadas: 0 });
-    return { limite, usadas: gasto.usadas };
+    const hoy = mp.cuota.toJSON().dia;
+    if (gasto.dia !== hoy) Object.assign(gasto, { dia: hoy, base: 0 });
+    return { limite, usadas: Math.max(0, mp.cuota.usadas - gasto.base) };
   };
-  const ctx: Ctx = { mp, abrirStore, cacheado, topeAgente };
+
+  let trabajo: Trabajo | undefined;
+  const lanzar: Ctx["lanzar"] = (t, correr) => {
+    const j: Trabajo = { ...t, estado: "planificando", inicio: new Date().toISOString(), abort: new AbortController(), listo: undefined! };
+    trabajo = j;
+    // Con un timer, el que lo pidió responde antes de que el trabajo gaste su primera consulta (su `costo` no se la lleva).
+    j.listo = new Promise<void>((fin) =>
+      setTimeout(async () => {
+        const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
+        let s: Salida;
+        try {
+          s = await correr(j);
+        } catch (e) {
+          s = e instanceof MercadoPublicoError && e.tipo === "cancelada" ? { estado: "cancelado", mensaje: "Cancelado; lo hecho quedó guardado." } : { estado: "error", mensaje: msg(e) };
+        }
+        // Primero se suelta el lock y recién después se publica el estado final.
+        await j.store.cerrar?.().catch((e) => (s = { ...s, mensaje: [s.mensaje, `no se pudo cerrar el store: ${msg(e)}`].filter(Boolean).join(" · ") }));
+        Object.assign(j, s, { fin: new Date().toISOString() });
+        fin();
+      }, 0),
+    );
+    return j;
+  };
+  const ctx: Ctx = { mp, abrirStore, cacheado, topeAgente, trabajo: () => trabajo, storeTrabajo: () => (enCurso(trabajo) ? trabajo.store : undefined), lanzar };
 
   // Las herramientas que consultan la API van de a una: así el delta de `mp.cuota.usadas` es de esa llamada y no de otra.
   let cola: Promise<unknown> = Promise.resolve();
@@ -483,6 +691,7 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
   async function ejecutar(h: Herramienta, args: Args) {
     const abierta = h.annotations.openWorldHint;
     const antes = mp.cuota.usadas;
+    const conTrabajo = enCurso(trabajo); // sus consultas se mezclan con las de esta llamada en el delta
     let datos: Objeto;
     let consultas = 0;
     try {
@@ -496,11 +705,9 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
       // La cuota cuenta cada intento, también los que fallan. Si cambia el día a mitad de camino el delta puede salir negativo.
       if (abierta) {
         consultas = Math.max(0, mp.cuota.usadas - antes);
-        topeAgente(); // pasa al día nuevo si hace falta
-        gasto.usadas += consultas;
       }
     }
-    const salida = { ...datos, costo: { consultas, restanteHoy: mp.cuota.restante, topeAgente: topeAgente() } };
+    const salida = { ...datos, costo: { consultas, restanteHoy: mp.cuota.restante, topeAgente: topeAgente(), ...(conTrabajo && abierta && { nota: "incluye consultas del trabajo en curso" }) } };
     return { content: [{ type: "text", text: JSON.stringify(salida) }], structuredContent: salida };
   }
 

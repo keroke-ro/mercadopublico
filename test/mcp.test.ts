@@ -1,20 +1,24 @@
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Readable } from "node:stream";
 import { describe, expect, it, vi } from "vitest";
 import { servirStdio } from "../src/cli.js";
-import { MercadoPublico, storeMemoria, type Proceso, type Store } from "../src/index.js";
+import { MercadoPublico, storeArchivo, storeMemoria, type Proceso, type Store } from "../src/index.js";
 import { crearServidorMcp } from "../src/mcp.js";
 
 const fixture = (r: string) => readFileSync(new URL(`./fixtures/${r}.json`, import.meta.url), "utf8");
 const VACIO = '{"Cantidad":0,"Listado":[]}';
 
 /** Fetch falso con los fixtures; `sinLicitacion` son códigos que la API v1 no encuentra como licitación. */
-function api({ sinLicitacion = [] as string[] } = {}) {
+function api({ sinLicitacion = [] as string[], gate }: { sinLicitacion?: string[]; gate?: Promise<unknown> } = {}) {
   const urls: string[] = [];
+  let detalles = 0;
   const f = (async (u: string | URL | Request) => {
     const url = new URL(String(u));
     urls.push(url.pathname + url.search);
     const codigo = url.searchParams.get("codigo");
+    if (gate && (codigo || /compra-agil\/./.test(url.pathname)) && ++detalles > 1) await gate; // desde el segundo detalle esperan: el trabajo queda a medias
     if (url.hostname === "api2.mercadopublico.cl") return new Response(fixture(url.pathname.endsWith("compra-agil") ? "v2/listado-p1" : "v2/detalle"));
     if (url.pathname.endsWith("/licitaciones.json")) return new Response(codigo ? (sinLicitacion.includes(codigo) ? VACIO : fixture("v1/licitacion-detalle")) : fixture("v1/licitaciones-listado"));
     if (url.pathname.endsWith("/ordenesdecompra.json")) return new Response(fixture(codigo ? "v1/oc-detalle" : "v1/ordenes-listado"));
@@ -24,10 +28,10 @@ function api({ sinLicitacion = [] as string[] } = {}) {
   return { f, urls };
 }
 
-function servidor(op: { tope?: number; store?: Store; sinLicitacion?: string[] } = {}) {
+function servidor(op: { tope?: number; store?: Store; abrirStore?: () => Promise<Store>; sinLicitacion?: string[]; gate?: Promise<unknown> } = {}) {
   const { f, urls } = api(op);
   const mp = new MercadoPublico({ ticket: "T", fetch: f, conversor: false, intervaloMs: 0 });
-  const s = crearServidorMcp({ mp, tope: op.tope, version: "9.9.9", abrirStore: op.store && (async () => op.store!) });
+  const s = crearServidorMcp({ mp, tope: op.tope, version: "9.9.9", abrirStore: op.abrirStore ?? (op.store && (async () => op.store!)) });
   let n = 0;
   const rpc = (method: string, params?: object) => s.manejar({ jsonrpc: "2.0", id: ++n, method, params }) as Promise<any>;
   const llamar = async (name: string, args: object = {}) => (await rpc("tools/call", { name, arguments: args })).result;
@@ -65,16 +69,22 @@ describe("protocolo", () => {
     expect(r.error).toMatchObject({ code: -32022, data: { supported: expect.arrayContaining(["2026-07-28", "2025-11-25"]), requested: "1900-01-01" } });
   });
 
-  it("tools/list: sin radar si no hay store, con radar si lo hay; ttlMs, cacheScope, title y annotations", async () => {
+  it("tools/list: sin radar ni trabajos si no hay store, con ellos si lo hay; ttlMs, cacheScope, title y annotations", async () => {
     const sin = (await servidor().rpc("tools/list")).result;
     expect(sin.tools.map((t: any) => t.name)).toEqual(["search", "fetch", "listar", "organismos", "proveedor", "cuota"]);
     expect(sin).toMatchObject({ resultType: "complete", ttlMs: expect.any(Number), cacheScope: "private" });
     const con = (await servidor({ store: storeMemoria() }).rpc("tools/list")).result;
-    expect(con.tools.map((t: any) => t.name)).toEqual(["search", "fetch", "listar", "organismos", "proveedor", "cuota", "radar"]);
+    expect(con.tools.map((t: any) => t.name)).toEqual(["search", "fetch", "listar", "organismos", "proveedor", "cuota", "radar", "sync", "trabajo_estado", "trabajo_cancelar"]);
+    const escriben = ["sync", "trabajo_cancelar"];
     for (const t of con.tools) {
       expect(t.title).toBeTruthy();
-      expect(t.annotations).toMatchObject({ readOnlyHint: true, idempotentHint: true, openWorldHint: expect.any(Boolean) });
+      expect(t.annotations).toMatchObject({ readOnlyHint: !escriben.includes(t.name), idempotentHint: true, openWorldHint: expect.any(Boolean) });
     }
+    const por = (n: string) => con.tools.find((t: any) => t.name === n);
+    expect(por("sync").annotations).toEqual({ readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true });
+    expect(por("trabajo_cancelar").annotations).toEqual({ readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false });
+    expect(por("trabajo_estado").annotations.openWorldHint).toBe(false);
+    expect(por("sync").inputSchema.required).toEqual(["desde", "maxConsultas"]);
     expect(con.tools.find((t: any) => t.name === "cuota").annotations.openWorldHint).toBe(false);
     expect(con.tools.find((t: any) => t.name === "search").outputSchema.properties.results.items.required).toEqual(["id", "title", "url"]);
   });
@@ -326,6 +336,178 @@ describe("radar", () => {
     expect(vacio.isError).toBe(true);
     expect(vacio.content[0].text).toContain("sync --desde");
     expect((await llamar("radar", { perfil: "perfil.json" })).isError).toBe(true);
+  });
+});
+
+describe("sync como trabajo en segundo plano", () => {
+  const DIA = { desde: "2026-06-12", hasta: "2026-06-12" }; // 1 día por fuente: el listado cuesta 3
+  const esperar = async (f: () => boolean | Promise<boolean>) => {
+    for (let i = 0; i < 400; i++) {
+      if (await f()) return;
+      await new Promise((r) => setTimeout(r, 5));
+    }
+    throw new Error("se acabó la espera");
+  };
+  const estado = async (llamar: (n: string) => Promise<any>) => datos(await llamar("trabajo_estado")).trabajo;
+  const compuerta = () => {
+    let abrir!: () => void;
+    return { gate: new Promise<void>((r) => (abrir = r)), abrir };
+  };
+  const detalles = (urls: string[]) => urls.filter((u) => /codigo=|compra-agil\/./.test(u)).length;
+
+  it("responde al tiro con planificando y el job termina con resultado y procesos en el store", async () => {
+    const store = storeMemoria();
+    const { llamar, urls } = servidor({ store });
+    expect(datos(await llamar("trabajo_estado"))).toMatchObject({ trabajo: null, costo: { consultas: 0 } });
+    const t0 = Date.now();
+    const r = await llamar("sync", { ...DIA, maxConsultas: 100 });
+    expect(Date.now() - t0).toBeLessThan(100);
+    expect(datos(r).trabajo).toMatchObject({ tipo: "sync", estado: "planificando", parametros: { ...DIA, fuentes: ["licitaciones", "ordenes", "compra_agil"], maxConsultas: 100 }, inicio: expect.any(String) });
+    expect(datos(r).costo.consultas).toBe(0); // lo que gaste el job no es de esta llamada
+    expect(urls).toHaveLength(0);
+    expect((await llamar("sync", { ...DIA, maxConsultas: 100 })).isError).toBe(true); // mientras corre o no, el primero sigue en el espacio
+
+    await esperar(async () => !["planificando", "ejecutando"].includes((await estado(llamar)).estado));
+    const t = await estado(llamar);
+    expect(t).toMatchObject({ estado: "terminado", fin: expect.any(String), plan: { cabeHoy: true, desglose: expect.any(Array) }, resultado: { nuevos: expect.any(Number), totalErrores: 0 } });
+    expect(t.resultado.nuevos).toBeGreaterThan(0);
+    expect(t.resultado).not.toHaveProperty("errores", undefined);
+    expect(t.plan.consultas).toBeGreaterThanOrEqual(3);
+    expect(t.avance).toMatchObject({ fuente: expect.any(String), hechas: expect.any(Number), total: expect.any(Number) });
+    let n = 0;
+    for await (const _ of store.todos()) n++;
+    expect(n).toBeGreaterThan(0);
+    expect(await store.cursor("licitaciones")).toBe("2026-06-12");
+    // El terminado sigue visible hasta el siguiente trabajo y la cuota refleja al job.
+    expect(await estado(llamar)).toMatchObject({ estado: "terminado" });
+    expect(datos(await llamar("cuota")).topeAgente.usadas).toBe(urls.length);
+  });
+
+  it("el precheck niega un rango demasiado caro sin consultar nada", async () => {
+    const store = storeMemoria();
+    const { llamar, urls } = servidor({ store });
+    const r = await llamar("sync", { desde: "2026-01-01", hasta: "2026-03-01", maxConsultas: 50 });
+    expect(r.isError).toBe(true);
+    expect(r.content[0].text).toMatch(/cuesta 121 consultas.*60 días de licitaciones.*Prueba un rango más corto.*npx mercadopublico sync/);
+    expect(urls).toHaveLength(0);
+    expect(datos(await llamar("trabajo_estado")).trabajo).toBeNull();
+    // También cuenta el tope del agente y se descuenta lo que el store ya tiene.
+    const tope = servidor({ store, tope: 2 });
+    expect((await tope.llamar("sync", { ...DIA, maxConsultas: 100 })).content[0].text).toContain("tope del agente 2");
+    await store.fijarCursor("licitaciones", "2026-06-12");
+    await store.fijarCursor("ordenes", "2026-06-12");
+    // Con los cursores al día no hay días que listar: ni el tope de 2 niega el sync.
+    expect((await tope.llamar("sync", { ...DIA, maxConsultas: 100, fuentes: ["licitaciones", "ordenes"] })).isError).toBeUndefined();
+    await esperar(async () => !["planificando", "ejecutando"].includes((await estado(tope.llamar)).estado));
+  });
+
+  it("argumentos inválidos son isError", async () => {
+    const { llamar, urls } = servidor({ store: storeMemoria() });
+    for (const args of [{ maxConsultas: 5 }, { desde: "2026-06-12" }, { desde: "ayer", maxConsultas: 5 }, { desde: "2026-02-30", maxConsultas: 5 }, { desde: "2026-06-12", hasta: "2026-06-01", maxConsultas: 5 }, { desde: "2026-06-12", maxConsultas: 5, fuentes: ["otra"] }, { desde: "2026-06-12", maxConsultas: 0 }])
+      expect((await llamar("sync", args)).isError, JSON.stringify(args)).toBe(true);
+    expect(urls).toHaveLength(0);
+  });
+
+  it("un plan que pasa maxConsultas termina detenido sin ejecutar y deja el plan visible", async () => {
+    const store = storeMemoria();
+    const { llamar, urls } = servidor({ store });
+    await llamar("sync", { ...DIA, maxConsultas: 3 }); // alcanza para los 3 listados, no para los detalles
+    await esperar(async () => !["planificando", "ejecutando"].includes((await estado(llamar)).estado));
+    const t = await estado(llamar);
+    expect(t).toMatchObject({ estado: "detenido", plan: { gastadas: 3, cabeHoy: true }, mensaje: expect.stringMatching(/El plan necesita unas \d+ consultas más.*No se ejecutó nada/) });
+    expect(t.resultado).toBeUndefined();
+    expect(detalles(urls)).toBe(0);
+    expect(urls).toHaveLength(3);
+    let n = 0;
+    for await (const _ of store.todos()) n++;
+    expect(n).toBe(0);
+    // Y el espacio queda libre: se puede pedir otro.
+    expect((await llamar("sync", { ...DIA, maxConsultas: 3 })).isError).toBeUndefined();
+  });
+
+  it("trabajo_cancelar a mitad de la ejecución guarda lo hecho, libera el lock y deja el estado cancelado", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "mp-mcp-"));
+    try {
+      const ruta = join(dir, "mp.json");
+      const { gate, abrir } = compuerta();
+      const { llamar, urls } = servidor({ abrirStore: () => storeArchivo(ruta), gate });
+      expect((await llamar("trabajo_cancelar")).isError).toBe(true); // sin trabajo
+      await llamar("sync", { ...DIA, maxConsultas: 100 });
+      await esperar(() => detalles(urls) > 1); // el primer detalle quedó esperando en la compuerta
+      expect(await estado(llamar)).toMatchObject({ estado: "ejecutando" });
+      const cancelando = llamar("trabajo_cancelar");
+      abrir();
+      expect(datos(await cancelando).trabajo).toMatchObject({ estado: "cancelado", resultado: { nuevos: expect.any(Number) } });
+      expect(await estado(llamar)).toMatchObject({ estado: "cancelado", fin: expect.any(String) });
+      expect((await llamar("trabajo_cancelar")).isError).toBe(true); // ya no hay uno en curso
+      const s = await storeArchivo(ruta); // el lock se soltó
+      const guardados: string[] = [];
+      for await (const p of s.todos()) guardados.push(p.codigo);
+      expect(guardados.length).toBeGreaterThan(0); // lo pedido antes de cancelar quedó en disco
+      expect(await s.cursor("licitaciones")).toBeUndefined(); // sin día completo no se mueve el cursor
+      await s.cerrar!();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("un segundo sync con uno corriendo es isError con un mensaje claro", async () => {
+    const { gate, abrir } = compuerta();
+    const { llamar, urls } = servidor({ store: storeMemoria(), gate });
+    await llamar("sync", { ...DIA, maxConsultas: 100 });
+    await esperar(() => detalles(urls) > 1);
+    const r = await llamar("sync", { ...DIA, maxConsultas: 100 });
+    expect(r.isError).toBe(true);
+    expect(r.content[0].text).toMatch(/Ya hay un trabajo en curso.*trabajo_estado.*trabajo_cancelar/);
+    abrir();
+    await esperar(async () => (await estado(llamar)).estado === "terminado");
+  });
+
+  it("mientras el job tiene el store, search y radar leen por su handle (sin error de lock) y el costo avisa del trabajo", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "mp-mcp-"));
+    try {
+      const ruta = join(dir, "mp.json");
+      const previo = await storeArchivo(ruta);
+      await previo.guardar([{ tipo: "orden_compra", codigo: "9-9-SE26", nombre: "OC insumos previa", estado: "aceptada", comprador: null, fechas: { cierre: null }, monto: null, items: [], oferentes: null, personales: null, origen: "v1", raw: null } as unknown as Proceso]);
+      await previo.cerrar!();
+      const { gate, abrir } = compuerta();
+      const { llamar, urls } = servidor({ abrirStore: () => storeArchivo(ruta), gate });
+      await llamar("sync", { ...DIA, maxConsultas: 100 });
+      await esperar(() => detalles(urls) > 1);
+      await expect(storeArchivo(ruta)).rejects.toThrow(/en uso/); // el job sí tiene el lock
+      const d = datos(await llamar("search", { query: "insumos", tipo: "orden_compra" }));
+      expect(d.notas).toEqual([]);
+      expect(d.results.map((x: any) => x.id)).toEqual(["9-9-SE26"]);
+      expect(d.costo.nota).toBe("incluye consultas del trabajo en curso");
+      expect((await llamar("radar", { perfil: { pesos: { region: 1 } } })).isError).toBeUndefined(); // lee el mismo handle
+      expect(datos(await llamar("cuota")).costo).not.toHaveProperty("nota");
+      abrir();
+      await esperar(async () => (await estado(llamar)).estado === "terminado");
+      const sin = datos(await llamar("search", { query: "insumos", tipo: "orden_compra" })); // sin job: abre y cierra el suyo
+      expect(sin.costo).not.toHaveProperty("nota");
+      expect(sin.notas).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("si el gasto del agente llega al tope a mitad de camino, el job se detiene con el motivo y lo hecho queda guardado", async () => {
+    const store = storeMemoria();
+    const { gate, abrir } = compuerta();
+    const { llamar, urls, mp } = servidor({ store, gate, tope: 16 }); // 3 listados + 11 del plan caben con 2 de sobra
+    await llamar("sync", { ...DIA, maxConsultas: 100 });
+    await esperar(() => detalles(urls) > 1);
+    expect(await estado(llamar)).toMatchObject({ estado: "ejecutando", plan: { consultas: 11, gastadas: 3 } });
+    mp.cuota.registrar(10); // consultas de más (p. ej. de otro proceso con el mismo ticket): el tope global las cuenta
+    abrir();
+    await esperar(async () => !["planificando", "ejecutando"].includes((await estado(llamar)).estado));
+    const t = await estado(llamar);
+    expect(t).toMatchObject({ estado: "detenido", mensaje: expect.stringContaining("tope diario del agente"), resultado: { nuevos: expect.any(Number) } });
+    expect(datos(await llamar("cuota")).topeAgente.usadas).toBeGreaterThanOrEqual(16);
+    let n = 0;
+    for await (const _ of store.todos()) n++;
+    expect(n).toBeGreaterThan(0); // se guardó el primer detalle
+    expect((await llamar("sync", { ...DIA, maxConsultas: 100 })).isError).toBe(true); // y el tope sigue cortando
   });
 });
 

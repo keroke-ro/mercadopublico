@@ -1,5 +1,5 @@
 // Revisa el paquete tal como llega a npm: build, publint, attw, `npm pack` e import del tarball desde
-// Node ESM, Node CJS, el subpath /radar, el bin, Bun y Deno (si están) y un entorno tipo edge sin globales
+// Node ESM, Node CJS, los subpaths /radar y /mcp, el bin, Bun y Deno (si están) y un entorno tipo edge sin globales
 // de Node (node:vm, solo APIs web). Uso: npm run paquete. Sale con 1 al primer fallo.
 import { execFileSync, spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -41,30 +41,49 @@ async function principal() {
   writeFileSync(join(proy, "package.json"), JSON.stringify({ name: "prueba", private: true }));
   correr("npm", ["install", "--no-audit", "--no-fund", "--no-package-lock", tgz], { cwd: proy });
 
+  // Un POST initialize por manejadorHttp y un error de la API (el fetch falla) que debe volver como resultado de la
+  // herramienta (isError) y no como -32603: eso exige que mercadopublico/mcp y mercadopublico compartan MercadoPublicoError,
+  // algo que en CJS solo pasa si el build comparte chunks.
+  const PRUEBA_MCP = `
+const mpMcp = new mp.MercadoPublico({ ticket: "x", conversor: false, intervaloMs: 0, fetch: async () => new Response("", { status: 404 }) });
+const http = mcp.manejadorHttp(mcp.crearServidorMcp({ mp: mpMcp }), { clave: "k" });
+const pedir = (cuerpo, url = "https://x.test/mcp/k") => http(new Request(url, { method: "POST", body: JSON.stringify(cuerpo) }));
+const ini = await pedir({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25" } });
+if (ini.status !== 200 || (await ini.json()).result.serverInfo.name !== "mercadopublico") throw new Error("mcp initialize");
+if ((await pedir({ jsonrpc: "2.0", id: 1, method: "ping" }, "https://x.test/mcp/mala")).status !== 401) throw new Error("mcp clave");
+const llam = await (await pedir({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "fetch", arguments: { id: "1509-5-LE26" } } })).json();
+if (llam.error) throw new Error("mcp: un error de la API volvió como error de protocolo: " + JSON.stringify(llam.error));`;
+
   writeFileSync(
     join(proy, "esm.mjs"),
     `import * as mp from "mercadopublico";
 import * as radar from "mercadopublico/radar";
+import * as mcp from "mercadopublico/mcp";
 const c = new mp.MercadoPublico({ ticket: "x", conversor: false });
 if (typeof c.cuota.restante !== "number" || typeof radar.priorizar !== "function") throw new Error("API incompleta");
 if (radar.priorizar([], { pesos: { monto: 1 } }).length !== 0) throw new Error("priorizar");
-console.log(JSON.stringify([Object.keys(mp).sort(), Object.keys(radar).sort()]));
+${PRUEBA_MCP}
+console.log(JSON.stringify([Object.keys(mp).sort(), Object.keys(radar).sort(), Object.keys(mcp).sort()]));
 `,
   );
   writeFileSync(
     join(proy, "cjs.cjs"),
     `const mp = require("mercadopublico");
 const radar = require("mercadopublico/radar");
+const mcp = require("mercadopublico/mcp");
 const c = new mp.MercadoPublico({ ticket: "x", conversor: false });
 if (typeof c.cuota.restante !== "number" || !(new mp.MercadoPublicoError("red", "x") instanceof Error)) throw new Error("API incompleta");
-console.log(JSON.stringify([Object.keys(mp).filter((k) => k !== "__esModule").sort(), Object.keys(radar).sort()]));
+(async () => {
+${PRUEBA_MCP}
+console.log(JSON.stringify([Object.keys(mp).filter((k) => k !== "__esModule").sort(), Object.keys(radar).sort(), Object.keys(mcp).filter((k) => k !== "__esModule").sort()]));
+})();
 `,
   );
 
   const esm = correr("node", ["esm.mjs"], { cwd: proy }).trim();
   const cjs = correr("node", ["cjs.cjs"], { cwd: proy }).trim();
   if (esm !== cjs) throw new Error(`ESM y CJS exportan distinto:\n${esm}\n${cjs}`);
-  console.log("node esm/cjs/radar: ok");
+  console.log("node esm/cjs/radar/mcp: ok");
 
   const env = { ...process.env, MERCADOPUBLICO_HOME: tmp, MP_TICKET: "" };
   if (!correr("npx", ["--no-install", "mercadopublico", "--ayuda"], { cwd: proy, env }).includes("--ticket")) throw new Error("--ayuda sin texto");
@@ -99,7 +118,7 @@ async function borde(dist) {
     if (new URL(url).pathname.endsWith("/licitaciones.json")) return Response.json(lic);
     return new Response("no", { status: 404 });
   };
-  const g = { URL, URLSearchParams, TextEncoder, TextDecoder, TextDecoderStream, DecompressionStream, ReadableStream, WritableStream, TransformStream };
+  const g = { atob, btoa, URL, URLSearchParams, TextEncoder, TextDecoder, TextDecoderStream, DecompressionStream, ReadableStream, WritableStream, TransformStream };
   Object.assign(g, { Response, Request, Headers, AbortController, AbortSignal, setTimeout, clearTimeout, queueMicrotask, structuredClone, console, fetch: fetchFalso });
   const vm = await import("node:vm");
   const ctx = vm.createContext(g);
@@ -121,6 +140,7 @@ async function borde(dist) {
   };
   const sdk = await enlazar("index.js");
   const radar = await enlazar("radar.js");
+  const mcp = await enlazar("mcp.js");
 
   const mp = new sdk.MercadoPublico({ ticket: "x", conversor: false, intervaloMs: 0 });
   const l = await mp.licitaciones.porCodigo(lic.Listado[0].CodigoExterno);
@@ -136,5 +156,14 @@ async function borde(dist) {
   if (ocds.length !== 1 || !ocds[0].codigo) throw new Error("leerOcds en edge");
 
   if (radar.priorizar([l], { pesos: { monto: 1 } }, { incluirCerrados: true }).length !== 1) throw new Error("priorizar en edge");
+  const http = mcp.manejadorHttp(mcp.crearServidorMcp({ mp }), { clave: "k" });
+  const pedir = (cuerpo, cab = {}) => http(new Request("https://x.test/mcp/k", { method: "POST", headers: cab, body: JSON.stringify(cuerpo) }));
+  const ini = await pedir({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25" } });
+  if (ini.status !== 200 || (await ini.json()).result.serverInfo.name !== "mercadopublico") throw new Error("mcp initialize en edge");
+  if ((await http(new Request("https://x.test/mcp/k"))).status !== 405) throw new Error("mcp GET en edge");
+  const meta = { "io.modelcontextprotocol/protocolVersion": "2026-07-28" };
+  const nombre = `=?base64?${btoa("ping")}?=`;
+  const mod = await pedir({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "ping", _meta: meta } }, { "mcp-protocol-version": "2026-07-28", "mcp-method": "tools/call", "mcp-name": nombre });
+  if (mod.status !== 200) throw new Error("mcp moderno (Mcp-Name base64) en edge");
   console.log("edge (node:vm sin globales de Node): ok");
 }
