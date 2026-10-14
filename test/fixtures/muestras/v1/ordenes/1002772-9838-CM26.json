@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:53.9714092Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1002772-9838-CM26",
+      "Nombre": "TAPA OBTURACION SIN GOMA PARA PUNCION UNIDAD ROJA (1-33) (CM,TRANSVERSAL,2204005003,RRC)",
+      "CodigoEstado": 4,
+      "Estado": "Enviada a proveedor",
+      "CodigoLicitacion": "",
+      "Descripcion": "Orden de Compra codigo: 1002772-9838-CM26 dirigida a ARTICULOS MEDICOS Y QUIRURGICOS CHILE S.A.",
+      "CodigoTipo": "9",
+      "Tipo": "CM",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 1,
+      "EstadoProveedor": "Nueva orden de compra",
+      "Fechas": {
+        "FechaCreacion": "2026-10-06T12:25:46.863",
+        "FechaEnvio": "2026-10-09T15:15:27.333",
+        "FechaAceptacion": null,
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-06T12:29:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 889000,
+      "PorcentajeIva": 19,
+      "Impuestos": 168910,
+      "Total": 1057910,
+      "Financiamiento": "",
+      "Pais": "Other",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7383",
+        "NombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+        "RutUnidad": "61.608.205-1",
+        "CodigoUnidad": "1002772",
+        "NombreUnidad": "INSUMOS CLINICOS",
+        "Actividad": "Hospital ",
+        "DireccionUnidad": "Av. Holanda 060",
+        "ComunaUnidad": "",
+        "RegionUnidad": "",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "1312302",
+        "Nombre": "ARTICULOS MEDICOS Y QUIRURGICOS CHILE S.A.",
+        "Actividad": "Venta de Insumos medicos",
+        "CodigoSucursal": "712216",
+        "NombreSucursal": "AMEQ CHILE S.A.",
+        "RutSucursal": "76.209.836-9",
+        "Direccion": "AVENIDA LAS CONDES N° 9792",
+        "Comuna": "",
+        "Region": "",
+        "Pais": "CL",
+        "NombreContacto": "",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 0,
+            "Categoria": "",
+            "CodigoProducto": 0,
+            "Producto": "TAPA DE OBTURACIÓN BLUCARE ROJA LUER LOCK MACHO-HEMBRA CAJA 100 UNIDADES",
+            "EspecificacionComprador": "(2233818) TAPA DE OBTURACIÓN BLUCARE ROJA LUER LOCK MACHO-HEMBRA CAJA 100 UNIDADES",
+            "EspecificacionProveedor": "(2233818) TAPA DE OBTURACIÓN BLUCARE ROJA LUER LOCK MACHO-HEMBRA CAJA 100 UNIDADES ; Región Metropolitana de Santiago; Cerro Navia; MAPOCHO 7432 ENTRADA POR GALVARINO #1509",
+            "Cantidad": 500,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 1778,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 889000
+          }
+        ]
+      }
+    }
+  ]
+}

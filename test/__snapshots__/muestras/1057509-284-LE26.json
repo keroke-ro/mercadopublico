@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1057509-284-LE26",
+  "nombre": "CONVENIO COMPRA DE SERVICIOS TÉCNICO PARAMÉDICO PARA LA UNIDAD DE ONCOLOGÍA nat",
+  "descripcion": "El Hospital Clínico Herminda Martín de Chillán llama a Licitación Pública, a través del Portal Mercado Público, para la compra de servicios de Técnicos Paramédicos (TENS), con la finalidad de contar con prestaciones de apoyo clínico en la Unidad de Oncología, debido a la alta demanda de tratamientos de quimioterapia de los pacientes de la Región de Ñuble. Por lo anterior, se hace imperiosa la necesidad de contar con personal técnico suficiente y capacitado, que permita dar resolutividad a las atenciones requeridas, obteniendo la mejor calidad y oportunidad en la prestación de los servicios, a un precio conveniente para el establecimiento.",
+  "estado": "desierta",
+  "estadoGlosa": "Desierta (o art. 3 ó 9 Ley 19.886)",
+  "comprador": {
+    "codigoOrganismo": "7042",
+    "nombreOrganismo": "HOSPITAL CLINICO HERMINDA MARTIN",
+    "rutUnidad": "61.607.001-0",
+    "codigoUnidad": "1057509",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 16,
+    "comuna": "Chillán"
+  },
+  "fechas": {
+    "creacion": "2026-09-04T00:00:00-04:00",
+    "publicacion": "2026-09-16T11:23:56-03:00",
+    "cierre": "2026-09-24T12:00:00-03:00",
+    "adjudicacion": "2026-10-09T15:06:26-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 85101604,
+      "nombre": "Servicios paramédicos",
+      "descripcion": "El Hospital requiere contratar Servicios de Técnicos Paramédicos para apoyo en consultas, procedimientos y exámenes en en la Unidad de Oncología, debido a la alta demanda de tratamientos de quimioterapia de los pacientes de la Región de Ñuble. Ofertar seg",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 1,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LE",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 100 UTM e inferior a 1.000 UTM"
+}

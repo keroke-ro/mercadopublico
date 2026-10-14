@@ -1,0 +1,64 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1699-5-LP26",
+  "nombre": "Reparación del sistema de climatización CJ Rgua",
+  "descripcion": "Se requiere contratar el servicio de reparación del sistema de climatización para el Centro de Justicia de Rancagua",
+  "estado": "adjudicada",
+  "estadoGlosa": "Adjudicada",
+  "comprador": {
+    "codigoOrganismo": "7342",
+    "nombreOrganismo": "CORP ADMINISTRATIVA DEL PODER JUDICIAL",
+    "rutUnidad": "60.301.001-9",
+    "codigoUnidad": "2695",
+    "nombreUnidad": "Corp. Adm. del Poder Judicial - Rancagua",
+    "region": 6,
+    "comuna": "Rancagua"
+  },
+  "fechas": {
+    "creacion": "2026-08-07T11:37:35-04:00",
+    "publicacion": "2026-08-07T17:33:00-04:00",
+    "cierre": "2026-08-28T16:00:00-04:00",
+    "adjudicacion": "2026-10-09T15:06:01-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 72102302,
+      "nombre": "Instalación, reparación o mantenimiento de sistemas de calefacción",
+      "descripcion": "SERVICIO DE REPARACIÓN DEL SISTEMA DE CLIMATIZACIÓN PARA EL CENTRO DE JUSTICIA DE RANCAGUA",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": {
+        "valor": 128466000,
+        "moneda": "CLP",
+        "clp": 128466000,
+        "fechaValor": "2026-08-07",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 128466000,
+        "moneda": "CLP",
+        "clp": 128466000,
+        "fechaValor": "2026-08-07",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.192.428-1",
+        "nombre": "CONSTRUCCION Y CLIMATIZACION LIMITADA",
+        "codigo": null
+      }
+    }
+  ],
+  "oferentes": 4,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LP",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

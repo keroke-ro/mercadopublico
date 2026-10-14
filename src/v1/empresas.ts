@@ -1,4 +1,5 @@
-import type { Transporte } from "../http.js";
+import { exigirRut } from "../errores.js";
+import type { Cancelable, Transporte } from "../http.js";
 import { str } from "../util.js";
 
 // [W] escribe estas rutas con "Publico" en mayúscula y no se sabe si el server distingue: se sube un nivel
@@ -22,18 +23,18 @@ export class Empresas {
   constructor(private readonly t: Transporte) {}
 
   /** Código de empresa del proveedor en Mercado Público; null si el RUT no está registrado. 1 consulta. */
-  async buscarProveedor(rut: string): Promise<Empresa | null> {
-    const e = (await this.listar("BuscarProveedor", { rutempresaproveedor: formatearRut(rut) }))[0];
+  async buscarProveedor(rut: string, { signal }: Cancelable = {}): Promise<Empresa | null> {
+    const e = (await this.listar("BuscarProveedor", { rutempresaproveedor: formatearRut(exigirRut(rut)) }, signal))[0];
     return e ?? null;
   }
 
   /** Todos los organismos compradores. 1 consulta. */
-  buscarComprador(): Promise<Empresa[]> {
-    return this.listar("BuscarComprador");
+  buscarComprador({ signal }: Cancelable = {}): Promise<Empresa[]> {
+    return this.listar("BuscarComprador", {}, signal);
   }
 
-  private async listar(ruta: string, params: Record<string, string> = {}): Promise<Empresa[]> {
-    const r = await this.t.v1<Respuesta | null>(`${RUTA}/${ruta}`, params);
+  private async listar(ruta: string, params: Record<string, string>, signal?: AbortSignal): Promise<Empresa[]> {
+    const r = await this.t.v1<Respuesta | null>(`${RUTA}/${ruta}`, params, { signal });
     // La lista se llama "listaEmpresas" según terceros; se acepta "Listado" por si acaso.
     const l = r?.listaEmpresas ?? r?.Listado;
     return (Array.isArray(l) ? l : []).flatMap((x: Record<string, unknown> | null) => {

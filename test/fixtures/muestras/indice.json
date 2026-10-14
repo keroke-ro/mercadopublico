@@ -1,0 +1,579 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "consultas": 85,
+  "cobertura": {
+    "licitaciones": {
+      "tipos": [
+        "B2",
+        "CO",
+        "DC",
+        "E2",
+        "I2",
+        "L1",
+        "LE",
+        "LP",
+        "LQ",
+        "LR",
+        "LS",
+        "O1"
+      ],
+      "estados": [
+        "15 Revocada",
+        "16 Suspendida",
+        "5 Publicada",
+        "6 Cerrada",
+        "7 Desierta (o art. 3 ó 9 Ley 19.886)",
+        "8 Adjudicada"
+      ],
+      "monedas": [
+        "CLF",
+        "CLP"
+      ]
+    },
+    "ordenes": {
+      "tipos": [
+        "13 AG",
+        "14 CC",
+        "16 TD",
+        "17 CT",
+        "8 SE",
+        "9 CM"
+      ],
+      "estados": [
+        "12 Recepción Conforme",
+        "4 Enviada a proveedor",
+        "5 En proceso",
+        "6 Aceptada",
+        "9 Cancelada"
+      ],
+      "monedas": [
+        "CLP",
+        "USD"
+      ]
+    },
+    "compraAgil": {
+      "tipos": [],
+      "estados": [],
+      "monedas": []
+    }
+  },
+  "muestras": [
+    {
+      "archivo": "v1/licitaciones/1049242-34-LE26.json",
+      "tipo": "LE",
+      "estado": "6 Cerrada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1051425-50-LE26.json",
+      "tipo": "LE",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1057402-146-LR26.json",
+      "tipo": "LR",
+      "estado": "6 Cerrada",
+      "moneda": "CLP",
+      "items": 35,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1057402-160-LR26.json",
+      "tipo": "LR",
+      "estado": "6 Cerrada",
+      "moneda": "CLP",
+      "items": 17,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1057472-121-LR26.json",
+      "tipo": "LR",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1057500-78-CO26.json",
+      "tipo": "CO",
+      "estado": "6 Cerrada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1057501-510-I226.json",
+      "tipo": "I2",
+      "estado": "7 Desierta (o art. 3 ó 9 Ley 19.886)",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1057509-12-LP26.json",
+      "tipo": "LP",
+      "estado": "7 Desierta (o art. 3 ó 9 Ley 19.886)",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1057509-284-LE26.json",
+      "tipo": "LE",
+      "estado": "7 Desierta (o art. 3 ó 9 Ley 19.886)",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1057509-314-LP26.json",
+      "tipo": "LP",
+      "estado": "6 Cerrada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1058071-23-LR26.json",
+      "tipo": "LR",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 17,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1058085-150-LP26.json",
+      "tipo": "LP",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 3,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1059240-2-LE26.json",
+      "tipo": "LE",
+      "estado": "15 Revocada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1078333-19-LE26.json",
+      "tipo": "LE",
+      "estado": "8 Adjudicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 1
+    },
+    {
+      "archivo": "v1/licitaciones/1099402-42-L126.json",
+      "tipo": "L1",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1110404-212-L126.json",
+      "tipo": "L1",
+      "estado": "8 Adjudicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 1
+    },
+    {
+      "archivo": "v1/licitaciones/1148-20-O126.json",
+      "tipo": "O1",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1148-24-O126.json",
+      "tipo": "O1",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1148-25-O126.json",
+      "tipo": "O1",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1180885-9-LR26.json",
+      "tipo": "LR",
+      "estado": "6 Cerrada",
+      "moneda": "CLP",
+      "items": 3,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1202333-97-LP26.json",
+      "tipo": "LP",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1268-10-O126.json",
+      "tipo": "O1",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1268-9-O126.json",
+      "tipo": "O1",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1412-4-LS26.json",
+      "tipo": "LS",
+      "estado": "7 Desierta (o art. 3 ó 9 Ley 19.886)",
+      "moneda": "CLF",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1422824-11-LR26.json",
+      "tipo": "LR",
+      "estado": "8 Adjudicada",
+      "moneda": "CLP",
+      "items": 30,
+      "adjudicada": true,
+      "itemsAdjudicados": 21
+    },
+    {
+      "archivo": "v1/licitaciones/1469-227-R126.json",
+      "tipo": "L1",
+      "estado": "8 Adjudicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 1
+    },
+    {
+      "archivo": "v1/licitaciones/1469-242-L126.json",
+      "tipo": "L1",
+      "estado": "6 Cerrada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1480074-14-L126.json",
+      "tipo": "L1",
+      "estado": "15 Revocada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1499900-5-B226.json",
+      "tipo": "B2",
+      "estado": "6 Cerrada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1523-53-R226.json",
+      "tipo": "LE",
+      "estado": "7 Desierta (o art. 3 ó 9 Ley 19.886)",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1627-114-LP26.json",
+      "tipo": "LP",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1642-24-LP26.json",
+      "tipo": "LP",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/1699-5-LP26.json",
+      "tipo": "LP",
+      "estado": "8 Adjudicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 1
+    },
+    {
+      "archivo": "v1/licitaciones/2933-52-R226.json",
+      "tipo": "LP",
+      "estado": "8 Adjudicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 1
+    },
+    {
+      "archivo": "v1/licitaciones/4776-48-I226.json",
+      "tipo": "I2",
+      "estado": "7 Desierta (o art. 3 ó 9 Ley 19.886)",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/500977-115-DC26.json",
+      "tipo": "DC",
+      "estado": "15 Revocada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/5209-32-LQ25.json",
+      "tipo": "LQ",
+      "estado": "8 Adjudicada",
+      "moneda": "CLP",
+      "items": 12,
+      "adjudicada": true,
+      "itemsAdjudicados": 6
+    },
+    {
+      "archivo": "v1/licitaciones/552578-69-LQ24.json",
+      "tipo": "LQ",
+      "estado": "15 Revocada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/611669-23-LS26.json",
+      "tipo": "LS",
+      "estado": "5 Publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/707424-22-LP26.json",
+      "tipo": "LP",
+      "estado": "16 Suspendida",
+      "moneda": "CLP",
+      "items": 14,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/licitaciones/879-16-E226.json",
+      "tipo": "E2",
+      "estado": "6 Cerrada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false,
+      "itemsAdjudicados": 0
+    },
+    {
+      "archivo": "v1/ordenes/1002584-335-AG26.json",
+      "tipo": "13 AG",
+      "estado": "12 Recepción Conforme",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1002772-8976-CM26.json",
+      "tipo": "9 CM",
+      "estado": "12 Recepción Conforme",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1002772-9226-SE26.json",
+      "tipo": "8 SE",
+      "estado": "12 Recepción Conforme",
+      "moneda": "CLP",
+      "items": 7,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1002772-9838-CM26.json",
+      "tipo": "9 CM",
+      "estado": "4 Enviada a proveedor",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1002772-9923-AG26.json",
+      "tipo": "13 AG",
+      "estado": "4 Enviada a proveedor",
+      "moneda": "CLP",
+      "items": 2,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1002772-9967-SE26.json",
+      "tipo": "8 SE",
+      "estado": "6 Aceptada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1011254-441-AG26.json",
+      "tipo": "13 AG",
+      "estado": "6 Aceptada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1016414-102-TD26.json",
+      "tipo": "16 TD",
+      "estado": "6 Aceptada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1019-350-CM26.json",
+      "tipo": "9 CM",
+      "estado": "6 Aceptada",
+      "moneda": "USD",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1024-236-SE26.json",
+      "tipo": "8 SE",
+      "estado": "4 Enviada a proveedor",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1043-74-TD26.json",
+      "tipo": "16 TD",
+      "estado": "4 Enviada a proveedor",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1057049-18088-TD26.json",
+      "tipo": "16 TD",
+      "estado": "12 Recepción Conforme",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1057430-2829-CM26.json",
+      "tipo": "9 CM",
+      "estado": "5 En proceso",
+      "moneda": "CLP",
+      "items": 2,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1057432-106-CC24.json",
+      "tipo": "14 CC",
+      "estado": "12 Recepción Conforme",
+      "moneda": "USD",
+      "items": 4,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1057489-10895-SE26.json",
+      "tipo": "8 SE",
+      "estado": "9 Cancelada",
+      "moneda": "CLP",
+      "items": 2,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1057506-4741-CC26.json",
+      "tipo": "14 CC",
+      "estado": "6 Aceptada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1057511-499-CC26.json",
+      "tipo": "14 CC",
+      "estado": "9 Cancelada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    },
+    {
+      "archivo": "v1/ordenes/1111432-544-CT26.json",
+      "tipo": "17 CT",
+      "estado": "6 Aceptada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": null
+    }
+  ],
+  "notas": [
+    "licitación 500977-114-CI26: sin detalle (HTTP 500 String or binary data would be truncated. The statement has been terminated.)",
+    "v2 listado: HTTP 500 [{\"codigo\":\"ERROR_INTERNO\",\"mensaje\":\"Servicio no disponible, intente nuevamente más tarde\",\"detalle\":\"\"}]"
+  ]
+}

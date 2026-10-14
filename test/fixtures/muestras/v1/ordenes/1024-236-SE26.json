@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:21.7645679Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1024-236-SE26",
+      "Nombre": "ORDEN DE COMPRA DESDE 1024-45-LE26",
+      "CodigoEstado": 4,
+      "Estado": "Enviada a proveedor",
+      "CodigoLicitacion": "1024-45-LE26",
+      "Descripcion": "SERV. TRANSPORTE MATERIAL GRANULAR DVRT DESDE 1024-45-LE26",
+      "CodigoTipo": "8",
+      "Tipo": "SE",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 1,
+      "EstadoProveedor": "Nueva orden de compra",
+      "Fechas": {
+        "FechaCreacion": "2026-10-07T17:08:01.263",
+        "FechaEnvio": "2026-10-09T22:57:03.113",
+        "FechaAceptacion": null,
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-09T22:54:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 36000000,
+      "PorcentajeIva": 19,
+      "Impuestos": 6840000,
+      "Total": 42840000,
+      "Financiamiento": "22 08 007",
+      "Pais": "CL",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7248",
+        "NombreOrganismo": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO PP DCYF",
+        "RutUnidad": "61.202.000-0",
+        "CodigoUnidad": "2020",
+        "NombreUnidad": "Dirección de Vialidad - I Región - Dirección Regional",
+        "Actividad": "GOBIERNO CENTRAL Y ADMINISTRACION PUBLICA",
+        "DireccionUnidad": "Tarapacá N° 130, piso 3",
+        "ComunaUnidad": "Iquique",
+        "RegionUnidad": "Región de Tarapacá  ",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "[oculto]",
+        "Nombre": "[oculto]",
+        "Actividad": "Transporte de Carga por carretera",
+        "CodigoSucursal": "[oculto]",
+        "NombreSucursal": "[oculto]",
+        "RutSucursal": "[oculto]",
+        "Direccion": "[oculto]",
+        "Comuna": "Arica",
+        "Region": "Región de Arica y Parinacota",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 78101800,
+            "Categoria": "Servicios de transporte, almacenaje y correo / Transporte de correo y carga / Transporte de carga por carretera",
+            "CodigoProducto": 78101801,
+            "Producto": "Servicios de transporte local en camión",
+            "EspecificacionComprador": "Servicio de transporte de material granular como complemento a las labores realizadas por la Administración Directa, de la Dirección de Vialidad, Región de Tarapacá; duranción del contrato 70 días hábiles.",
+            "EspecificacionProveedor": "SERV. TRANSPORTE MATERIAL GRANULAR DVRT.- VALIDEZ DE LA OFERTA DE 60 DÍAS CORRIDOS.",
+            "Cantidad": 3600,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 10000,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 36000000
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1057430-2829-CM26",
+  "nombre": "Reposición Vales de Gas Bodega General (Despacho URGENTE)",
+  "descripcion": "Orden de Compra codigo: 1057430-2829-CM26 dirigida a ABASTIBLE S.A.",
+  "estado": "en_proceso",
+  "estadoGlosa": "En proceso",
+  "comprador": {
+    "codigoOrganismo": "7481",
+    "nombreOrganismo": "SERVICIO NACIONAL DE SALUD HOSPITAL DE LOTA",
+    "rutUnidad": "61.602.203-2",
+    "codigoUnidad": "1057430",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": null,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": "2026-10-08T17:15:33-03:00",
+    "publicacion": "2026-10-09T12:53:42-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-08T17:18:00-03:00"
+  },
+  "monto": {
+    "valor": 835191,
+    "moneda": "CLP",
+    "clp": 835191,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": null,
+      "nombre": "GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 15 KG REGIÓN DEL BIOBÍO",
+      "descripcion": "(4510582) GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 15 KG REGIÓN DEL BIOBÍO",
+      "cantidad": 30,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 17806,
+        "moneda": "CLP",
+        "clp": 17806,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 534180,
+        "moneda": "CLP",
+        "clp": 534180,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": null,
+      "nombre": "GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 45 KG REGIÓN DEL BIOBÍO",
+      "descripcion": "(4510599) GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 45 KG REGIÓN DEL BIOBÍO",
+      "cantidad": 3,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 55887,
+        "moneda": "CLP",
+        "clp": 55887,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 167661,
+        "moneda": "CLP",
+        "clp": 167661,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "CM",
+  "proveedor": {
+    "rut": "91.806.000-6",
+    "nombre": "ABASTIBLE S.A.",
+    "codigo": "26796"
+  },
+  "procesoOrigen": null
+}

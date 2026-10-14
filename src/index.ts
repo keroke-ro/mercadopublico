@@ -1,6 +1,7 @@
-import { Transporte, type OpcionesTransporte } from "./http.js";
+import type { Fuente } from "./eventos.js";
+import { Transporte, type OpcionesTransporte, type Salud } from "./http.js";
 import type { Enriquecer, Proceso } from "./modelo.js";
-import { convertirMontos, conversorPorDefecto, type Conversor } from "./monto.js";
+import { cadenaPorDefecto, convertirMontos, type Conversor } from "./monto.js";
 import { CAMPOS_PERSONALES_OCDS } from "./ocds.js";
 import { ocultarPersonales as ocultar } from "./personales.js";
 import { Sync } from "./sync.js";
@@ -27,8 +28,9 @@ export class MercadoPublico {
   readonly sync: Sync;
 
   constructor(opciones: OpcionesMercadoPublico) {
-    const { conversor = conversorPorDefecto, ...transporte } = opciones;
+    const { conversor: elegido, ...transporte } = opciones;
     this.http = new Transporte(transporte);
+    const conversor = elegido ?? cadenaPorDefecto({ alEvento: opciones.alEvento, circuitos: this.http.circuitos });
     const enriquecer: Enriquecer = conversor ? (p) => convertirMontos(p, conversor) : async (p) => p;
     this.licitaciones = new Licitaciones(this.http, enriquecer);
     this.ordenes = new OrdenesCompra(this.http, enriquecer);
@@ -40,6 +42,11 @@ export class MercadoPublico {
   /** Consultas usadas hoy, límite, restante y cuándo se reinicia (medianoche de Santiago). */
   get cuota() {
     return this.http.cuota;
+  }
+
+  /** Circuito, caídas seguidas, última caída y pausa actual de cada fuente (v1, v2 y los conversores de montos). */
+  salud(): Record<Fuente, Salud> {
+    return this.http.salud();
   }
 }
 
@@ -55,9 +62,10 @@ export function ocultarPersonales<T extends Proceso>(p: T): T {
 }
 
 export { MercadoPublicoError, type TipoError } from "./errores.js";
-export { Cuota, Transporte, type EstadoCuota, type OpcionesTransporte } from "./http.js";
+export type { AlEvento, Aviso, EstadoCircuito, Evento, Fuente } from "./eventos.js";
+export { CIRCUITO, Circuito, Cuota, PRESUPUESTO_REINTENTOS, RITMO, Transporte, UMBRALES_CUOTA, type Cancelable, type EstadoCuota, type OpcionesTransporte, type Salud } from "./http.js";
 export type * from "./modelo.js";
-export { convertirMontos, conversorBancoCentral, conversorEncadenado, conversorMindicador, conversorParidadChileCompra, conversorPorDefecto, type Conversor, type OpcionesConversor, type Paridad } from "./monto.js";
+export { cadenaPorDefecto, convertirMontos, conversorBancoCentral, conversorEncadenado, conversorMindicador, conversorParidadChileCompra, conversorPorDefecto, type Conversor, type OpcionesConversor, type Paridad } from "./monto.js";
 export { desdeOcds, leerOcds, urlOcds, type OpcionesOcds } from "./ocds.js";
 export { storeArchivo, storeMemoria, type Store } from "./store.js";
 export type { FuenteSync, ListadoSync, OpcionesSync, PlanSync, ResultadoSync } from "./sync.js";

@@ -1,0 +1,54 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1099402-42-L126",
+  "nombre": "CESFAM REQUIERE HABILITACIÓN REAS CESFAM LLAY LLAY",
+  "descripcion": "DE ACUERDO CON REQUERIMIENTOS INDICADOS POR SEREMI DE SALUD EN ULTIMA INSPECCIÓN SE REQUIEREN MODIFICACIONES EN REAS DEL CESFAM LLAY LLAY",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "1688785",
+    "nombreOrganismo": "CENTRO DE SALUD FAMILIAR CESFAM LLAY LLAY",
+    "rutUnidad": "62.000.620-3",
+    "codigoUnidad": "1099402",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 5,
+    "comuna": "Llay-Llay"
+  },
+  "fechas": {
+    "creacion": "2026-10-01T00:00:00-03:00",
+    "publicacion": "2026-10-09T10:52:27-03:00",
+    "cierre": "2026-10-16T09:36:00-03:00",
+    "adjudicacion": "2026-10-20T16:37:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 6000000,
+    "moneda": "CLP",
+    "clp": 6000000,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 72131702,
+      "nombre": "Construcción de obras civiles",
+      "descripcion": "PROYECTO HABILITACIÓN REAS CESFAM LLAY LLAY",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "L1",
+  "tipoLicitacionGlosa": "Licitación Pública menor a 100 UTM"
+}

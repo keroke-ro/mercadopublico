@@ -1,0 +1,254 @@
+{
+  "tipo": "licitacion",
+  "codigo": "5209-32-LQ25",
+  "nombre": "SUMINISTRO DE ANTIVIRALES ORALES",
+  "descripcion": "La Universidad de Chile, para su Hospital Clínico de la Universidad de Chile, en adelante e indistintamente el “Hospital Clínico” o el “HOSPITAL”, establecimiento docente-asistencial de medicina de alta complejidad, llama a licitación pública para la adquisición, por sistema de suministro, de ANTIVIRALES ORALES, la cual se regulará por las presentes Bases.",
+  "estado": "adjudicada",
+  "estadoGlosa": "Adjudicada",
+  "comprador": {
+    "codigoOrganismo": "7251",
+    "nombreOrganismo": "UNIVERSIDAD DE CHILE",
+    "rutUnidad": "60.910.000-1",
+    "codigoUnidad": "6122",
+    "nombreUnidad": "Hospital Clínico Univ. de Chile - Unidad de Medicamentos",
+    "region": 13,
+    "comuna": "Independencia"
+  },
+  "fechas": {
+    "creacion": "2025-06-02T12:24:05-04:00",
+    "publicacion": "2025-06-02T13:46:47-04:00",
+    "cierre": "2025-06-23T16:00:00-04:00",
+    "adjudicacion": "2026-10-07T17:42:41-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 51102301,
+      "nombre": "Aciclovir",
+      "descripcion": "Línea de Productos Nº1: ACICLOVIR 200 MG",
+      "cantidad": 90000,
+      "unidad": "Comprimido",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 51102310,
+      "nombre": "Lamivudina",
+      "descripcion": "Línea de Productos Nº2: LAMIVUDINA – ZIDOVUDINA 150-300 MG",
+      "cantidad": 3600,
+      "unidad": "Comprimido",
+      "precioUnitario": {
+        "valor": 712,
+        "moneda": "CLP",
+        "clp": 712,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 2563200,
+        "moneda": "CLP",
+        "clp": 2563200,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "85.025.700-0",
+        "nombre": "GLAXOSMITHKLINE CHILE FARMACEUTICA LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 51102314,
+      "nombre": "Ritonavir",
+      "descripcion": "Línea de Productos Nº3: OSELTAMIVIR 75 MG",
+      "cantidad": 10800,
+      "unidad": "Comprimido",
+      "precioUnitario": {
+        "valor": 1577.8,
+        "moneda": "CLP",
+        "clp": 1577.8,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 17040240,
+        "moneda": "CLP",
+        "clp": 17040240,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.237.266-5",
+        "nombre": "LABORATORIOS ANDROMACO S.A.",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 51102314,
+      "nombre": "Ritonavir",
+      "descripcion": "Línea de Productos Nº4: OSELTAMIVIR 6 - 12 MG / ML 55 ML - 75 ML",
+      "cantidad": 360,
+      "unidad": "Frasco",
+      "precioUnitario": {
+        "valor": 35650,
+        "moneda": "CLP",
+        "clp": 35650,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 12834000,
+        "moneda": "CLP",
+        "clp": 12834000,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.237.266-5",
+        "nombre": "LABORATORIOS ANDROMACO S.A.",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 51102332,
+      "nombre": "Tenofovir disoproxil fumarato",
+      "descripcion": "Línea de Productos Nº5: TENOFOVIR 300 - EMTRICITABINA 200",
+      "cantidad": 4320,
+      "unidad": "Comprimido",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 51102333,
+      "nombre": "Clorhidrato de valganciclovir",
+      "descripcion": "Línea de Productos Nº6: RALTEGRAVIR 400 MG",
+      "cantidad": 4320,
+      "unidad": "Comprimido",
+      "precioUnitario": {
+        "valor": 5650,
+        "moneda": "CLP",
+        "clp": 5650,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 24408000,
+        "moneda": "CLP",
+        "clp": 24408000,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "59.043.540-6",
+        "nombre": "MERCK SHARP & DOHME (I.A) LLC,AGENCIA EN CHILE",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 51102333,
+      "nombre": "Clorhidrato de valganciclovir",
+      "descripcion": "Línea de Productos Nº7: VALGANCICLOVIR 450 MG",
+      "cantidad": 8640,
+      "unidad": "Comprimido",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 51102332,
+      "nombre": "Tenofovir disoproxil fumarato",
+      "descripcion": "Línea de Productos Nº8:TENOFOVIR-LAMIVUDINA-DOLUTEGRAVIR 300/300/50 MG",
+      "cantidad": 18000,
+      "unidad": "Comprimido",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 51102305,
+      "nombre": "Famciclovir",
+      "descripcion": "Línea de Productos Nº9:ENTECAVIR 0.5 MG",
+      "cantidad": 2160,
+      "unidad": "Comprimido",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 51102311,
+      "nombre": "Nevirapina",
+      "descripcion": "Línea de Productos Nº10:NEVIRAPINA 50 MG / 5 ML  240 ML",
+      "cantidad": 72,
+      "unidad": "Frasco",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 51102321,
+      "nombre": "Zidovudina",
+      "descripcion": "Línea de Productos Nº11:ZIDOVUDINA 50 MG / 5 ML 200 ML",
+      "cantidad": 72,
+      "unidad": "Frasco",
+      "precioUnitario": {
+        "valor": 34443,
+        "moneda": "CLP",
+        "clp": 34443,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 2479896,
+        "moneda": "CLP",
+        "clp": 2479896,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "85.025.700-0",
+        "nombre": "GLAXOSMITHKLINE CHILE FARMACEUTICA LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 51102318,
+      "nombre": "Hidrocloruro de valaciclovir",
+      "descripcion": "Línea de Productos Nº12:VALACICLOVIR 500 MG",
+      "cantidad": 1080,
+      "unidad": "Comprimido",
+      "precioUnitario": {
+        "valor": 453,
+        "moneda": "CLP",
+        "clp": 453,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 489240,
+        "moneda": "CLP",
+        "clp": 489240,
+        "fechaValor": "2025-06-02",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.175.092-5",
+        "nombre": "ASCEND LABORATORIES SPA",
+        "codigo": null
+      }
+    }
+  ],
+  "oferentes": 7,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LQ",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 2.000 UTM e inferior a 5.000 UTM"
+}

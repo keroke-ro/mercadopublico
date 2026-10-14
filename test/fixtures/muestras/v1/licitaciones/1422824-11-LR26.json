@@ -1,0 +1,389 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:36:36.0302804Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "CodigoExterno": "1422824-11-LR26",
+      "Nombre": "CONTRATO DE SUMINISTRO DE INSUMOS DE ACCESOS EN CONSIGNACION PARA NEURORRADIOLOGÍA INTERVENCIONAL DEL HOSPITAL CARLOS VAN BUREN",
+      "CodigoEstado": 8,
+      "Descripcion": "CONTRATO DE SUMINISTRO DE INSUMOS DE ACCESOS EN CONSIGNACION PARA NEURORRADIOLOGÍA INTERVENCIONAL DEL HOSPITAL CARLOS VAN BUREN",
+      "FechaCierre": null,
+      "Estado": "Adjudicada",
+      "Comprador": {
+        "CodigoOrganismo": "1468521",
+        "NombreOrganismo": "SERVICIO NACIONAL DE SALUD HOSPITAL CARLOS VAN BUREN",
+        "RutUnidad": "61.602.054-4",
+        "CodigoUnidad": "1422824",
+        "NombreUnidad": "Insumos y Reactivos",
+        "DireccionUnidad": "San Ignacio 725, Valparaiso",
+        "ComunaUnidad": "Valparaíso",
+        "RegionUnidad": "Región de Valparaíso ",
+        "RutUsuario": "",
+        "CodigoUsuario": "[oculto]",
+        "NombreUsuario": "[oculto]",
+        "CargoUsuario": "[oculto]"
+      },
+      "DiasCierreLicitacion": "0",
+      "Informada": 0,
+      "CodigoTipo": 1,
+      "Tipo": "LR",
+      "TipoConvocatoria": "1",
+      "Moneda": "CLP",
+      "Etapas": 1,
+      "EstadoEtapas": "1",
+      "TomaRazon": "0",
+      "EstadoPublicidadOfertas": 1,
+      "JustificacionPublicidad": "",
+      "Contrato": "0",
+      "Obras": "0",
+      "CantidadReclamos": 2399,
+      "Fechas": {
+        "FechaCreacion": "2026-04-15T00:00:00",
+        "FechaCierre": "2026-07-17T16:00:00",
+        "FechaInicio": "2026-06-16T13:00:00",
+        "FechaFinal": "2026-07-01T17:00:00",
+        "FechaPubRespuestas": "2026-07-08T17:30:00",
+        "FechaActoAperturaTecnica": "2026-07-17T16:01:00",
+        "FechaActoAperturaEconomica": "2026-07-17T16:01:00",
+        "FechaPublicacion": "2026-06-16T10:39:36.237",
+        "FechaAdjudicacion": "2026-10-09T09:34:46.657",
+        "FechaEstimadaAdjudicacion": "2026-10-30T11:12:00",
+        "FechaSoporteFisico": null,
+        "FechaTiempoEvaluacion": null,
+        "FechaEstimadaFirma": null,
+        "FechasUsuario": null,
+        "FechaVisitaTerreno": null,
+        "FechaEntregaAntecedentes": null
+      },
+      "UnidadTiempoEvaluacion": 1,
+      "DireccionVisita": "",
+      "DireccionEntrega": "",
+      "Estimacion": 2,
+      "FuenteFinanciamiento": "Hospital Carlos Van Buren",
+      "VisibilidadMonto": 1,
+      "MontoEstimado": 523049887,
+      "Tiempo": "12",
+      "UnidadTiempo": "1",
+      "Modalidad": 1,
+      "TipoPago": "1",
+      "NombreResponsablePago": "[oculto]",
+      "EmailResponsablePago": "",
+      "NombreResponsableContrato": "[oculto]",
+      "EmailResponsableContrato": "",
+      "FonoResponsableContrato": "",
+      "ProhibicionContratacion": "",
+      "SubContratacion": "1",
+      "UnidadTiempoDuracionContrato": 4,
+      "TiempoDuracionContrato": "12",
+      "TipoDuracionContrato": " ",
+      "JustificacionMontoEstimado": "",
+      "ObservacionContract": null,
+      "ExtensionPlazo": 0,
+      "EsBaseTipo": 0,
+      "UnidadTiempoContratoLicitacion": "2",
+      "ValorTiempoRenovacion": "0",
+      "PeriodoTiempoRenovacion": " ",
+      "EsRenovable": 0,
+      "CodigoBIP": null,
+      "Adjudicacion": {
+        "Tipo": 2,
+        "Fecha": "2026-10-08T00:00:00",
+        "Numero": "4462",
+        "NumeroOferentes": 8,
+        "UrlActa": "http://www.mercadopublico.cl/Procurement/Modules/RFB/StepsProcessAward/PreviewAwardAct.aspx?qs=0dkG0oND9TPEuYQhd2Qa5w+/sROgRSk08d1RsG7ex04="
+      },
+      "Items": {
+        "Cantidad": 30,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoProducto": 42203403,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Juegos o catéteres introductores vasculares intervencionales o diagnósticos",
+            "Descripcion": "[2220467]\tSistema de catéter guía 6F, con simmons 2 hidrofílico 5F incluido",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 82,
+            "Adjudicacion": {
+              "RutProveedor": "76.462.810-1",
+              "NombreProveedor": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+              "Cantidad": 82,
+              "MontoUnitario": 240000
+            }
+          },
+          {
+            "Correlativo": 2,
+            "CodigoProducto": 42203403,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Juegos o catéteres introductores vasculares intervencionales o diagnósticos",
+            "Descripcion": "[222P1157]\tCatéter guía 5 F, curva MP2, diámetro interno 0.056 pulgadas o más y de 90 cm o más de largo.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 15,
+            "Adjudicacion": {
+              "RutProveedor": "76.462.810-1",
+              "NombreProveedor": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+              "Cantidad": 15,
+              "MontoUnitario": 210000
+            }
+          },
+          {
+            "Correlativo": 3,
+            "CodigoProducto": 42203403,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Juegos o catéteres introductores vasculares intervencionales o diagnósticos",
+            "Descripcion": "[222P1518]\tCatéter guía 6F, curva MP2, diámetro interno 0.070” o más, 90 cm o más de largo. ",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 15,
+            "Adjudicacion": {
+              "RutProveedor": "76.462.810-1",
+              "NombreProveedor": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+              "Cantidad": 15,
+              "MontoUnitario": 210000
+            }
+          },
+          {
+            "Correlativo": 4,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1200]\tCatéter guía 7 F, curva MP, diámetro interno 0.073 pulgadas o más, 90-100 cm de largo.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 5,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 5,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1292]\tCatéter guía 8 F, curva MP, diámetro interno 0.086 pulgadas, 90-100 cm de largo.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 30,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 6,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1413]\tCatéter guía 7F diseñado para acceso radial, largos 95, 100 y 105 cm.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 30,
+            "Adjudicacion": {
+              "RutProveedor": "77.237.150-0",
+              "NombreProveedor": "COMERCIAL MEDTRONIC CHILE LTDA",
+              "Cantidad": 30,
+              "MontoUnitario": 1197000
+            }
+          },
+          {
+            "Correlativo": 7,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1438]\tCatéter de acceso distal y de aspiración 6F, disponible en largos de 125 y 131 cm.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 12,
+            "Adjudicacion": {
+              "RutProveedor": "76.453.086-1",
+              "NombreProveedor": "CICLO MED CHILE SPA",
+              "Cantidad": 12,
+              "MontoUnitario": 1050000
+            }
+          },
+          {
+            "Correlativo": 8,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1439]\tCatéter intermedio de 5F, de lumen interno de 0,055”, largos 115 y 125",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 40,
+            "Adjudicacion": {
+              "RutProveedor": "76.453.086-1",
+              "NombreProveedor": "CICLO MED CHILE SPA",
+              "Cantidad": 40,
+              "MontoUnitario": 1050000
+            }
+          },
+          {
+            "Correlativo": 9,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1482]\tCatéter intermedio de 5F-6F, de lumen interno de 0,058”, de largos de 105, 115, 125 y 130.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 20,
+            "Adjudicacion": {
+              "RutProveedor": "76.453.086-1",
+              "NombreProveedor": "CICLO MED CHILE SPA",
+              "Cantidad": 20,
+              "MontoUnitario": 1050000
+            }
+          },
+          {
+            "Correlativo": 10,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1488]\tCatéter guía neurovascular 8 F, con balón en su punta.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 10,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 11,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1580]\tMicrocatéter cerebral de lumen interno de 0,017\", de 150cm de largo, con dos marcadores distales y con extremos distales recto o preformados en 45° y 90°.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 50,
+            "Adjudicacion": {
+              "RutProveedor": "76.462.810-1",
+              "NombreProveedor": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+              "Cantidad": 30,
+              "MontoUnitario": 620000
+            }
+          },
+          {
+            "Correlativo": 11,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1580]\tMicrocatéter cerebral de lumen interno de 0,017\", de 150cm de largo, con dos marcadores distales y con extremos distales recto o preformados en 45° y 90°.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 50,
+            "Adjudicacion": {
+              "RutProveedor": "76.453.086-1",
+              "NombreProveedor": "CICLO MED CHILE SPA",
+              "Cantidad": 20,
+              "MontoUnitario": 630000
+            }
+          },
+          {
+            "Correlativo": 12,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1260]\tMicro catéter cerebral de lumen interno 0.021 pulgadas, diámetro externo proximal 2.5 F, distal 2.0 F, largo 150 cm, punta recta o anguladas.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 30,
+            "Adjudicacion": {
+              "RutProveedor": "76.462.810-1",
+              "NombreProveedor": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+              "Cantidad": 30,
+              "MontoUnitario": 640000
+            }
+          },
+          {
+            "Correlativo": 13,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1566]\tMicro catéter cerebral de lumen interno 0.027 pulgadas, diámetro externo proximal 2.9 -3.1 F, distal 2.6-2.7 F, largo 150cm, punta recta o anguladas.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 35,
+            "Adjudicacion": {
+              "RutProveedor": "76.462.810-1",
+              "NombreProveedor": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+              "Cantidad": 35,
+              "MontoUnitario": 640000
+            }
+          },
+          {
+            "Correlativo": 14,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1662]\tMicro catéter cerebral de lumen interno de disminución progresiva hasta 1.2 F, de 165 cm de largo, punta recta, para neuronavegación.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 35,
+            "Adjudicacion": {
+              "RutProveedor": "76.595.497-5",
+              "NombreProveedor": "VISALMED VIDA Y SALUD LIMITADA",
+              "Cantidad": 35,
+              "MontoUnitario": 980000
+            }
+          },
+          {
+            "Correlativo": 15,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1599]\tMicro catéter cerebral de lumen interno de disminución progresiva hasta 1.5 F, de 165 cm de largo punta recta, para neuronavegación.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 15,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 16,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P1676]\tMicro catéter cerebral de lumen interno distal 0,0165 pulgadas, con uno y dos marcadores, de largos de 156 y 167 cm.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 15,
+            "Adjudicacion": {
+              "RutProveedor": "76.462.810-1",
+              "NombreProveedor": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+              "Cantidad": 15,
+              "MontoUnitario": 850000
+            }
+          },
+          {
+            "Correlativo": 17,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P2047]\tMicro catéter cerebral de lumen interno de 0.025 pulgadas, diámetro externo proximal 2.9 F, distal 2.7 F. De 130 cm de largo. Incluye micro guía compatible.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 10,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 18,
+            "CodigoProducto": 42203402,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Catéteres o juegos vasculares intervencional o diagnósticos",
+            "Descripcion": "[222P2223]\tMicro catéter cerebral de flujo, recubierto de PTFE, de 1.5 F de diámetro, compatible con micro guía 0.010 pulgadas, DMSO y Onyx.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 5,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 19,
+            "CodigoProducto": 42203403,
+            "CodigoCategoria": "42203400",
+            "Categoria": "Equipamiento y suministros médicos / Productos para imágenes y de medicina nuclear / Artículos para imágenes vasculares, cardiología intervencional y laboratorio de cateterización cardiaca",
+            "NombreProducto": "Juegos o catéteres introductores vasculares intervencionales o diagnósticos",
+            "Descripcion": "[222P1503]\tMicro catéter cerebral de flujo, con punta desprendible, de 1.5 F de diámetro, compatible con Onyx, DMSO y micro guía.",
+            "UnidadMedida": "Unidad",
+            "Cantidad": 10,
+            "Adjudicacion": null
+          }
+        ]
+      }
+    }
+  ]
+}

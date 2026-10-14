@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1057501-510-I226",
+  "nombre": "MANTENCIÓN MAMÓGRAFO",
+  "descripcion": "es menester mantener el equipamiento médico del Hospital, con programas/registros de mantenimiento preventivo, correctivo y predictivo de acuerdo a lo establecido por el fabricante, según sea el caso, para un correcto funcionamiento, logrando un alto índice de disponibilidad, óptimas condiciones de operatividad y seguridad y, dentro de los parámetros de funcionamiento definidos por el fabricante.",
+  "estado": "desierta",
+  "estadoGlosa": "Desierta (o art. 3 ó 9 Ley 19.886)",
+  "comprador": {
+    "codigoOrganismo": "7320",
+    "nombreOrganismo": "COMPLEJO ASISTENCIAL DR. SOTERO DEL RIO",
+    "rutUnidad": "61.608.502-6",
+    "codigoUnidad": "1057501",
+    "nombreUnidad": "COMPLEJO ASISTENCIAL DR. SOTERO DEL RIO",
+    "region": 13,
+    "comuna": "Puente Alto"
+  },
+  "fechas": {
+    "creacion": "2026-08-07T00:00:00-04:00",
+    "publicacion": "2026-09-07T14:04:54-03:00",
+    "cierre": "2026-10-07T10:00:00-03:00",
+    "adjudicacion": "2026-12-07T17:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 73152101,
+      "nombre": "Servicio de mantenimiento de equipo de fabricación",
+      "descripcion": "77-002-001-433-00 Mantenimiento preventivo Mamógrafo",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 0,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "I2",
+  "tipoLicitacionGlosa": "Licitación Privada mayor a 5.000 UTM"
+}

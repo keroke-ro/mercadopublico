@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:42.8113897Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1002772-8976-CM26",
+      "Nombre": "REGULADOR DE GOTEO LARGO 40-55 CMS (CM,TRANSVERSAL,2204005003,MTM)",
+      "CodigoEstado": 12,
+      "Estado": "Recepción Conforme",
+      "CodigoLicitacion": "",
+      "Descripcion": " INSUMO TRANSVERSAL\n          ***      DESPACHO PARCIALIZADO DE ACUERDO A REQUERIMIENTO DE BODEGA      ***\nDESPACHO SÓLO CON GUÍA DE DESPACHO Y ORDEN DE COMPRA ACEPTADA A: GALVARINO #1509, CERRO NAVIA, PISO -1, BODEGA DE ABASTECIMIENTO.\nENVIAR DOCUMENTOS ",
+      "CodigoTipo": "9",
+      "Tipo": "CM",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 7,
+      "EstadoProveedor": "Recepción Conforme",
+      "Fechas": {
+        "FechaCreacion": "2026-08-13T16:52:54.777",
+        "FechaEnvio": "2026-09-14T14:16:55.873",
+        "FechaAceptacion": "2026-09-14T15:12:38.78",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-08-13T17:02:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 4.275,
+      "CantidadEvaluacion": 8,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 3594000,
+      "PorcentajeIva": 19,
+      "Impuestos": 682860,
+      "Total": 4276860,
+      "Financiamiento": "",
+      "Pais": "Other",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7383",
+        "NombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+        "RutUnidad": "61.608.205-1",
+        "CodigoUnidad": "1002772",
+        "NombreUnidad": "INSUMOS CLINICOS",
+        "Actividad": "Hospital ",
+        "DireccionUnidad": "Av. Holanda 060",
+        "ComunaUnidad": "Cerro Navia",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "69350",
+        "Nombre": "HOSPITALIA PRODUCTOS MEDICOS LTDA",
+        "Actividad": "VENTA AL POR MAYOR DE OTROS PRODUCTOS N.C.P.",
+        "CodigoSucursal": "71514",
+        "NombreSucursal": "HOSPITALIA Productos Médicos Spa",
+        "RutSucursal": "78.233.420-4",
+        "Direccion": "AV.AMERICO VESPUCIO N° 1565",
+        "Comuna": "",
+        "Region": "",
+        "Pais": "CL",
+        "NombreContacto": "",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 0,
+            "Categoria": "",
+            "CodigoProducto": 0,
+            "Producto": "ALARGADOR VENOSO DISPOMEDICA CON REGULADOR DE FLUJO/GOTEO 45 CM CAJA UNIDAD",
+            "EspecificacionComprador": "(2228340) ALARGADOR VENOSO DISPOMEDICA CON REGULADOR DE FLUJO/GOTEO 45 CM CAJA UNIDAD",
+            "EspecificacionProveedor": "(2228340) ALARGADOR VENOSO DISPOMEDICA CON REGULADOR DE FLUJO/GOTEO 45 CM CAJA UNIDAD ; Región Metropolitana de Santiago; Cerro Navia; MAPOCHO 7432, INGRESO PROVEEDORES GALVARINO N°1509, BODEGA ABASTECIMIENTO PISO -1",
+            "Cantidad": 6000,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 599,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 3594000
+          }
+        ]
+      }
+    }
+  ]
+}

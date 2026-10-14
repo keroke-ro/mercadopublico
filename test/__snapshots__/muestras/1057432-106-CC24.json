@@ -1,0 +1,136 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1057432-106-CC24",
+  "nombre": "OC PROVENIENTE DE LICITACION ID:1122317-5-LR23",
+  "descripcion": "SE EMITE ORDEN DE COMPRA PROVENIENTE DE LICITACION ID: 1122317-5-LR23 Referente al Arriendo de computadores por compra coordinada por un periodo de 36 meses para el Servicio de Salud Concepcion. CANTIDAD DE TOTAL DE COMPUTADORES 100. VIGENCIA CONTADA DESDE EL 25.01.2024 HASTA EL 24.01.2027",
+  "estado": "recepcion_conforme",
+  "estadoGlosa": "Recepción Conforme",
+  "comprador": {
+    "codigoOrganismo": "7205",
+    "nombreOrganismo": "SERVICIO DE SALUD CONCEPCION",
+    "rutUnidad": "61.607.100-9",
+    "codigoUnidad": "1057432",
+    "nombreUnidad": "Servicio de Salud  Concepción",
+    "region": 8,
+    "comuna": "Concepción"
+  },
+  "fechas": {
+    "creacion": "2024-02-23T11:49:21-03:00",
+    "publicacion": "2024-02-26T11:37:55-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2024-02-23T12:16:00-03:00"
+  },
+  "monto": {
+    "valor": 87037.8,
+    "moneda": "USD",
+    "clp": null,
+    "fechaValor": null,
+    "fuente": null
+  },
+  "items": [
+    {
+      "codigoProducto": 43211507,
+      "nombre": "Computadores de escritorio",
+      "descripcion": "SOLICITUD DE COMPRA 15524",
+      "cantidad": 36,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 1379.74833333333,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "total": {
+        "valor": 49670.93999999988,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 43211507,
+      "nombre": "Computadores de escritorio",
+      "descripcion": "SOLICITUD DE COMPRA 15524",
+      "cantidad": 36,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 96.9335555555556,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "total": {
+        "valor": 3489.6080000000015,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 43211503,
+      "nombre": "Notebook, laptop o computador portátil excepto Tab",
+      "descripcion": "SOLICITUD DE COMPRA 15524",
+      "cantidad": 36,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 535.112833333333,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "total": {
+        "valor": 19264.061999999987,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 43211503,
+      "nombre": "Notebook, laptop o computador portátil excepto Tab",
+      "descripcion": "SOLICITUD DE COMPRA 15524",
+      "cantidad": 36,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 19.8998888888889,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "total": {
+        "valor": 716.3960000000004,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "CC",
+  "proveedor": {
+    "rut": "96.513.980-k",
+    "nombre": "RICOH",
+    "codigo": "37731"
+  },
+  "procesoOrigen": "1122317-5-LR23"
+}

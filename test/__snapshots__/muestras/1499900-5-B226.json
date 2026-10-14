@@ -1,0 +1,54 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1499900-5-B226",
+  "nombre": "SERVICIO DE CONTROL Y MANEJO INTEGRADO DE PLAGAS",
+  "descripcion": "Se requieren contratar el siguiente servicio de SERVICIO DE CONTROL Y MANEJO INTEGRADO DE PLAGAS PARA EL CENTRO “IP-IRC GRANEROS” CENTRO DE ADMINISTRACIÓN DIRECTA DEL SERVICIO NACIONAL DE REINSERCIÓN SOCIAL JUVENIL DE LA REGIÓN DEL LIBERTADOR BERNARDO O´HIGGINS: \r\n\r\nEl servicio deberá comprender, a lo menos, las siguientes prestaciones específicas, las que deberán ejecutarse de conformidad con las presentes Bases Técnicas y la normativa sanitaria vigente: \r\na\tDesratización\r\nb\tSanitización.\r\nc\tDesinsectación.\r\nd\tFumigación.",
+  "estado": "cerrada",
+  "estadoGlosa": "Cerrada",
+  "comprador": {
+    "codigoOrganismo": "1887034",
+    "nombreOrganismo": "SERVICIO NACIONAL DE REINSERCION SOCIAL JUVENIL",
+    "rutUnidad": "62.000.970-9",
+    "codigoUnidad": "1499900",
+    "nombreUnidad": "DIRECCIÓN REGIONAL DE OHIGGINS",
+    "region": 6,
+    "comuna": "Rancagua"
+  },
+  "fechas": {
+    "creacion": "2026-09-24T16:58:44-03:00",
+    "publicacion": "2026-09-28T16:19:00-03:00",
+    "cierre": "2026-10-09T15:02:00-03:00",
+    "adjudicacion": "2026-10-19T17:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 8700000,
+    "moneda": "CLP",
+    "clp": 8700000,
+    "fechaValor": "2026-09-28",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 70141605,
+      "nombre": "Servicios integrados de gestión de plagas",
+      "descripcion": "CONTROL Y MANEJO INTEGRADO DE PLAGAS",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "B2",
+  "tipoLicitacionGlosa": "Licitación Privada igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

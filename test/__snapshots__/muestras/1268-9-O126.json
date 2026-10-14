@@ -1,0 +1,46 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1268-9-O126",
+  "nombre": "Csv. Borde Costero El Morro, Lota",
+  "descripcion": "Las obras contempladas a conservar en el presente proyecto, se orientan principalmente en alargar la vida útil de la infraestructura existente y que ha sido afectada por la corrosión del ambiente salino.",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "7246",
+    "nombreOrganismo": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO PP DCYF",
+    "rutUnidad": "61.202.000-0",
+    "codigoUnidad": "2264",
+    "nombreUnidad": "Dirección de Obras Portuarias - Concepción",
+    "region": 8,
+    "comuna": "Concepción"
+  },
+  "fechas": {
+    "creacion": "2026-09-22T13:37:03-03:00",
+    "publicacion": "2026-10-09T08:35:27-03:00",
+    "cierre": "2026-11-02T15:01:00-03:00",
+    "adjudicacion": "2026-12-31T17:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 101101001,
+      "nombre": "Licitación Pública de Obra",
+      "descripcion": "Licitación Pública de Obra",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "O1",
+  "tipoLicitacionGlosa": "Licitación Pública MOP"
+}

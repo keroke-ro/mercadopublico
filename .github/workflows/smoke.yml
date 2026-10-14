@@ -1,0 +1,30 @@
+name: smoke
+on:
+  schedule:
+    - cron: "0 12 * * 3"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency: smoke
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      MP_TICKET: ${{ secrets.MP_TICKET }}
+    steps:
+      - if: env.MP_TICKET == ''
+        run: echo "::notice::Sin secreto MP_TICKET, no se corre el smoke."
+      - if: env.MP_TICKET != ''
+        uses: actions/checkout@v4
+      - if: env.MP_TICKET != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - if: env.MP_TICKET != ''
+        run: npm ci && npm run build
+      # ≤ 30 consultas a la API real con el paquete construido. Sale con 1 solo ante una falla real.
+      - if: env.MP_TICKET != ''
+        run: |
+          set -o pipefail
+          npm run --silent smoke | tee -a "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,68 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1002772-8976-CM26",
+  "nombre": "REGULADOR DE GOTEO LARGO 40-55 CMS (CM,TRANSVERSAL,2204005003,MTM)",
+  "descripcion": "INSUMO TRANSVERSAL\n          ***      DESPACHO PARCIALIZADO DE ACUERDO A REQUERIMIENTO DE BODEGA      ***\nDESPACHO SÓLO CON GUÍA DE DESPACHO Y ORDEN DE COMPRA ACEPTADA A: GALVARINO #1509, CERRO NAVIA, PISO -1, BODEGA DE ABASTECIMIENTO.\nENVIAR DOCUMENTOS",
+  "estado": "recepcion_conforme",
+  "estadoGlosa": "Recepción Conforme",
+  "comprador": {
+    "codigoOrganismo": "7383",
+    "nombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+    "rutUnidad": "61.608.205-1",
+    "codigoUnidad": "1002772",
+    "nombreUnidad": "INSUMOS CLINICOS",
+    "region": 13,
+    "comuna": "Cerro Navia"
+  },
+  "fechas": {
+    "creacion": "2026-08-13T16:52:54-04:00",
+    "publicacion": "2026-09-14T14:16:55-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-08-13T17:02:00-04:00"
+  },
+  "monto": {
+    "valor": 4276860,
+    "moneda": "CLP",
+    "clp": 4276860,
+    "fechaValor": "2026-09-14",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": null,
+      "nombre": "ALARGADOR VENOSO DISPOMEDICA CON REGULADOR DE FLUJO/GOTEO 45 CM CAJA UNIDAD",
+      "descripcion": "(2228340) ALARGADOR VENOSO DISPOMEDICA CON REGULADOR DE FLUJO/GOTEO 45 CM CAJA UNIDAD",
+      "cantidad": 6000,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 599,
+        "moneda": "CLP",
+        "clp": 599,
+        "fechaValor": "2026-09-14",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 3594000,
+        "moneda": "CLP",
+        "clp": 3594000,
+        "fechaValor": "2026-09-14",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "CM",
+  "proveedor": {
+    "rut": "78.233.420-4",
+    "nombre": "HOSPITALIA PRODUCTOS MEDICOS LTDA",
+    "codigo": "69350"
+  },
+  "procesoOrigen": null
+}

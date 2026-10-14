@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:58.5457331Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1057049-18088-TD26",
+      "Nombre": "Orden de Compra generada por Trato Directo ID 1057049-86-FTD25",
+      "CodigoEstado": 12,
+      "Estado": "Recepción Conforme",
+      "CodigoLicitacion": "",
+      "Descripcion": "AUTORIZA CONTRATACIÓN DIRECTA POR PROCESO LICITATORIO ANTERIOR DESIERTO, PARA LA CONTRATACIÓN DEL SUMINISTRO DE EXAMEN EEG 32 CANALES Y/O EEG CON PRIVACIÓN DE SUEÑO PARA PACIENTES DEL HOSPITAL CLÍNICO SAN BORJA ARRIARÁN",
+      "CodigoTipo": "16",
+      "Tipo": "TD",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 7,
+      "EstadoProveedor": "Recepción Conforme",
+      "Fechas": {
+        "FechaCreacion": "2026-09-09T13:16:28",
+        "FechaEnvio": "2026-09-24T15:30:25.743",
+        "FechaAceptacion": "2026-10-02T08:42:29.377",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-09-16T11:27:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 688790,
+      "PorcentajeIva": 0,
+      "Impuestos": 0,
+      "Total": 688790,
+      "Financiamiento": "",
+      "Pais": "Other",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7326",
+        "NombreOrganismo": "SERV SALUD METROPOLITANO CENTRAL HOSPITAL CLINICO SAN BORJA ARRIARAN",
+        "RutUnidad": "61.608.604-9",
+        "CodigoUnidad": "1057049",
+        "NombreUnidad": "Bienes y Servicios",
+        "Actividad": "Adquisición Bienes y Servicios",
+        "DireccionUnidad": "",
+        "ComunaUnidad": "Santiago",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "1240734",
+        "Nombre": "SERVICIOS MEDICOS BICENTENARIO SPA",
+        "Actividad": "CENTRO MEDICO AMBULATORIO",
+        "CodigoSucursal": "637695",
+        "NombreSucursal": "SEMEBI SPA",
+        "RutSucursal": "76.124.062-5",
+        "Direccion": "ALAMEDA BDO.O\"HIGGINS N° 4850",
+        "Comuna": "María Elena",
+        "Region": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 85122200,
+            "Categoria": "Salud, servicios sanitarios y alimentación / Medicina y servicios de salud / Evaluaciones de salud individuales",
+            "CodigoProducto": 85122201,
+            "Producto": "Exámenes médicos",
+            "EspecificacionComprador": "400-1649 - EEG 32 CANALES Y EEG PRIVACION DE SUEÑO  \r\n\r\nRES.EX 977 INT. 432\r\nPERIODO DEL 04/05/2026 AL 29/05/2026\r\nMEMO 261",
+            "EspecificacionProveedor": "",
+            "Cantidad": 1,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 688790,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 0
+          }
+        ]
+      }
+    }
+  ]
+}

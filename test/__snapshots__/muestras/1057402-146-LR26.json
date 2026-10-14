@@ -1,0 +1,238 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1057402-146-LR26",
+  "nombre": "INSUMOS PARA PABELLÓN GENERAL",
+  "descripcion": "El propósito de la licitación es contar con contratos de suministro por la adquisición de “INSUMOS PARA PABELLÓN GENERAL”, que permitan el aprovisionamiento oportuno de los productos necesarios en la atención de los usuarios del Hospital para los años 2026 - 2028, en las circunstancias que estos productos no fueran provistos por la Central Nacional de Abastecimiento de los Servicios de Salud, ni se encuentren disponibles en catálogos electrónicos del Convenio Marco, en las Compras Coordinadas y/o Compras Conjuntas del Ministerio de Salud, o bien su adquisición sea desventajosa respecto al resultado de la presente licitación, ni existen en propiedad de otros organismo del Estado o servicios compartidos que permitan satisfacer el requerimiento, cuyas condiciones más ventajosas serán informadas en la oportunidad correspondiente a la Dirección de Compras, en conformidad con lo dispuesto en el D.S. Nº 661, de 2024, del Ministerio de Hacienda.",
+  "estado": "cerrada",
+  "estadoGlosa": "Cerrada",
+  "comprador": {
+    "codigoOrganismo": "7297",
+    "nombreOrganismo": "HOSPITAL CLINICO DE MAGALLANES DR. LAUTARO NAVARRO AVARIA",
+    "rutUnidad": "61.607.901-8",
+    "codigoUnidad": "1057402",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 12,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": "2026-08-13T00:00:00-04:00",
+    "publicacion": "2026-09-08T16:12:10-03:00",
+    "cierre": "2026-10-09T15:00:00-03:00",
+    "adjudicacion": "2027-02-11T20:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 42142530,
+      "nombre": "Agujas de tratamiento diagnóstico",
+      "descripcion": "AGUJA DE VERRES 120 CM PARA LAPAROSCOPÍA ( 340-0032)",
+      "cantidad": 12,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42142530,
+      "nombre": "Agujas de tratamiento diagnóstico",
+      "descripcion": "AGUJA DE VERRES 150 CM PARA LAPAROSCOPÍA (340-0032-1)",
+      "cantidad": 12,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41103001,
+      "nombre": "Sondas de placas refrigeradas de enfriamiento",
+      "descripcion": "CATETER INTERCAMBIADOR DE TET 11 Y 14 FR X 83 CMS., LUMEN EN TODA SU EXTENSION, PUNTA ROMA, 2 ORIFICIOS LATERALES DISTALES, INCL.2 CONECTORES RAPI FIT PARA VENTILACIÓN TIPO COOK C-CAE",
+      "cantidad": 24,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41103001,
+      "nombre": "Sondas de placas refrigeradas de enfriamiento",
+      "descripcion": "CATETER VENOSO CENTRAL TRIPLE LUMEN. POLIURETANO SUAVE, PUNTA CONICA ATRAUMATICA, RADIOPACO LUMEN 18 - 20 - 22G (222-0173)",
+      "cantidad": 1500,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42312010,
+      "nombre": "Grapadoras para cierre de piel",
+      "descripcion": "CORCHETERAS QUIRURGICAS PARA PIEL DESECHABLES (340-0042)",
+      "cantidad": 3480,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42272219,
+      "nombre": "Filtros o intercambiadores de humedad o calor del ventilador",
+      "descripcion": "FILTRO C02 SET DE FILTRO PARA INSUFLACION CON MANGUERAS DE SILICONA COMPATIBILIDAD CONEXIÓN STORZ (347-0172)",
+      "cantidad": 3400,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41104011,
+      "nombre": "Filtros y recambios para toma muestras",
+      "descripcion": "FILTRO PAPEL REDONDO PARA CONTENEDOR AESCULAP (TIPO JK-095) (347-0172)",
+      "cantidad": 150000,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41104011,
+      "nombre": "Filtros y recambios para toma muestras",
+      "descripcion": "FILTROS DESECHABLES PARA CONTENEDORES 225 X 225 MM (TIPO JF 481) (347-0172)",
+      "cantidad": 65000,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 44102907,
+      "nombre": "Fundas para proteger del polvo al equipamiento",
+      "descripcion": "FUNDA MICROSCOPIO QUIRURGICO ZEIIS OTORRINO ESTERIL OPMI VARIO 700 COD 306070 (225-9001-2)",
+      "cantidad": 400,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42295401,
+      "nombre": "Lápices quirúrgicos de cauterio operados con pila",
+      "descripcion": "LAPICES ESTERILES PARA MARCAR FIJACIONES (MARCADOR DE PIEL CON REGLA) (225-9505-1)",
+      "cantidad": 2880,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41103001,
+      "nombre": "Sondas de placas refrigeradas de enfriamiento",
+      "descripcion": "MASCARA ANESTESIA BORDE INFLABLE CON VALVULA  3",
+      "cantidad": 1200,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41103001,
+      "nombre": "Sondas de placas refrigeradas de enfriamiento",
+      "descripcion": "MASCARA ANESTESIA BORDE INFLABLE CON VALVULA  4",
+      "cantidad": 1200,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41103001,
+      "nombre": "Sondas de placas refrigeradas de enfriamiento",
+      "descripcion": "MASCARA ANESTESIA BORDE INFLABLE CON VALVULA 5",
+      "cantidad": 1200,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41103001,
+      "nombre": "Sondas de placas refrigeradas de enfriamiento",
+      "descripcion": "MASCARA ANESTESIA BORDE INFLABLE CON VALVULA 6",
+      "cantidad": 1200,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42311505,
+      "nombre": "Vendas o vendajes para uso general",
+      "descripcion": "PARCHE PERICARDICO BOVINO SUTURABLE DE ALTA PUREZA,  ESTERIL, DOBLE ENVASE,  PARA USO EN CIRUGIAS CARDIACAS.  VARIAS MEDIDAS",
+      "cantidad": 48,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41122102,
+      "nombre": "Placas de múltiples receptáculos",
+      "descripcion": "PLACA ELECTROBISTURI NEONATAL (347-0210)",
+      "cantidad": 120,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41122102,
+      "nombre": "Placas de múltiples receptáculos",
+      "descripcion": "PLACAS ELECTROBISTURI ADULTO DUAL + CABLE DE PLACA (347-0091)",
+      "cantidad": 24000,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41122102,
+      "nombre": "Placas de múltiples receptáculos",
+      "descripcion": "PLACAS ELECTROBISTURI ADULTO MONOPOLAR + CABLE DE PLACA",
+      "cantidad": 120,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 41103001,
+      "nombre": "Sondas de placas refrigeradas de enfriamiento",
+      "descripcion": "PLACAS ELECTROBISTURI INFANTIL DUAL (347-0092)",
+      "cantidad": 600,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42292704,
+      "nombre": "Puntas y ganchos quirúrgicos",
+      "descripcion": "PUNTA DE ELECTROBISTURI PALETA CORTA. COMPATIBLE CON CONSOLA VALLEYLAB. (TIPO E1450-6) LARGO TOTAL 16,51 CMS. (347-1990-6)",
+      "cantidad": 1200,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LR",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 5.000 UTM"
+}

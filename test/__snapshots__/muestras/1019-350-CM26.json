@@ -1,0 +1,68 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1019-350-CM26",
+  "nombre": "Orden de Compra: 1019-350-CM26 ADQUISICIÓN DE LAPTOP PARA LA DGA.ID: 4750937",
+  "descripcion": "Orden de Compra codigo: 1019-350-CM26 dirigida a LECHNER S.A\nUSD (9 Oct) 981,609985351562\n\n45 unidades x 1.344,50 = 60.502,5",
+  "estado": "aceptada",
+  "estadoGlosa": "Aceptada",
+  "comprador": {
+    "codigoOrganismo": "7247",
+    "nombreOrganismo": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO PP DCYF",
+    "rutUnidad": "61.202.000-0",
+    "codigoUnidad": "2015",
+    "nombreUnidad": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO",
+    "region": 13,
+    "comuna": "Santiago"
+  },
+  "fechas": {
+    "creacion": "2026-10-09T11:46:46-03:00",
+    "publicacion": "2026-10-09T12:06:43-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-09T12:09:00-03:00"
+  },
+  "monto": {
+    "valor": 71997.98,
+    "moneda": "USD",
+    "clp": null,
+    "fechaValor": null,
+    "fuente": null
+  },
+  "items": [
+    {
+      "codigoProducto": null,
+      "nombre": "COMPRA LAPTOP HP 200 G2I WINDOWS 11 PRO AI ULTRA 5 220H 16GB 1 TB",
+      "descripcion": "(4750937) COMPRA LAPTOP HP 200 G2I WINDOWS 11 PRO AI ULTRA 5 220H 16GB 1 TB",
+      "cantidad": 45,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 1344.5,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "total": {
+        "valor": 60502.5,
+        "moneda": "USD",
+        "clp": null,
+        "fechaValor": null,
+        "fuente": null
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "CM",
+  "proveedor": {
+    "rut": "78.114.650-1",
+    "nombre": "LECHNER S.A",
+    "codigo": "29788"
+  },
+  "procesoOrigen": null
+}

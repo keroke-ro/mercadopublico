@@ -1,0 +1,112 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:29.2957932Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1057430-2829-CM26",
+      "Nombre": "Reposición Vales de Gas Bodega General (Despacho URGENTE)",
+      "CodigoEstado": 5,
+      "Estado": "En proceso",
+      "CodigoLicitacion": "",
+      "Descripcion": "Orden de Compra codigo: 1057430-2829-CM26 dirigida a ABASTIBLE S.A.",
+      "CodigoTipo": "9",
+      "Tipo": "CM",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 2,
+      "EstadoProveedor": "En proceso",
+      "Fechas": {
+        "FechaCreacion": "2026-10-08T17:15:33.813",
+        "FechaEnvio": "2026-10-09T12:53:42.78",
+        "FechaAceptacion": null,
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-08T17:18:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 4.680981595092025,
+      "CantidadEvaluacion": 163,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 701841,
+      "PorcentajeIva": 19,
+      "Impuestos": 133350,
+      "Total": 835191,
+      "Financiamiento": "7202",
+      "Pais": "CL",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7481",
+        "NombreOrganismo": "SERVICIO NACIONAL DE SALUD HOSPITAL DE LOTA",
+        "RutUnidad": "61.602.203-2",
+        "CodigoUnidad": "1057430",
+        "NombreUnidad": "Bienes y Servicios",
+        "Actividad": "Servicio Público",
+        "DireccionUnidad": "Carrera 702 Lota",
+        "ComunaUnidad": "",
+        "RegionUnidad": "",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "26796",
+        "Nombre": "ABASTIBLE S.A.",
+        "Actividad": "FABRICACION DE GAS; DISTRIBUCION DE COMBUSTIBLES GASEOSOS POR TUBERIAS| SERVICIO DE LAVADO DE VEHICULOS AUTOMOTORES| MANTENIMIENTO Y REPARACION DE VEHICULOS AUTOMOTORES| VENTA AL POR MENOR DE COMBUSTIBLE PARA AUTOMOTORES| VENTA AL POR MAYOR DE COMBUSTIBLE",
+        "CodigoSucursal": "26592",
+        "NombreSucursal": "ABASTIBLE S.A.",
+        "RutSucursal": "91.806.000-6",
+        "Direccion": "PANAMERIC NORTE KM 812,5 N° LOT 3F",
+        "Comuna": "",
+        "Region": "",
+        "Pais": "CL",
+        "NombreContacto": "",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 2,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 0,
+            "Categoria": "",
+            "CodigoProducto": 0,
+            "Producto": "GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 15 KG REGIÓN DEL BIOBÍO",
+            "EspecificacionComprador": "(4510582) GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 15 KG REGIÓN DEL BIOBÍO",
+            "EspecificacionProveedor": "(4510582) GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 15 KG REGIÓN DEL BIOBÍO ; Región del Biobío ; Lota; Carrera 702 Lota",
+            "Cantidad": 30,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 17806,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 534180
+          },
+          {
+            "Correlativo": 2,
+            "CodigoCategoria": 0,
+            "Categoria": "",
+            "CodigoProducto": 0,
+            "Producto": "GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 45 KG REGIÓN DEL BIOBÍO",
+            "EspecificacionComprador": "(4510599) GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 45 KG REGIÓN DEL BIOBÍO",
+            "EspecificacionProveedor": "(4510599) GAS LICUADO CILINDRO MEDIANTE VALE DE RECARGA 45 KG REGIÓN DEL BIOBÍO ; Región del Biobío ; Lota; Carrera 702 Lota",
+            "Cantidad": 3,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 55887,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 167661
+          }
+        ]
+      }
+    }
+  ]
+}

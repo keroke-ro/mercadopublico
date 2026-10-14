@@ -1,0 +1,92 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1057489-10895-SE26",
+  "nombre": "SERVICIO DE RESIDENCIA MEDICINA PARA EL HDS  AGOSTO 2026",
+  "descripcion": "1057489-466-LR25\r\nSERVICIO DE RESIDENCIA MEDICINA PARA EL HDS \r\n12 MESES\r\n 01-01-2026 AL 30-12-2026\r\nAGOSTO  2026\r\nTODAS LAS FACTURAS DEBEN SER EMITIDAS DETALLANDO CORRECTAMENTE EL ID DE LA ORDEN DE COMPRA DE MERCADO PUBLICO Y DEBEN ENVIARSE A LA CASILLA [oculto]\r\nSE RECLAMARÁ TODA FACTURA QUE NO CUMPLE CON ESTA INDICACION Y QUE NO CUENTAN CON RECEPCION CONFORME ANTES DE 7 DIAS CORRIDOS A PARTIR DE LA FECHA DE EMISION",
+  "estado": "cancelada",
+  "estadoGlosa": "Cancelada",
+  "comprador": {
+    "codigoOrganismo": "7428",
+    "nombreOrganismo": "SERVICIO DE SALUD ORIENTE HOSPITAL DEL SALVADOR",
+    "rutUnidad": "61.608.406-2",
+    "codigoUnidad": "1057489",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 13,
+    "comuna": "*"
+  },
+  "fechas": {
+    "creacion": "2026-09-23T18:22:32-03:00",
+    "publicacion": "2026-09-30T16:22:29-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-08T13:26:00-03:00"
+  },
+  "monto": {
+    "valor": 46847040,
+    "moneda": "CLP",
+    "clp": 46847040,
+    "fechaValor": "2026-09-30",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 80111606,
+      "nombre": "Personal médico temporal",
+      "descripcion": "5301800014 \tREMPLAZO HORAS MÉDICAS ESPECIALISTA",
+      "cantidad": 483,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 34880,
+        "moneda": "CLP",
+        "clp": 34880,
+        "fechaValor": "2026-09-30",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 16847040,
+        "moneda": "CLP",
+        "clp": 16847040,
+        "fechaValor": "2026-09-30",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 80111606,
+      "nombre": "Personal médico temporal",
+      "descripcion": "5301800006 \tHORAS MEDICAS PARA REEMPLAZO DE MEDICOS",
+      "cantidad": 1000,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 30000,
+        "moneda": "CLP",
+        "clp": 30000,
+        "fechaValor": "2026-09-30",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 30000000,
+        "moneda": "CLP",
+        "clp": 30000000,
+        "fechaValor": "2026-09-30",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "SE",
+  "proveedor": {
+    "rut": "76.179.729-8",
+    "nombre": "LAYNER MEDICAL",
+    "codigo": "1272732"
+  },
+  "procesoOrigen": "1057489-466-LR25"
+}

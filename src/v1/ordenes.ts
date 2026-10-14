@@ -1,6 +1,6 @@
-import { MercadoPublicoError } from "../errores.js";
+import { exigirCodigo, exigirDia, exigirUno } from "../errores.js";
 import { ddmmaaaa } from "../fecha.js";
-import type { Transporte } from "../http.js";
+import type { Cancelable, Transporte } from "../http.js";
 import type { Enriquecer, OrdenCompra } from "../modelo.js";
 import { ESTADO_FILTRO_OC, type EstadoFiltroOC } from "./codigos.js";
 import { parseOrdenCompra } from "./parse.js";
@@ -10,8 +10,11 @@ const RUTA = "ordenesdecompra.json";
 
 type Respuesta = { Listado?: unknown };
 
+const fecha = (dia: string) => ddmmaaaa(exigirDia(dia));
+const estadoApi = (e: EstadoFiltroOC | undefined) => e && ESTADO_FILTRO_OC[exigirUno(e, Object.keys(ESTADO_FILTRO_OC), "estado")];
+
 /**
- * Órdenes de compra de la API v1. Cada método gasta 1 consulta.
+ * Órdenes de compra de la API v1. Cada método gasta 1 consulta; con parámetros inválidos falla sin gastar ninguna.
  * Los listados traen solo código, nombre y estado; el detalle requiere `porCodigo` (1 consulta por OC).
  */
 export class OrdenesCompra {
@@ -20,33 +23,32 @@ export class OrdenesCompra {
     private readonly enriquecer: Enriquecer = async (p) => p,
   ) {}
 
-  async porCodigo(codigo: string): Promise<OrdenCompra | null> {
+  async porCodigo(codigo: string, { signal }: Cancelable = {}): Promise<OrdenCompra | null> {
     // Sin código la API devuelve el listado del día y se tomaría un proceso cualquiera como "detalle".
-    if (!codigo?.trim()) throw new MercadoPublicoError("parametros", "Falta el código");
-    const p = (await this.listar({ codigo: codigo.trim() }))[0];
+    const p = (await this.listar({ codigo: exigirCodigo(codigo) }, signal))[0];
     return p ? this.enriquecer(p) : null;
   }
 
   /** Enviadas el día `dia` ("AAAA-MM-DD"), opcionalmente filtradas por estado. */
-  delDia(dia: string, { estado }: { estado?: EstadoFiltroOC } = {}): Promise<OrdenCompra[]> {
-    return this.listar({ fecha: ddmmaaaa(dia), estado: estado && ESTADO_FILTRO_OC[estado] });
+  async delDia(dia: string, { estado, signal }: { estado?: EstadoFiltroOC } & Cancelable = {}): Promise<OrdenCompra[]> {
+    return this.listar({ fecha: fecha(dia), estado: estadoApi(estado) }, signal);
   }
 
   /** Sin `dia`, el día actual ("todos" = todos los estados de hoy). */
-  porEstado(estado: EstadoFiltroOC, { dia }: { dia?: string } = {}): Promise<OrdenCompra[]> {
-    return this.listar({ estado: ESTADO_FILTRO_OC[estado], fecha: dia && ddmmaaaa(dia) });
+  async porEstado(estado: EstadoFiltroOC, { dia, signal }: { dia?: string } & Cancelable = {}): Promise<OrdenCompra[]> {
+    return this.listar({ estado: estadoApi(estado), fecha: dia && fecha(dia) }, signal);
   }
 
-  porOrganismo(codigoOrganismo: string, { dia }: { dia: string }): Promise<OrdenCompra[]> {
-    return this.listar({ fecha: ddmmaaaa(dia), CodigoOrganismo: codigoOrganismo });
+  async porOrganismo(codigoOrganismo: string, { dia, signal }: { dia: string } & Cancelable): Promise<OrdenCompra[]> {
+    return this.listar({ fecha: fecha(dia), CodigoOrganismo: exigirCodigo(codigoOrganismo, "código de organismo") }, signal);
   }
 
-  porProveedor(codigoProveedor: string, { dia }: { dia: string }): Promise<OrdenCompra[]> {
-    return this.listar({ fecha: ddmmaaaa(dia), CodigoProveedor: codigoProveedor });
+  async porProveedor(codigoProveedor: string, { dia, signal }: { dia: string } & Cancelable): Promise<OrdenCompra[]> {
+    return this.listar({ fecha: fecha(dia), CodigoProveedor: exigirCodigo(codigoProveedor, "código de proveedor") }, signal);
   }
 
-  private async listar(params: Record<string, string | undefined>): Promise<OrdenCompra[]> {
-    const r = await this.t.v1<Respuesta | null>(RUTA, params);
-    return Array.isArray(r?.Listado) ? r.Listado.map(parseOrdenCompra) : [];
+  private async listar(params: Record<string, string | undefined>, signal?: AbortSignal): Promise<OrdenCompra[]> {
+    const r = await this.t.v1<Respuesta | null>(RUTA, params, { signal });
+    return Array.isArray(r?.Listado) ? r.Listado.map((x) => parseOrdenCompra(x, { avisar: this.t.avisar })) : [];
   }
 }

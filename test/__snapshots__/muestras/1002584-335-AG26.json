@@ -1,0 +1,69 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1002584-335-AG26",
+  "nombre": "CAJAS MEGA BOX 1002584-93-COT26",
+  "descripcion": "Orden de Compra codigo: 1002584-335-AG26 dirigida a SOCIEDAD DE INVERSIONES LUCY ALARCON FUENTES SPA\r\n\r\nPara coordinar retiro:\r\n[oculto]; [oculto] [oculto] [oculto]",
+  "estado": "recepcion_conforme",
+  "estadoGlosa": "Recepción Conforme",
+  "comprador": {
+    "codigoOrganismo": "1593363",
+    "nombreOrganismo": "DIRECCION DE EDUCACION PUBLICA",
+    "rutUnidad": "65.154.016-k",
+    "codigoUnidad": "1002584",
+    "nombreUnidad": "Dirección de Educación Pública",
+    "region": 13,
+    "comuna": "Santiago"
+  },
+  "fechas": {
+    "creacion": "2026-10-09T08:38:54-03:00",
+    "publicacion": "2026-10-09T10:12:56-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-09T12:05:00-03:00"
+  },
+  "monto": {
+    "valor": 711025,
+    "moneda": "CLP",
+    "clp": 711025,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 24112503,
+      "nombre": "Cartones acanalados de transporte cortados con troquel de tapas separadas",
+      "descripcion": "Medidas: Alto 29,5 cms. - Ancho 36 cms. – Largo 45 cms.\r\nColor:\tCafé\r\nMaterial: Cartón\r\nModelo:\tMega box",
+      "cantidad": 250,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 2390,
+        "moneda": "CLP",
+        "clp": 2390,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 597500,
+        "moneda": "CLP",
+        "clp": 597500,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "AG",
+  "proveedor": {
+    "rut": "77.945.906-3",
+    "nombre": "SOCIEDAD DE INVERSIONES LUCY ALARCON FUENTES SPA",
+    "codigo": "1988821"
+  },
+  "procesoOrigen": "1002584-93-COT26"
+}

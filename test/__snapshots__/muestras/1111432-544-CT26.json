@@ -1,0 +1,69 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1111432-544-CT26",
+  "nombre": "SERVICIO DE NUTRICIONISTA PARA ESPACIOS AMIGABLES",
+  "descripcion": "SERVICIO DE NUTRICIONISTA PARA ESPACIOS AMIGABLES DEL CESFAM SAN FELIPE EL REAL, DESDE EL 13 .10.2026 AL 31/12/2026 PROVENIENTE DE REMANENTE DE CONTRATO TERMINADO CON ANTICIPACION DE LICITACION PUBLICA ID 1111432-22-LE26.",
+  "estado": "aceptada",
+  "estadoGlosa": "Aceptada",
+  "comprador": {
+    "codigoOrganismo": "1688781",
+    "nombreOrganismo": "CONSULTORIO GENERAL URBANO SAN FELIPE",
+    "rutUnidad": "69.287.560-5",
+    "codigoUnidad": "1111432",
+    "nombreUnidad": "BIENES Y SERVICIOS",
+    "region": 5,
+    "comuna": "San Felipe"
+  },
+  "fechas": {
+    "creacion": "2026-10-08T15:42:13-03:00",
+    "publicacion": "2026-10-09T14:38:46-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-09T14:38:00-03:00"
+  },
+  "monto": {
+    "valor": 1374975,
+    "moneda": "CLP",
+    "clp": 1374975,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 80111715,
+      "nombre": "Profesionales",
+      "descripcion": "SERVICIO DE NUTRICIONISTA PARA ESPACIOS AMIGABLES DEL CESFAM SAN FELIPE EL REAL, DESDE EL 13.10.2026 AL 31/12/2026 PROVENIENTE DE REMANENTE DE CONTRATO TERMINADO CON ANTICIPACION DE LICITACION PUBLICA ID 1111432-22-LE26.",
+      "cantidad": 175,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 7857,
+        "moneda": "CLP",
+        "clp": 7857,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 1374975,
+        "moneda": "CLP",
+        "clp": 1374975,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "CT",
+  "proveedor": {
+    "rut": "[oculto]",
+    "nombre": "[oculto]",
+    "codigo": "[oculto]"
+  },
+  "procesoOrigen": null
+}

@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:51.968494Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1002772-9967-SE26",
+      "Nombre": "OC FORMALIZACION",
+      "CodigoEstado": 6,
+      "Estado": "Aceptada",
+      "CodigoLicitacion": "1002772-63-R126",
+      "Descripcion": "SUMINISTRO DE DRENAJES QUIRÚRGICOS Y RESERVORIO DESDE 1002772-63-R126 OC FORMALIZACION FAVOR ACEPTAR",
+      "CodigoTipo": "8",
+      "Tipo": "SE",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 4,
+      "EstadoProveedor": "Aceptada",
+      "Fechas": {
+        "FechaCreacion": "2026-10-09T15:06:24.547",
+        "FechaEnvio": "2026-10-09T15:12:10.22",
+        "FechaAceptacion": "2026-10-09T16:09:32.417",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-09T15:09:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 1,
+      "PorcentajeIva": 19,
+      "Impuestos": 0,
+      "Total": 1,
+      "Financiamiento": "",
+      "Pais": "Other",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7383",
+        "NombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+        "RutUnidad": "61.608.205-1",
+        "CodigoUnidad": "1002772",
+        "NombreUnidad": "INSUMOS CLINICOS",
+        "Actividad": "Hospital ",
+        "DireccionUnidad": "Sin dirección Registrada para Unidad de Compra",
+        "ComunaUnidad": "",
+        "RegionUnidad": "",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "1851666",
+        "Nombre": "COMERCIALIZADORA Y DISTRIBUIDORA AP SPA",
+        "Actividad": "VENTA AL POR MAYOR DE PRODUCTOS TEXTILES, PRENDAS ",
+        "CodigoSucursal": "1265783",
+        "NombreSucursal": "CARING MED",
+        "RutSucursal": "77.646.274-8",
+        "Direccion": "GENERAL SAN MARTIN N° 7940",
+        "Comuna": "Quilicura",
+        "Region": "Región Metropolitana de Santiago",
+        "Pais": "CL",
+        "NombreContacto": "",
+        "CargoContacto": "",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 42295400,
+            "Categoria": "Equipamiento y suministros médicos / Productos quirúrgicos / Suministros quirúrgicos auxiliares",
+            "CodigoProducto": 42295453,
+            "Producto": "Drenajes quirúrgicos, sets o accesorios",
+            "EspecificacionComprador": "0010043716\tSISTEMA DE DRENAJE TIPO BLAKE 19 FR\r\nOC FORMALIZACION FAVOR ACEPTAR",
+            "EspecificacionProveedor": "Drenaje tipo Blake 19 FR con trocar\r\nOC FORMALIZACION FAVOR ACEPTAR",
+            "Cantidad": 1,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 1,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 1
+          }
+        ]
+      }
+    }
+  ]
+}

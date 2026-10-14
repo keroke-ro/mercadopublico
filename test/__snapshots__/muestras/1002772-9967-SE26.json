@@ -1,0 +1,68 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1002772-9967-SE26",
+  "nombre": "OC FORMALIZACION",
+  "descripcion": "SUMINISTRO DE DRENAJES QUIRÚRGICOS Y RESERVORIO DESDE 1002772-63-R126 OC FORMALIZACION FAVOR ACEPTAR",
+  "estado": "aceptada",
+  "estadoGlosa": "Aceptada",
+  "comprador": {
+    "codigoOrganismo": "7383",
+    "nombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+    "rutUnidad": "61.608.205-1",
+    "codigoUnidad": "1002772",
+    "nombreUnidad": "INSUMOS CLINICOS",
+    "region": null,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": "2026-10-09T15:06:24-03:00",
+    "publicacion": "2026-10-09T15:12:10-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-09T15:09:00-03:00"
+  },
+  "monto": {
+    "valor": 1,
+    "moneda": "CLP",
+    "clp": 1,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 42295453,
+      "nombre": "Drenajes quirúrgicos, sets o accesorios",
+      "descripcion": "0010043716\tSISTEMA DE DRENAJE TIPO BLAKE 19 FR\r\nOC FORMALIZACION FAVOR ACEPTAR",
+      "cantidad": 1,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 1,
+        "moneda": "CLP",
+        "clp": 1,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 1,
+        "moneda": "CLP",
+        "clp": 1,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "SE",
+  "proveedor": {
+    "rut": "77.646.274-8",
+    "nombre": "COMERCIALIZADORA Y DISTRIBUIDORA AP SPA",
+    "codigo": "1851666"
+  },
+  "procesoOrigen": "1002772-63-R126"
+}

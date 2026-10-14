@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:47.8426225Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1011254-441-AG26",
+      "Nombre": "REPUESTO PARA ELECTROCARDIOGRAFO MINDRAY",
+      "CodigoEstado": 6,
+      "Estado": "Aceptada",
+      "CodigoLicitacion": "",
+      "Descripcion": "\"(Se solicita cumplir con el plazo de entrega establecido, de lo contrario se procederá a la cancelación de la Orden de compra). \r\nLa Recepción se realizará SÓLO CONTRA GUÍA DE DESPACHO en conformidad a Ley de Pago Oportuno N°21.131. Posterior a Recepción Conforme en Portal de Mercado Público, facturar y enviar dcto. Electrónico: [oculto] y [oculto]. Despachar en Avda. Videla s/n, Bodega de Economato, atención de Lunes a Jueves desde las 08 a 15:00 hrs y Viernes hasta las 12:00 hrs, llamar al fono [oculto] / [oculto].- IBM:  Unidad/Servicio:  (cc.0) \r\n\r\n\r\n                   [oculto]                                                          [oculto]\r\n  ENCARGADO DE COMPRAS SDGO                                      JEFE U. ABASTECIMIENTO\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\"\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\r\n",
+      "CodigoTipo": "13",
+      "Tipo": "AG",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 4,
+      "EstadoProveedor": "Aceptada",
+      "Fechas": {
+        "FechaCreacion": "2026-10-07T16:27:53.48",
+        "FechaEnvio": "2026-10-08T15:35:36.433",
+        "FechaAceptacion": "2026-10-09T16:46:31.547",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-08T10:53:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 4,
+      "CantidadEvaluacion": 39,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 206000,
+      "PorcentajeIva": 19,
+      "Impuestos": 39140,
+      "Total": 245140,
+      "Financiamiento": "",
+      "Pais": "Other",
+      "TipoDespacho": "7",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7416",
+        "NombreOrganismo": "SERVICIO DE SALUD COQUIMBO HOSPITAL DE COQUIMBO",
+        "RutUnidad": "61.606.403-7",
+        "CodigoUnidad": "1011254",
+        "NombreUnidad": "Obras y Mantenimientos",
+        "Actividad": "Adquisición de Bienes Generales y Servicios",
+        "DireccionUnidad": "",
+        "ComunaUnidad": "Coquimbo",
+        "RegionUnidad": "Región de Coquimbo ",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "71204",
+        "Nombre": "IMPORTADORA Y DISTRIBUIDORA ARQUIMED LTDA",
+        "Actividad": "FABRICACION DE INSTRUMENTOS Y APARATOS PARA MEDIR, VERIFICAR, ENSAYAR,",
+        "CodigoSucursal": "73443",
+        "NombreSucursal": "Imp. Dist. Arquimed Ltda.",
+        "RutSucursal": "92.999.000-5",
+        "Direccion": "COPIAPO N° 954",
+        "Comuna": "Santiago",
+        "Region": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 73152100,
+            "Categoria": "Servicios de producción y fabricación industrial / Servicios de apoyo o soporte a la fabricación / Servicios de mantenimiento y reparación de equipo de fabricación",
+            "CodigoProducto": 73152102,
+            "Producto": "Servicio de reparación de equipo de fabricación",
+            "EspecificacionComprador": "ADQUISICION DE CABEZAL IMPRESION TERMICA 8 PUNTOS 72MM,60MM/ SEG, CABLE FPC ORIGINAL",
+            "EspecificacionProveedor": "ADQUISICION DE CABEZAL IMPRESION TERMICA 8 PUNTOS 72MM,60MM/ SEG, CABLE FPC ORIGINA",
+            "Cantidad": 1,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 206000,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 0
+          }
+        ]
+      }
+    }
+  ]
+}

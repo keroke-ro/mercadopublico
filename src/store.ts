@@ -8,6 +8,13 @@ export interface Store {
   cursor(clave: string): Promise<string | undefined>;
   fijarCursor(clave: string, valor: string): Promise<void>;
   todos(): AsyncIterable<Proceso>;
+  /**
+   * Opcional: `guardar` + `fijarCursor` en una sola escritura (transacción). Sin esto, sync llama a los dos en ese
+   * orden; con esto, un corte nunca deja el cursor adelante de los datos y se ahorra una escritura por lote.
+   */
+  guardarConCursor?(procesos: Proceso[], clave: string, valor: string): Promise<void>;
+  /** Opcional: libera lo que tenga tomado (el lock de `storeArchivo`). Después no se puede escribir. */
+  cerrar?(): Promise<void>;
 }
 
 interface Datos {
@@ -38,31 +45,129 @@ export function storeMemoria(): Store {
   return new StoreMemoria();
 }
 
+/** Un lock sin señales de vida por más de esto se considera abandonado. Mientras el dueño vive, lo renueva cada minuto. */
+const VENCE_LOCK_MS = 10 * 60_000;
+
+type Fs = typeof import("node:fs/promises");
+
 /**
- * Store en un archivo JSON. Se lee entero al abrir y se reescribe (atómico: tmp + rename) en cada guardado.
+ * Store en un archivo JSON. Se lee entero al abrir y se reescribe (atómico: tmp + fsync + rename) en cada lote.
+ * Toma `<ruta>.lock` (pid, host y hora; nunca el ticket) para que dos procesos no escriban el mismo archivo: si otro
+ * lo tiene, falla con un mensaje claro. El lock se libera con `cerrar()` o queda abandonado si el proceso muere.
+ * Si el JSON está dañado, lo mueve a `<ruta>.corrupto-<fecha>` y falla: nunca parte de cero en silencio.
  * ponytail: sirve hasta unas decenas de miles de procesos; más allá, usar un Store con base de datos.
  * Solo Node/Bun/Deno: importa node:fs al abrir.
  */
 export async function storeArchivo(ruta: string): Promise<Store> {
   const fs = await import("node:fs/promises");
-  let d: Datos = { procesos: {}, cursores: {} };
-  try {
-    d = JSON.parse(await fs.readFile(ruta, "utf8")) as Datos;
-  } catch (e) {
-    if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
-  }
-  const escribir = async () => {
-    await fs.writeFile(`${ruta}.tmp`, JSON.stringify(d));
-    await fs.rename(`${ruta}.tmp`, ruta);
+  const { hostname } = await import("node:os");
+  const lock = `${ruta}.lock`;
+  const yo = await tomarLock(fs, ruta, lock, hostname());
+  const latido = setInterval(() => {
+    const t = new Date();
+    fs.utimes(lock, t, t).catch(() => {});
+  }, 60_000);
+  (latido as { unref?: () => void }).unref?.();
+  const soltar = async () => {
+    clearInterval(latido);
+    if ((await fs.readFile(lock, "utf8").catch(() => "")) === yo) await fs.rm(lock, { force: true });
   };
+
+  let d: Datos;
+  try {
+    d = await leer(fs, ruta);
+  } catch (e) {
+    await soltar();
+    throw e;
+  }
+
+  let cerrado = false;
+  let cola: Promise<void> = Promise.resolve();
+  // Serializadas: dos escrituras a la vez se pisarían el .tmp.
+  const escribir = () =>
+    (cola = cola
+      .catch(() => {})
+      .then(async () => {
+        if (cerrado) throw new Error(`El store ${ruta} ya se cerró`);
+        const h = await fs.open(`${ruta}.tmp`, "w");
+        try {
+          await h.writeFile(JSON.stringify(d));
+          await h.sync();
+        } finally {
+          await h.close();
+        }
+        await fs.rename(`${ruta}.tmp`, ruta);
+      }));
+
   return new (class extends StoreMemoria {
     override async guardar(procesos: Proceso[]) {
       await super.guardar(procesos);
-      await escribir();
+      if (procesos.length) await escribir();
     }
     override async fijarCursor(clave: string, valor: string) {
       await super.fijarCursor(clave, valor);
       await escribir();
     }
+    async guardarConCursor(procesos: Proceso[], clave: string, valor: string) {
+      await super.guardar(procesos);
+      await super.fijarCursor(clave, valor);
+      await escribir();
+    }
+    async cerrar() {
+      if (cerrado) return;
+      await cola.catch(() => {});
+      cerrado = true;
+      await soltar();
+    }
   })(d);
+}
+
+async function tomarLock(fs: Fs, ruta: string, lock: string, host: string): Promise<string> {
+  const yo = JSON.stringify({ pid: process.pid, host, desde: new Date().toISOString() });
+  for (let intento = 0; ; intento++) {
+    try {
+      await fs.writeFile(lock, yo, { flag: "wx" });
+      return yo;
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e;
+    }
+    const otro = await fs.readFile(lock, "utf8").catch(() => "");
+    const mtime = (await fs.stat(lock).catch(() => undefined))?.mtimeMs ?? 0;
+    if (intento > 0 || !abandonado(otro, mtime, host)) {
+      throw new Error(`${ruta} está en uso por otro proceso (${lock}: ${otro || "sin datos"}). Si no hay otro sync corriendo, borra ${lock}.`);
+    }
+    // ponytail: si dos procesos ven el mismo lock abandonado a la vez, ambos pueden robarlo; la ventana es de ms.
+    await fs.rm(lock, { force: true });
+  }
+}
+
+/** ¿El dueño del lock murió (mismo host) o dejó de renovarlo? */
+function abandonado(contenido: string, mtimeMs: number, host: string): boolean {
+  if (Date.now() - mtimeMs > VENCE_LOCK_MS) return true;
+  try {
+    const l = JSON.parse(contenido) as { pid?: number; host?: string };
+    if (l.host !== host || !Number.isInteger(l.pid)) return false;
+    process.kill(l.pid!, 0); // no mata: solo pregunta si existe
+    return false;
+  } catch (e) {
+    return (e as NodeJS.ErrnoException).code === "ESRCH";
+  }
+}
+
+async function leer(fs: Fs, ruta: string): Promise<Datos> {
+  let texto: string;
+  try {
+    texto = await fs.readFile(ruta, "utf8");
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") return { procesos: {}, cursores: {} };
+    throw e;
+  }
+  try {
+    const d = JSON.parse(texto) as Datos;
+    const objeto = (x: unknown) => !!x && typeof x === "object" && !Array.isArray(x);
+    if (objeto(d) && objeto(d.procesos) && objeto(d.cursores)) return d;
+  } catch {}
+  const aparte = `${ruta}.corrupto-${new Date().toISOString().replace(/[:.]/g, "-")}`;
+  await fs.rename(ruta, aparte);
+  throw new Error(`${ruta} está dañado (no es un store válido); se movió a ${aparte} para no perderlo. Revísalo, o vuelve a sincronizar desde cero.`);
 }

@@ -1,0 +1,91 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1002772-9923-AG26",
+  "nombre": "SONDA FOLEY 10 FR CON BALON 5ML 100% SILICONA(1-30) ID:\t1002772-2689-COT26 (AG,TRANSVERSAL,2204005003,MTM)",
+  "descripcion": "INSUMO TRANSVERSAL\r\n          ***      DESPACHO PARCIALIZADO DE ACUERDO A REQUERIMIENTO DE BODEGA      ***\r\nDESPACHO SÓLO CON GUÍA DE DESPACHO Y ORDEN DE COMPRA ACEPTADA A: GALVARINO #1509, CERRO NAVIA, PISO -1, BODEGA DE ABASTECIMIENTO.\r\nENVIAR DOCUMENTOS TRIBUTARIOS ELECTRÓNICOS EN FORMATO XML A LA CASILLA [oculto] y CONDICION DE PAGO “CRÉDITO”\r\nCONTACTO BODEGA: [oculto]:  [oculto], [oculto] \r\nINSUMOS SERÁN REVISADOS POR UNIDAD DE BODEGA AL MOMENTO DE RECEPCIONAR.\r\n\r\n\r\nJustificación selección de cotización menos económica: Los productos o servicios cotizados cumplen de mejor manera con los requisitos técnicos solicitados.",
+  "estado": "enviada_proveedor",
+  "estadoGlosa": "Enviada a Proveedor",
+  "comprador": {
+    "codigoOrganismo": "7383",
+    "nombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+    "rutUnidad": "61.608.205-1",
+    "codigoUnidad": "1002772",
+    "nombreUnidad": "INSUMOS CLINICOS",
+    "region": 13,
+    "comuna": "Cerro Navia"
+  },
+  "fechas": {
+    "creacion": "2026-10-08T15:46:17-03:00",
+    "publicacion": "2026-10-09T14:05:20-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-08T15:48:00-03:00"
+  },
+  "monto": {
+    "valor": 1138830,
+    "moneda": "CLP",
+    "clp": 1138830,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 42293603,
+      "nombre": "Sondas quirúrgicas",
+      "descripcion": "342080048 SONDA FOLEY 10 FR CON BALON 5ML 100% SILICONA",
+      "cantidad": 80,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 1650,
+        "moneda": "CLP",
+        "clp": 1650,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 132000,
+        "moneda": "CLP",
+        "clp": 132000,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42293603,
+      "nombre": "Sondas quirúrgicas",
+      "descripcion": "342080048 SONDA FOLEY 10 FR CON BALON 5ML 100% SILICONA",
+      "cantidad": 500,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 1650,
+        "moneda": "CLP",
+        "clp": 1650,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 825000,
+        "moneda": "CLP",
+        "clp": 825000,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "AG",
+  "proveedor": {
+    "rut": "78.041.826-5",
+    "nombre": "DIPRO MEDICAL DEVICE SPA",
+    "codigo": "2031908"
+  },
+  "procesoOrigen": "1002772-2689-COT26"
+}

@@ -1,0 +1,70 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1024-236-SE26",
+  "nombre": "ORDEN DE COMPRA DESDE 1024-45-LE26",
+  "descripcion": "SERV. TRANSPORTE MATERIAL GRANULAR DVRT DESDE 1024-45-LE26",
+  "estado": "enviada_proveedor",
+  "estadoGlosa": "Enviada a Proveedor",
+  "comprador": {
+    "codigoOrganismo": "7248",
+    "nombreOrganismo": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO PP DCYF",
+    "rutUnidad": "61.202.000-0",
+    "codigoUnidad": "2020",
+    "nombreUnidad": "Dirección de Vialidad - I Región - Dirección Regional",
+    "region": 1,
+    "comuna": "Iquique"
+  },
+  "fechas": {
+    "creacion": "2026-10-07T17:08:01-03:00",
+    "publicacion": "2026-10-09T22:57:03-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-09T22:54:00-03:00"
+  },
+  "monto": {
+    "valor": 42840000,
+    "moneda": "CLP",
+    "clp": 42840000,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 78101801,
+      "nombre": "Servicios de transporte local en camión",
+      "descripcion": "Servicio de transporte de material granular como complemento a las labores realizadas por la Administración Directa, de la Dirección de Vialidad, Región de Tarapacá; duranción del contrato 70 días hábiles.",
+      "cantidad": 3600,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 10000,
+        "moneda": "CLP",
+        "clp": 10000,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 36000000,
+        "moneda": "CLP",
+        "clp": 36000000,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "SE",
+  "proveedor": {
+    "rut": "[oculto]",
+    "nombre": "[oculto]",
+    "codigo": "[oculto]"
+  },
+  "procesoOrigen": "1024-45-LE26"
+}

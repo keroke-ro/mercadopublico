@@ -115,7 +115,8 @@ function monto(p: Proceso, min: number, max: number, a: Ajustes): Evaluado {
   if (x >= min && x <= max) return { valor: 1, razon: `Monto ${clp(x)} dentro de tu rango.` };
   // f = max(0, 1 − |log10(x / borde)| / decadasMonto)
   const borde = x < min ? min : max;
-  const valor = Math.max(0, 1 - Math.abs(Math.log10(x / borde)) / a.decadasMonto);
+  // Un monto ≤ 0 (o un borde 0) no tiene escala log: vale 0, no NaN.
+  const valor = x > 0 && borde > 0 ? Math.max(0, 1 - Math.abs(Math.log10(x / borde)) / a.decadasMonto) : 0;
   return { valor, razon: `Monto ${clp(x)} ${x < min ? "bajo tu mínimo" : "sobre tu máximo"} de ${clp(borde)} (${dec(x / borde)}×).` };
 }
 
@@ -132,7 +133,7 @@ function diasAlCierre(p: Proceso, ahora: Date, a: Ajustes): Evaluado {
 
 function competencia(p: Proceso, a: Ajustes): Evaluado {
   const n = p.oferentes;
-  if (n === null) return { valor: a.neutro, razon: "No se sabe cuántos oferentes hay; factor neutro." };
+  if (n === null || !(n >= 0)) return { valor: a.neutro, razon: "No se sabe cuántos oferentes hay; factor neutro." };
   // f = k / (k + n): 0 oferentes → 1, k → 0,5. En un proceso abierto n es cuántos van, no cuántos habrá.
   const k = a.oferentesReferencia;
   return { valor: k / (k + n), razon: `${n} oferente${n === 1 ? "" : "s"} hasta ahora (referencia: ${k} → 0,5).` };
@@ -148,9 +149,11 @@ export function priorizar(procesos: Proceso[], perfil: Perfil, opciones: { ahora
 
   const crudos = FACTORES.map((f) => perfil.pesos[f] ?? 0);
   if (crudos.some((w) => !Number.isFinite(w) || w < 0)) throw new RangeError("Los pesos deben ser números finitos ≥ 0");
-  const total = crudos.reduce((s, w) => s + w, 0);
-  if (total === 0) throw new RangeError("Al menos un peso debe ser mayor que 0");
-  const pesos = crudos.map((w) => w / total);
+  // Se escalan por el mayor antes de sumar: dos pesos de 1e308 suman Infinity y todos quedarían en 0.
+  const mayor = Math.max(...crudos);
+  if (mayor === 0) throw new RangeError("Al menos un peso debe ser mayor que 0");
+  const total = crudos.reduce((s, w) => s + w / mayor, 0);
+  const pesos = crudos.map((w) => w / mayor / total);
 
   const rubros = (perfil.rubros ?? []).map((r) => String(r).trim());
   const malo = rubros.find((r) => !/^\d{2}(\d{2}){0,3}$/.test(r));
@@ -170,7 +173,8 @@ export function priorizar(procesos: Proceso[], perfil: Perfil, opciones: { ahora
         competencia: competencia(p, a),
       };
       const factores = FACTORES.map((nombre, i) => ({ nombre, ...evaluados[nombre], peso: pesos[i]!, aporte: pesos[i]! * evaluados[nombre].valor }));
-      return { proceso: p, puntaje: factores.reduce((s, f) => s + f.aporte, 0), factores };
+      // Con todos los fᵢ en 1 el redondeo puede dar 1,0000000000000002: se acota a 1.
+      return { proceso: p, puntaje: Math.min(1, factores.reduce((s, f) => s + f.aporte, 0)), factores };
     })
     .sort((x, y) => y.puntaje - x.puntaje);
 }

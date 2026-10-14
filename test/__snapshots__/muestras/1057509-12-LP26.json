@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1057509-12-LP26",
+  "nombre": "CONVENIO KIT PROTESIS REVERSA HOMBRO vps",
+  "descripcion": "El Hospital Clínico Herminda Martín de Chillán llama a Licitación Pública a través del Portal Mercado Público, para suscribir “Convenio Kit prótesis reversa hombro” con el fin de realizar oportunos procedimientos quirúrgicos traumatológicos para los pacientes beneficiarios del sistema de salud.",
+  "estado": "desierta",
+  "estadoGlosa": "Desierta (o art. 3 ó 9 Ley 19.886)",
+  "comprador": {
+    "codigoOrganismo": "7042",
+    "nombreOrganismo": "HOSPITAL CLINICO HERMINDA MARTIN",
+    "rutUnidad": "61.607.001-0",
+    "codigoUnidad": "1057509",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 16,
+    "comuna": "Chillán"
+  },
+  "fechas": {
+    "creacion": "2026-01-14T00:00:00-03:00",
+    "publicacion": "2026-07-14T11:01:50-04:00",
+    "cierre": "2026-07-24T15:30:00-04:00",
+    "adjudicacion": "2026-10-09T10:16:55-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 42295134,
+      "nombre": "Sets suministros quirúrgicos generales o accesorios",
+      "descripcion": "KIT PROTESIS REVERSA HOMBRO . Ofertar en Anexo N°3: Oferta Económica. Presupuesto Referencial Total $141.372.000.-",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 2,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LP",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

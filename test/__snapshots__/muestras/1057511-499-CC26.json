@@ -1,0 +1,70 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1057511-499-CC26",
+  "nombre": "INSUMOS CLINICOS ABR 26",
+  "descripcion": "ID 1057508-24-LQ25  N°5235 14.11.2025\r\nRequisitos al momento de emitir una factura:\r\n1.- Dirección envió “DTE” a la casilla de intercambio [oculto] el DTE que no se encuentre direccionado a dicha\r\ncasilla será reclamado de forma automática transcurrida 72 horas desde la recepción del DTE en SII. (Envió formato XML)\r\n2.- El DTE debe contener el campo 801 o campo de referencia con el número de la orden de compra correctamente. Ej. 1058104-XX-SE22\r\n(Con Mayúscula)\r\n3.- Orden de compra en estado aceptada en www.mercadopublico.cl\r\n4.- Método de pago de un DTE “al crédito\"\r\n5.- Al momento de facturar debe considerar los siguientes puntos:\r\n• Modelo ( si corresponde)\r\n• N° Lote/ serie\r\n• Fecha de vencimiento si corresponde.\r\n• Fecha de elaboración si corresponde\r\n• Fecha de elaboración si corresponde",
+  "estado": "cancelada",
+  "estadoGlosa": "Cancelada",
+  "comprador": {
+    "codigoOrganismo": "7137",
+    "nombreOrganismo": "HOSPITAL COMUNITARIO DE SALUD FAMILIAR DE BULNES",
+    "rutUnidad": "61.607.003-7",
+    "codigoUnidad": "1057511",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 16,
+    "comuna": "*"
+  },
+  "fechas": {
+    "creacion": "2026-04-13T12:18:41-04:00",
+    "publicacion": "2026-04-13T12:36:51-04:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-04-13T12:32:00-04:00"
+  },
+  "monto": {
+    "valor": 197242,
+    "moneda": "CLP",
+    "clp": 197242,
+    "fechaValor": "2026-04-13",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 42142611,
+      "nombre": "Jeringas tuberculinas",
+      "descripcion": "JERINGA DESECHABLE PARA TUBERCULINA 1 CC CON AGUJA INTERCAMBIABLE 26-27 G X 1/2\" CAJA X150UN",
+      "cantidad": 13,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 12750,
+        "moneda": "CLP",
+        "clp": 12750,
+        "fechaValor": "2026-04-13",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 165750,
+        "moneda": "CLP",
+        "clp": 165750,
+        "fechaValor": "2026-04-13",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "CC",
+  "proveedor": {
+    "rut": "92.288.000-k",
+    "nombre": "DROGUERIA HOFMANN SAC",
+    "codigo": "39998"
+  },
+  "procesoOrigen": "1057508-24-LQ25"
+}

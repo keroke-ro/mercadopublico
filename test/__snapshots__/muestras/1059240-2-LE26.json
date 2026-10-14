@@ -1,0 +1,54 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1059240-2-LE26",
+  "nombre": "AQUISICIÓN E INSTALACIÓN DE UN GRUPO ELECTRÓGENO",
+  "descripcion": "El MINISTERIO PÚBLICO necesita contratar la provisión, instalación y puesta en marcha de un 1 grupo electrógeno de 160 KVA como mínimo para la Fiscalía Regional de Ñuble bajo la modalidad de Licitación Pública, con el objeto de que respalde la casi la totalidad de la demanda de energía eléctrica del inmueble, lo que resulta esencial para la continuidad y operación normal de la institución.\r\n\r\nLos bienes a que se refiere la presente licitación deberán ser prestados de acuerdo con las especificaciones y en los términos que señalan las Bases Técnicas, detalladas en el apartado II de estas Bases de licitación, para lo cual, las empresas participantes deberán presentar propuestas que se ajusten íntegramente a lo indicado en ellas y en las presentes Bases Administrativas.",
+  "estado": "revocada",
+  "estadoGlosa": "Revocada",
+  "comprador": {
+    "codigoOrganismo": "224060",
+    "nombreOrganismo": "MINISTERIO PUBLICO",
+    "rutUnidad": "61.935.400-1",
+    "codigoUnidad": "1059240",
+    "nombreUnidad": "FR ÑUBLE",
+    "region": 16,
+    "comuna": "Chillán"
+  },
+  "fechas": {
+    "creacion": "2026-08-05T14:11:41-04:00",
+    "publicacion": "2026-08-06T18:14:44-04:00",
+    "cierre": "2026-08-25T20:00:00-04:00",
+    "adjudicacion": "2026-09-16T16:40:45-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 50000000,
+    "moneda": "CLP",
+    "clp": 50000000,
+    "fechaValor": "2026-08-06",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 72102201,
+      "nombre": "Instalación o servicio de sistemas de energía eléctrica",
+      "descripcion": "AQUISICIÓN E INSTALACIÓN DE UN GRUPO ELECTRÓGENO PARA LA FISCALÍA REGIONAL DE ÑUBLE",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LE",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 100 UTM e inferior a 1.000 UTM"
+}

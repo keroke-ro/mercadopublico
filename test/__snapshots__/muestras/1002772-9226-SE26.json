@@ -1,0 +1,202 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1002772-9226-SE26",
+  "nombre": "PROTESIS DE RODILLA PRIMARIA PERSONA LIC 1002772-26-LR24 (LC,PABELLON,2204004004,CBO)",
+  "descripcion": "CONSUMO PABELLON TRAUMATOLOGIA COTIZACION 268996 FCX 25-06-2026 PAC. [oculto] enviar los documentos tributarios electrónicos (Factura) en el formato XML a la casilla [oculto]\r\nESTIMADO PROVEEDOR FAVOR FACTURAR CON CONDICION DE PAGO “CREDITO”.",
+  "estado": "recepcion_conforme",
+  "estadoGlosa": "Recepción Conforme",
+  "comprador": {
+    "codigoOrganismo": "7383",
+    "nombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+    "rutUnidad": "61.608.205-1",
+    "codigoUnidad": "1002772",
+    "nombreUnidad": "INSUMOS CLINICOS",
+    "region": null,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": "2026-09-05T15:54:59-04:00",
+    "publicacion": "2026-09-10T17:48:07-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-09-05T15:58:00-04:00"
+  },
+  "monto": {
+    "valor": 1826100,
+    "moneda": "CLP",
+    "clp": 1826100,
+    "fechaValor": "2026-09-10",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 42242002,
+      "nombre": "Dispositivos prostéticos de la extremidad superior",
+      "descripcion": "INSERTO TIBIAL",
+      "cantidad": 1,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 242105,
+        "moneda": "CLP",
+        "clp": 242105,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 242105,
+        "moneda": "CLP",
+        "clp": 242105,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42242002,
+      "nombre": "Dispositivos prostéticos de la extremidad superior",
+      "descripcion": "PAQUETE ROPA CADERA",
+      "cantidad": 1,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 47368,
+        "moneda": "CLP",
+        "clp": 47368,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 47368,
+        "moneda": "CLP",
+        "clp": 47368,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42242002,
+      "nombre": "Dispositivos prostéticos de la extremidad superior",
+      "descripcion": "ESCAFANDRA",
+      "cantidad": 4,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 26211,
+        "moneda": "CLP",
+        "clp": 26211,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 104844,
+        "moneda": "CLP",
+        "clp": 104844,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42242002,
+      "nombre": "Dispositivos prostéticos de la extremidad superior",
+      "descripcion": "CEMENTO OSEO",
+      "cantidad": 1,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 63053,
+        "moneda": "CLP",
+        "clp": 63053,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 63053,
+        "moneda": "CLP",
+        "clp": 63053,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42242002,
+      "nombre": "Dispositivos prostéticos de la extremidad superior",
+      "descripcion": "SIERRA OSCILANTE",
+      "cantidad": 2,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 51742,
+        "moneda": "CLP",
+        "clp": 51742,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 103484,
+        "moneda": "CLP",
+        "clp": 103484,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42242002,
+      "nombre": "Dispositivos prostéticos de la extremidad superior",
+      "descripcion": "BANDEJA TIBIAL PERSONA 5°",
+      "cantidad": 1,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 394737,
+        "moneda": "CLP",
+        "clp": 394737,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 394737,
+        "moneda": "CLP",
+        "clp": 394737,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42242002,
+      "nombre": "Dispositivos prostéticos de la extremidad superior",
+      "descripcion": "COMPONENTE FEMORAL",
+      "cantidad": 1,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 578947,
+        "moneda": "CLP",
+        "clp": 578947,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 578947,
+        "moneda": "CLP",
+        "clp": 578947,
+        "fechaValor": "2026-09-10",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "SE",
+  "proveedor": {
+    "rut": "96.863.710-k",
+    "nombre": "BIOMET CHILE S A",
+    "codigo": "27905"
+  },
+  "procesoOrigen": "1002772-26-LR24"
+}

@@ -1,0 +1,69 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1057506-4741-CC26",
+  "nombre": "Ecotomografia Mamaria Sept.",
+  "descripcion": "Ecotomografía Mamaria Sept. , con ID-1057508-109-LP25 , con Res.N° 479 del  05/02/2026 , con solicitud de compra N°659 por Jefa de SOME. \r\nRequisitos al momento de emitir factura:\r\n- Orden de Compra en estado “Aceptada” por el proveedor en Mercado Público.\r\n- La factura debe ser emitida una vez recepcionados los productos y/o servicios adquiridos. (Envío con Guía de Despacho)\r\n- La factura debe contener correctamente el número de la Orden de Compra en el campo 801.\r\n- Envío de la factura en formato XML a la casilla de intercambio en página SII: [oculto]\r\n- Factura debe ser emitida al “Crédito” y no al “Contado”\r\n- El incumplimiento de cualquiera de los puntos anteriores dará lugar a la reclamación del DTE en el sistema.",
+  "estado": "aceptada",
+  "estadoGlosa": "Aceptada",
+  "comprador": {
+    "codigoOrganismo": "7285",
+    "nombreOrganismo": "SERVICIO NACIONAL DE SALUD HOSPITAL DE COELEMU",
+    "rutUnidad": "61.602.194-K",
+    "codigoUnidad": "1057506",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 16,
+    "comuna": "*"
+  },
+  "fechas": {
+    "creacion": "2026-10-08T11:25:29-03:00",
+    "publicacion": "2026-10-09T08:34:39-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-08T11:28:00-03:00"
+  },
+  "monto": {
+    "valor": 189000,
+    "moneda": "CLP",
+    "clp": 189000,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 85122201,
+      "nombre": "Exámenes médicos",
+      "descripcion": "Ecotomografía Mamaria Septiembre",
+      "cantidad": 9,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 21000,
+        "moneda": "CLP",
+        "clp": 21000,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 189000,
+        "moneda": "CLP",
+        "clp": 189000,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "CC",
+  "proveedor": {
+    "rut": "76.016.305-8",
+    "nombre": "Soc. Radiologica Chillan.S.A.",
+    "codigo": "1033514"
+  },
+  "procesoOrigen": "1057508-109-LP25"
+}

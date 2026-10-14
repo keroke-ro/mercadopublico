@@ -1,0 +1,54 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1057509-314-LP26",
+  "nombre": "CONVENIO DE MANTENCIÓN PREVENTIVA Y CORRECTIVA PARA ENDOSCOPIOS  brd",
+  "descripcion": "El Hospital Clínico Herminda Martín de Chillán llama a Licitación Pública a través del Portal Mercado Público, requiere contratar un servicio de mantención preventiva y correctiva para endoscopios. El servicio contempla la realización de una mantención preventiva por equipo, además de mantenciones correctivas ilimitadas durante la vigencia del convenio, cuando estas sean requeridas. La contratación tendrá una duración de 6 meses y se ejecutará conforme a las condiciones establecidas en las presentes bases, con el propósito de asegurar la continuidad operativa de los equipos, contribuyendo al adecuado funcionamiento de las unidades de apoyo y demás servicios clínicos del establecimiento, y permitiendo satisfacer oportunamente la demanda asistencial del Hospital. Se pretende obtener la mejor calidad y oportunidad en la adquisición de estos servicios a un precio conveniente.",
+  "estado": "cerrada",
+  "estadoGlosa": "Cerrada",
+  "comprador": {
+    "codigoOrganismo": "7042",
+    "nombreOrganismo": "HOSPITAL CLINICO HERMINDA MARTIN",
+    "rutUnidad": "61.607.001-0",
+    "codigoUnidad": "1057509",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 16,
+    "comuna": "Chillán"
+  },
+  "fechas": {
+    "creacion": "2026-09-24T00:00:00-03:00",
+    "publicacion": "2026-09-29T12:56:01-03:00",
+    "cierre": "2026-10-09T13:00:00-03:00",
+    "adjudicacion": "2026-10-30T17:30:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 76001750,
+    "moneda": "CLP",
+    "clp": 76001750,
+    "fechaValor": "2026-09-29",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 73152102,
+      "nombre": "Servicio de reparación de equipo de fabricación",
+      "descripcion": "\"CONVENIO DE MANTENCIÓN PREVENTIVA Y CORRECTIVA PARA ENDOSCOPIOS\"  Completar y adjuntar Anexo N°2: Oferta Económica Presupuesto Total Bruto Referencial $76.001.750.-",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LP",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

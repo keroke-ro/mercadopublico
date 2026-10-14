@@ -1,0 +1,62 @@
+{
+  "tipo": "licitacion",
+  "codigo": "2933-52-R226",
+  "nombre": "ADQ DE NOTEBOOK PARA ESTUDIANTES 2026",
+  "descripcion": "Las presentes bases tienen por objetivo la adquisición de notebook para poner fin a la brecha tecnológica que existe en el sistema educacional, y entregar herramientas para un mejor desarrollo de las actividades de aprendizaje y continuar con el programa comunal que es entregar un pc a cada uno de nuestros estudiantes.",
+  "estado": "adjudicada",
+  "estadoGlosa": "Adjudicada",
+  "comprador": {
+    "codigoOrganismo": "111124",
+    "nombreOrganismo": "I MUNICIPALIDAD DE ALHUE",
+    "rutUnidad": "69.073.200-9",
+    "codigoUnidad": "3919",
+    "nombreUnidad": "DPTO. MUNICIPALIDAD",
+    "region": 13,
+    "comuna": "Alhué"
+  },
+  "fechas": {
+    "creacion": "2026-07-10T17:12:04-04:00",
+    "publicacion": "2026-07-10T17:37:43-04:00",
+    "cierre": "2026-07-30T14:01:00-04:00",
+    "adjudicacion": "2026-10-09T18:10:45-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 43211503,
+      "nombre": "Notebook, laptop o computador portátil excepto Tablet PC",
+      "descripcion": "La I. Municipalidad de Alhué llama a Licitación Publica para la adquisición de Notebooks nuevos con equipamientos para estudiantes con matricula nueva 2026",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 87975000,
+        "moneda": "CLP",
+        "clp": 87975000,
+        "fechaValor": "2026-07-10",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 87975000,
+        "moneda": "CLP",
+        "clp": 87975000,
+        "fechaValor": "2026-07-10",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.677.846-1",
+        "nombre": "GESTION NEGOCIOS SPA",
+        "codigo": null
+      }
+    }
+  ],
+  "oferentes": 12,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LP",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

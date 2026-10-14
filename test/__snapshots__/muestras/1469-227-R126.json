@@ -1,0 +1,62 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1469-227-R126",
+  "nombre": "EQUIPAMIENTO SALA DE REUNIONES VICERRECTORÍA DE FORMACION",
+  "descripcion": "Con el propósito de disponer de un espacio adecuado para el desarrollo de actividades académicas, administrativas y de gestión, se requiere implementar con equipamiento tecnológico la sala de reuniones de la Vicerrectoría de Formación, ubicada en dependencias de la Universidad de Talca, Campus Talca, garantizando condiciones adecuadas de funcionalidad para sus actividades institucionales.",
+  "estado": "adjudicada",
+  "estadoGlosa": "Adjudicada",
+  "comprador": {
+    "codigoOrganismo": "7147",
+    "nombreOrganismo": "UNIVERSIDAD DE TALCA",
+    "rutUnidad": "70.885.500-6",
+    "codigoUnidad": "2465",
+    "nombreUnidad": "Universidad de Talca",
+    "region": 7,
+    "comuna": "Talca"
+  },
+  "fechas": {
+    "creacion": "2026-09-24T14:48:41-03:00",
+    "publicacion": "2026-09-24T15:00:38-03:00",
+    "cierre": "2026-10-02T12:00:00-03:00",
+    "adjudicacion": "2026-10-09T17:06:58-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 52161505,
+      "nombre": "Televisores convencionales, de plasma y LCD",
+      "descripcion": "Smart TV 98\"",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 1875000,
+        "moneda": "CLP",
+        "clp": 1875000,
+        "fechaValor": "2026-09-24",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 1875000,
+        "moneda": "CLP",
+        "clp": 1875000,
+        "fechaValor": "2026-09-24",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "77.965.105-3",
+        "nombre": "COMERCIALIZADORA PUBLIMARKET SPA",
+        "codigo": null
+      }
+    }
+  ],
+  "oferentes": 12,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "L1",
+  "tipoLicitacionGlosa": "Licitación Pública menor a 100 UTM"
+}

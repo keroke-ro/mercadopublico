@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1412-4-LS26",
+  "nombre": "Servicios personales especializados investigación",
+  "descripcion": "La contratación de servicios personales especializados de investigación histórica sobre el origen y la evolución del Comité Sistema de Empresas - SEP de la Corporación de Fomento de la Producción.",
+  "estado": "desierta",
+  "estadoGlosa": "Desierta (o art. 3 ó 9 Ley 19.886)",
+  "comprador": {
+    "codigoOrganismo": "7057",
+    "nombreOrganismo": "Comité SEP",
+    "rutUnidad": "61.933.600-3",
+    "codigoUnidad": "2408",
+    "nombreUnidad": "Comité SEP",
+    "region": 13,
+    "comuna": "Santiago"
+  },
+  "fechas": {
+    "creacion": "2026-09-21T00:00:00-03:00",
+    "publicacion": "2026-09-22T18:34:00-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 60103807,
+      "nombre": "Libros de recursos de historia",
+      "descripcion": "La contratación de servicios personales especializados de investigación histórica sobre el origen y la evolución del Comité Sistema de Empresas - SEP de la Corporación de Fomento de la Producción.",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 0,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LS",
+  "tipoLicitacionGlosa": "Licitación Pública de servicios personales especializados"
+}

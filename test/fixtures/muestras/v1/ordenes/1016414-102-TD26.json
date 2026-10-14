@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:19.8739352Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1016414-102-TD26",
+      "Nombre": "Orden de Compra generada por Trato Directo ID 1016414-13-FTD26",
+      "CodigoEstado": 6,
+      "Estado": "Aceptada",
+      "CodigoLicitacion": "",
+      "Descripcion": "Adquisición de dispositivos pendrive requeridos ante la solicitud de la Corte de acompañar los dispositivos físicos por los recursos ingresados al tribunal.",
+      "CodigoTipo": "16",
+      "Tipo": "TD",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 4,
+      "EstadoProveedor": "Aceptada",
+      "Fechas": {
+        "FechaCreacion": "2026-10-07T16:00:17",
+        "FechaEnvio": "2026-10-08T18:54:50.69",
+        "FechaAceptacion": "2026-10-09T09:12:37.38",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-07T16:07:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 5,
+      "CantidadEvaluacion": 3,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 781950,
+      "PorcentajeIva": 19,
+      "Impuestos": 148570,
+      "Total": 930520,
+      "Financiamiento": "395",
+      "Pais": "Other",
+      "TipoDespacho": "7",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "1606467",
+        "NombreOrganismo": "CONSEJO NACIONAL DE TELEVISION",
+        "RutUnidad": "60.909.000-6",
+        "CodigoUnidad": "1016414",
+        "NombreUnidad": "CNTV",
+        "Actividad": "GOBIERNO CENTRAL",
+        "DireccionUnidad": "",
+        "ComunaUnidad": "Providencia",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "1437323",
+        "Nombre": "[oculto]",
+        "Actividad": "FABRICACION Y ARMADO DE COMPUTADORES Y HARDWARE EN GENERAL| VENTA AL POR MENOR DE ARTICULOS ELECTRODOMESTICOS Y ELECTRONICOS PARA| COMERCIO AL POR MENOR DE COMPUTADORAS, SOFTWARES Y SUMINISTROS| COMERCIO AL POR MENOR DE ARTICULOS Y ARTEFACTOS USADOS N.C.P",
+        "CodigoSucursal": "841272",
+        "NombreSucursal": "ACF WISE LTDA",
+        "RutSucursal": "76.139.769-9",
+        "Direccion": "AVENIDA VENTISQUERO N° 1111",
+        "Comuna": "María Elena",
+        "Region": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 32101600,
+            "Categoria": "Artículos de electrónica / Circuitos electrónicos / Circuitos integrados, memorias y microprocesadores",
+            "CodigoProducto": 32101622,
+            "Producto": "Memoria flash",
+            "EspecificacionComprador": "KINGSTON USB3.2 Gen1 DataTraveler Exodia M Negro +\r\nAzul",
+            "EspecificacionProveedor": "",
+            "Cantidad": 130,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 6015,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 0
+          }
+        ]
+      }
+    }
+  ]
+}

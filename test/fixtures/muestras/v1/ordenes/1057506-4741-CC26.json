@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:38:03.7957225Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1057506-4741-CC26",
+      "Nombre": "Ecotomografia Mamaria Sept.",
+      "CodigoEstado": 6,
+      "Estado": "Aceptada",
+      "CodigoLicitacion": "1057508-109-LP25",
+      "Descripcion": "Ecotomografía Mamaria Sept. , con ID-1057508-109-LP25 , con Res.N° 479 del  05/02/2026 , con solicitud de compra N°659 por Jefa de SOME. \r\nRequisitos al momento de emitir factura:\r\n- Orden de Compra en estado “Aceptada” por el proveedor en Mercado Público.\r\n- La factura debe ser emitida una vez recepcionados los productos y/o servicios adquiridos. (Envío con Guía de Despacho)\r\n- La factura debe contener correctamente el número de la Orden de Compra en el campo 801.\r\n- Envío de la factura en formato XML a la casilla de intercambio en página SII: [oculto]\r\n- Factura debe ser emitida al “Crédito” y no al “Contado”\r\n- El incumplimiento de cualquiera de los puntos anteriores dará lugar a la reclamación del DTE en el sistema.",
+      "CodigoTipo": "14",
+      "Tipo": "CC",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 4,
+      "EstadoProveedor": "Aceptada",
+      "Fechas": {
+        "FechaCreacion": "2026-10-08T11:25:29.907",
+        "FechaEnvio": "2026-10-09T08:34:39.45",
+        "FechaAceptacion": "2026-10-09T10:37:21.94",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-08T11:28:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 189000,
+      "PorcentajeIva": 0,
+      "Impuestos": 0,
+      "Total": 189000,
+      "Financiamiento": "",
+      "Pais": "CL",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7285",
+        "NombreOrganismo": "SERVICIO NACIONAL DE SALUD HOSPITAL DE COELEMU",
+        "RutUnidad": "61.602.194-K",
+        "CodigoUnidad": "1057506",
+        "NombreUnidad": "Bienes y Servicios",
+        "Actividad": "Servicio Público",
+        "DireccionUnidad": "Manuel A. Matta N°370",
+        "ComunaUnidad": "* ",
+        "RegionUnidad": "Región del Ñuble",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "1033514",
+        "Nombre": "Soc. Radiologica Chillan.S.A.",
+        "Actividad": "OTRAS ACTIVIDADES EMPRESARIALES RELACIONADAS CON L",
+        "CodigoSucursal": "514202",
+        "NombreSucursal": "Soc. Radiologica Chillan",
+        "RutSucursal": "76.016.305-8",
+        "Direccion": "Pedro Aguirre Cerda N°35",
+        "Comuna": "Chillán",
+        "Region": "Región del Ñuble",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 85122200,
+            "Categoria": "Salud, servicios sanitarios y alimentación / Medicina y servicios de salud / Evaluaciones de salud individuales",
+            "CodigoProducto": 85122201,
+            "Producto": "Exámenes médicos",
+            "EspecificacionComprador": "Ecotomografía Mamaria Septiembre",
+            "EspecificacionProveedor": "",
+            "Cantidad": 9,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 21000,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 189000
+          }
+        ]
+      }
+    }
+  ]
+}

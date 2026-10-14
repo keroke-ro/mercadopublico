@@ -1,0 +1,52 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1469-242-L126",
+  "nombre": "ADQUISICION DE BILIRRUBINÓMETRO, UNIVERSIDAD DE TALCA",
+  "descripcion": "ADQUISICION DE BILIRRUBINÓMETRO",
+  "estado": "cerrada",
+  "estadoGlosa": "Cerrada",
+  "comprador": {
+    "codigoOrganismo": "7147",
+    "nombreOrganismo": "UNIVERSIDAD DE TALCA",
+    "rutUnidad": "70.885.500-6",
+    "codigoUnidad": "2465",
+    "nombreUnidad": "Universidad de Talca",
+    "region": 7,
+    "comuna": "Talca"
+  },
+  "fechas": {
+    "creacion": "2026-10-01T10:50:33-03:00",
+    "publicacion": "2026-10-01T14:38:28-03:00",
+    "cierre": "2026-10-09T15:00:00-03:00",
+    "adjudicacion": "2026-10-14T14:54:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 7000000,
+    "moneda": "CLP",
+    "clp": 7000000,
+    "fechaValor": "2026-10-01",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 42181510,
+      "nombre": "Medidores transcutáneos de ictericia",
+      "descripcion": "La Universidad de Talca requiere la adquisición de un Bilirrubinómetro",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "L1",
+  "tipoLicitacionGlosa": "Licitación Pública menor a 100 UTM"
+}

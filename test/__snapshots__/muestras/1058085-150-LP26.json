@@ -1,0 +1,74 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1058085-150-LP26",
+  "nombre": "Convenio Soluciones Distintas Vías G-2 H. Salvador",
+  "descripcion": "Que, el Hospital del Salvador necesita contar con un Convenio Suministro de Soluciones de diferentes vías de administración G-2 en caso de no despacho de CENABAST para el Hospital del Salvador con la finalidad de satisfacer de manera adecuada y eficiente la labor asistencial durante el período de 36 meses;\r\nQue, el hospital debe implementar “Medidas Complementarias”, para asegurar el abastecimiento de los medicamentos intermediados por CENABAST, ante los reiterados quiebres de stock e incumplimientos derivados de sus proveedores;\r\nREF: Convenio Suministro de Soluciones de diferentes vías de administración G-2 en caso de no despacho de CENABAST para el Hospital del Salvador\r\nQue, por la cuantía determinada, la presente licitación se ubica en el tramo para contrataciones iguales o superiores a 1.000 UTM e inferiores a 5.000 UTM, en conformidad al Artículo 40 del Reglamento de la Ley Nº19.886;\r\nQue, hechas las consultas respectivas, la provisión de estos bienes o servicios no se encuentra disponible por Convenios Marcos ofrecidos en el Sistema de Información de la Dirección de Compras, www.mercadopublico.cl;\r\nQue, esta compra está vinculada al proyecto 1058085-8-PC26 del Plan Anual de Compras del año 2026.",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "7428",
+    "nombreOrganismo": "SERVICIO DE SALUD ORIENTE HOSPITAL DEL SALVADOR",
+    "rutUnidad": "61.608.406-2",
+    "codigoUnidad": "1058085",
+    "nombreUnidad": "Fármacos",
+    "region": 13,
+    "comuna": "Providencia"
+  },
+  "fechas": {
+    "creacion": "2026-10-09T11:02:52-03:00",
+    "publicacion": "2026-10-09T12:32:51-03:00",
+    "cierre": "2026-10-29T15:00:00-03:00",
+    "adjudicacion": "2027-03-01T15:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 260250000,
+    "moneda": "CLP",
+    "clp": 260250000,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 51171605,
+      "nombre": "Lactulosa",
+      "descripcion": "3002170087\r\nLACTULOSA 65% 200ML SOLUCIÓN ORAL",
+      "cantidad": 13500,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 51191802,
+      "nombre": "Cloruro potásico",
+      "descripcion": "3002180000\r\nPOTASIO CLORURO 40 MEQ 100 ML SOLUCIÓN INYECTABLE",
+      "cantidad": 7500,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 51142904,
+      "nombre": "Lidocaína",
+      "descripcion": "3002170110\r\nGEL PROTECTOR BUCOFARINGEO PARA QUIMIOTERAPIA 15 ML GEL",
+      "cantidad": 32500,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LP",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

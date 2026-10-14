@@ -1,0 +1,54 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1051425-50-LE26",
+  "nombre": "ADQ. MAQUINA AUTOPORTANTE DEMARCACION DRV ÑUBLE",
+  "descripcion": "Adquisición de máquina para la producción de autoportante de demarcación vial airless para faenas de Administración Directa de la Dirección de Vialidad, Región de Ñuble, según Bases de Licitación.",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "7248",
+    "nombreOrganismo": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO PP DCYF",
+    "rutUnidad": "61.202.000-0",
+    "codigoUnidad": "1051425",
+    "nombreUnidad": "Dirección de Vialidad - Dirección Regional Ñuble",
+    "region": 16,
+    "comuna": "Chillán"
+  },
+  "fechas": {
+    "creacion": "2026-10-08T15:27:42-03:00",
+    "publicacion": "2026-10-09T16:05:09-03:00",
+    "cierre": "2026-10-19T15:00:00-03:00",
+    "adjudicacion": "2026-11-09T19:54:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 60000000,
+    "moneda": "CLP",
+    "clp": 60000000,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 23153501,
+      "nombre": "Sistemas de aplicación de pintura",
+      "descripcion": "Adquisición de máquina para la producción de autoportante de demarcación vial airless para faenas de Administración Directa de la Dirección de Vialidad Región de Ñuble, según Bases de Licitación.",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LE",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 100 UTM e inferior a 1.000 UTM"
+}

@@ -54,7 +54,12 @@
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
+    "test:tipos": "vitest --typecheck.only --run",
+    "cobertura": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
+    "paquete": "node scripts/paquete.mjs",
+    "mutacion": "stryker run",
+    "smoke": "node --experimental-strip-types scripts/smoke.ts",
     "contrato": "node --experimental-strip-types scripts/contrato.ts",
     "fixtures:grabar": "node --experimental-strip-types scripts/contrato.ts --grabar",
     "changeset": "changeset",

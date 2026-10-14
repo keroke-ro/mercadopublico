@@ -1,0 +1,74 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1180885-9-LR26",
+  "nombre": "REPOSICION VEHICULOS AMBULANCIA RED HOSPITALARIA",
+  "descripcion": "PROYECTO REPOSICION VEHICULOS AMBULANCIAS RED HOSPITALARIA DEL SERVICIO DE SALUD ATACAMA, CODIGO IDI 40064619",
+  "estado": "cerrada",
+  "estadoGlosa": "Cerrada",
+  "comprador": {
+    "codigoOrganismo": "7409",
+    "nombreOrganismo": "SERVICIO DE SALUD ATACAMA",
+    "rutUnidad": "61.606.300-6",
+    "codigoUnidad": "1180885",
+    "nombreUnidad": "Compras Convenio GORE Atacama",
+    "region": 3,
+    "comuna": "Copiapó"
+  },
+  "fechas": {
+    "creacion": "2026-08-10T11:15:50-04:00",
+    "publicacion": "2026-08-13T11:56:00-04:00",
+    "cierre": "2026-10-09T15:00:00-03:00",
+    "adjudicacion": "2026-11-23T17:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 512890000,
+    "moneda": "CLP",
+    "clp": 512890000,
+    "fechaValor": "2026-08-13",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 25101703,
+      "nombre": "Ambulancias",
+      "descripcion": "AMBULANCIA AEB 4X2 Para Hospital San Jose del Carmen, Copiapó",
+      "cantidad": 2,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 25101703,
+      "nombre": "Ambulancias",
+      "descripcion": "AMBULANCIA AEA 4X2 Para Hospital Florencio Vargas Diaz, Diego de Almagro",
+      "cantidad": 2,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 25101703,
+      "nombre": "Ambulancias",
+      "descripcion": "AMBULANCIA AEA 4X2 Para Hospital Jeronimo Mendez Araya, Chañaral",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LR",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 5.000 UTM"
+}

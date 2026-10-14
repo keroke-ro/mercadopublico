@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "4776-48-I226",
+  "nombre": "CONTRATACIÓN DEL SERVICIO DE EXÁMENES OCUPACIONALES Y PREOCUPACIONALES A NIVEL NACIONAL PARA LA RED DE SALUD CAPREDENA",
+  "descripcion": "El objeto de la presente licitación es la CONTRATACIÓN DEL SERVICIO DE EXÁMENES OCUPACIONALES Y PREOCUPACIONALES A NIVEL NACIONAL PARA LA RED DE SALUD CAPREDENA, por el período de 24 meses.",
+  "estado": "desierta",
+  "estadoGlosa": "Desierta (o art. 3 ó 9 Ley 19.886)",
+  "comprador": {
+    "codigoOrganismo": "7175",
+    "nombreOrganismo": "CAJA DE PREVISION DE LA DEFENSA NACIONAL",
+    "rutUnidad": "61.108.000-k",
+    "codigoUnidad": "5691",
+    "nombreUnidad": "U. ADQUISICIONES  CENTRO SALUD Y REHABILITACION",
+    "region": 13,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": "2026-07-31T00:00:00-04:00",
+    "publicacion": "2026-07-31T16:24:11-04:00",
+    "cierre": "2026-08-31T15:00:00-04:00",
+    "adjudicacion": "2026-10-07T10:00:54-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 80111709,
+      "nombre": "Personal médico",
+      "descripcion": "Contratacion del Servicio de Examenes  ocupacionales y preocupacionales a nivel nacional para la Red Salud CAPREDENA.",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 2,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "I2",
+  "tipoLicitacionGlosa": "Licitación Privada mayor a 5.000 UTM"
+}

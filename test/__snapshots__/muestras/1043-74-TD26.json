@@ -1,0 +1,70 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1043-74-TD26",
+  "nombre": "Orden de Compra generada por Trato Directo ID 1043-9-FTD26",
+  "descripcion": "Que, esta Dirección de Aeropuertos requiere realizar servicio de mantención 250 hrs de Tractor Agrícola Jhon Deere placa patente LJBH89-0, año 2019, maquinaria que se debe mantener operativa para abordar trabajos que demanda la Administración Directa.",
+  "estado": "enviada_proveedor",
+  "estadoGlosa": "Enviada a Proveedor",
+  "comprador": {
+    "codigoOrganismo": "7243",
+    "nombreOrganismo": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO PP DCYF",
+    "rutUnidad": "61.202.000-0",
+    "codigoUnidad": "2039",
+    "nombreUnidad": "Dirección de Aeropuertos - XI Región",
+    "region": 11,
+    "comuna": "Coyhaique"
+  },
+  "fechas": {
+    "creacion": "2026-10-09T09:11:57-03:00",
+    "publicacion": "2026-10-09T11:31:11-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-09T11:30:00-03:00"
+  },
+  "monto": {
+    "valor": 1067118,
+    "moneda": "CLP",
+    "clp": 1067118,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 78180201,
+      "nombre": "Servicios de reparación o manutención del panel de instrumentos",
+      "descripcion": "DIAGNOSTICO POR 5 HORAS INS_TALLER INSUMOS DE TALLER SERV REPUESTOS FILTROS  FILTRO ACEITE MOTOR 30 MI ELEMENTO FILTRO PRIMARIOFILTRO HIDRAULICO 741201 FILTRO COMBUSTIBLE 781326 * FILTRO RECIRCULACION AIRE FILTRO AIRE FRESCO CABINA SERV LUBRICANTES ACEITE HIDRAULICO HY-GARD  ACEITE MOTOR PLUS",
+      "cantidad": 1,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 896738,
+        "moneda": "CLP",
+        "clp": 896738,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 896738,
+        "moneda": "CLP",
+        "clp": 896738,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "TD",
+  "proveedor": {
+    "rut": "91.502.000-3",
+    "nombre": "SALINAS Y FABRES SOCIEDAD ANONIMA",
+    "codigo": "26778"
+  },
+  "procesoOrigen": "1043-9-FTD26"
+}

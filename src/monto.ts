@@ -1,5 +1,8 @@
 // Montos a pesos con el valor del día del documento, nunca el de hoy. Ver docs/api-notes.md §6.
+import { MercadoPublicoError } from "./errores.js";
+import { emitir, type AlEvento, type Fuente } from "./eventos.js";
 import { diaSantiago, sumarDias } from "./fecha.js";
+import { Circuito } from "./http.js";
 import type { Moneda, Monto, Proceso } from "./modelo.js";
 import { moneda as aMoneda, num } from "./util.js";
 
@@ -19,17 +22,45 @@ export interface OpcionesConversor {
   /** Por defecto 10000. */
   timeoutMs?: number;
   url?: string;
+  /** Recibe un evento `conversion` por cada intento y `circuito` cuando la fuente cae o vuelve. */
+  alEvento?: AlEvento;
+  /** Circuit breaker de la fuente; por defecto uno propio. `MercadoPublico` pasa el suyo para exponerlo en `salud()`. */
+  circuito?: Circuito;
 }
 
-async function descargar(o: OpcionesConversor, url: string, init: RequestInit = {}): Promise<{ texto: string; cookie: string } | null> {
+/** Lanza "circuito_abierto" con la fuente caída; cualquier otra falla es null. */
+async function descargar(o: OpcionesConversor & { circuito: Circuito }, url: string, init: RequestInit = {}): Promise<{ texto: string; cookie: string } | null> {
+  o.circuito.exigir();
   try {
     const res = await (o.fetch ?? fetch)(url, { ...init, signal: AbortSignal.timeout(o.timeoutMs ?? 10_000) });
-    if (!res.ok) return null;
+    if (res.status >= 500) return (o.circuito.falla(), null);
+    if (!res.ok) return (o.circuito.exito(), null);
     const cookie = (res.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
-    return { texto: await res.text(), cookie };
+    const texto = await res.text();
+    o.circuito.exito();
+    return { texto, cookie };
   } catch {
+    o.circuito.falla();
     return null;
   }
+}
+
+const abierto = (e: unknown) => e instanceof MercadoPublicoError && e.tipo === "circuito_abierto";
+
+/** Prepara las opciones de una fuente y envuelve el conversor: nunca lanza y avisa cada intento. */
+function vigilar(fuente: Fuente, opciones: OpcionesConversor, crear: (o: OpcionesConversor & { circuito: Circuito }) => Conversor): Conversor {
+  const o = { ...opciones, circuito: opciones.circuito ?? new Circuito(fuente, { alEvento: opciones.alEvento }) };
+  const c = crear(o);
+  return async (moneda, dia) => {
+    let r: Paridad | null = null;
+    try {
+      r = await c(moneda, dia);
+    } catch {
+      // circuito abierto: queda sin convertir
+    }
+    emitir(o.alEvento, { tipo: "conversion", fuente, ok: r !== null, moneda, dia });
+    return r;
+  };
 }
 
 /** Tras una descarga fallida se espera esto antes de reintentar, para no pagar un timeout por monto con el servicio caído. */
@@ -37,7 +68,7 @@ const REINTENTO_MS = 5 * 60_000;
 /** Lo que aún puede cambiar (el año en curso, el CSV) se vuelve a bajar pasado esto. */
 const VIGENCIA_MS = 12 * 3_600_000;
 
-/** Memoriza `cargar`: un null (falla) vale REINTENTO_MS y un resultado vale `vigencia` ms. */
+/** Memoriza `cargar`: un null (falla) vale REINTENTO_MS y un resultado vale `vigencia` ms. Un circuito abierto no se memoriza. */
 function cacheado<T>(cargar: () => Promise<T | null>, vigencia: number): () => Promise<T | null> {
   let p: Promise<T | null> | undefined;
   let vence = 0;
@@ -45,7 +76,11 @@ function cacheado<T>(cargar: () => Promise<T | null>, vigencia: number): () => P
     if (p && Date.now() < vence) return p;
     vence = Infinity; // mientras carga, todos esperan la misma promesa
     return (p = cargar()
-      .catch(() => null)
+      .catch((e: unknown) => {
+        if (!abierto(e)) return null;
+        vence = 0;
+        throw e;
+      })
       .then((v) => ((vence = Date.now() + (v === null ? REINTENTO_MS : vigencia)), v)));
   };
 }
@@ -81,6 +116,10 @@ const INDICADOR = { CLF: "uf", UTM: "utm", USD: "dolar", EUR: "euro" } as const;
  * La UTM es mensual: vale el valor del mes. Los años pasados se bajan una vez; el en curso, cada VIGENCIA_MS.
  */
 export function conversorMindicador(opciones: OpcionesConversor = {}): Conversor {
+  return vigilar("mindicador", opciones, crearMindicador);
+}
+
+function crearMindicador(opciones: OpcionesConversor & { circuito: Circuito }): Conversor {
   const base = opciones.url ?? "https://mindicador.cl/api";
   const cache = new Map<string, () => Promise<Map<string, number> | null>>();
   const cargar = async (ruta: string) => {
@@ -94,6 +133,7 @@ export function conversorMindicador(opciones: OpcionesConversor = {}): Conversor
       }
       return dias;
     } catch {
+      opciones.circuito.falla(); // respondió algo que no es la serie
       return null;
     }
   };
@@ -138,6 +178,10 @@ export function leerSerieBancoCentral(html: string, anio: string): Map<string, n
  * La API SIETE del Banco Central es la alternativa estable, pero pide usuario y clave.
  */
 export function conversorBancoCentral(opciones: OpcionesConversor = {}): Conversor {
+  return vigilar("bcentral", opciones, crearBancoCentral);
+}
+
+function crearBancoCentral(opciones: OpcionesConversor & { circuito: Circuito }): Conversor {
   const base = opciones.url ?? URL_BANCO_CENTRAL;
   const enlaces = cacheado(async () => {
     const r = await descargar(opciones, `${base}Indicadoresdiarios.aspx`);
@@ -188,6 +232,10 @@ export const URL_PARIDAD = "https://transparenciachc.blob.core.windows.net/oc-da
  * primer día del mes. Se vuelve a bajar cada VIGENCIA_MS. El mes en curso no está hasta que termina.
  */
 export function conversorParidadChileCompra(opciones: OpcionesConversor = {}): Conversor {
+  return vigilar("paridad", opciones, crearParidad);
+}
+
+function crearParidad(opciones: OpcionesConversor & { circuito: Circuito }): Conversor {
   const tabla = cacheado(async () => {
     const t = (await descargar(opciones, opciones.url ?? URL_PARIDAD))?.texto;
     if (!t) return null;
@@ -225,8 +273,20 @@ export function conversorEncadenado(...conversores: Conversor[]): Conversor {
   };
 }
 
-/** mindicador.cl (diario); si no responde, el Banco Central (diario); y si tampoco, el promedio mensual de ChileCompra. */
-export const conversorPorDefecto: Conversor = conversorEncadenado(conversorMindicador(), conversorBancoCentral(), conversorParidadChileCompra());
+/**
+ * mindicador.cl (diario); si no responde, el Banco Central (diario); y si tampoco, el promedio mensual de ChileCompra.
+ * `circuitos` son los de `Transporte.circuitos` si se quieren ver en `salud()`.
+ */
+export function cadenaPorDefecto(o: { alEvento?: AlEvento; circuitos?: Partial<Record<Fuente, Circuito>> } = {}): Conversor {
+  const c = o.circuitos ?? {};
+  return conversorEncadenado(
+    conversorMindicador({ alEvento: o.alEvento, circuito: c.mindicador }),
+    conversorBancoCentral({ alEvento: o.alEvento, circuito: c.bcentral }),
+    conversorParidadChileCompra({ alEvento: o.alEvento, circuito: c.paridad }),
+  );
+}
+
+export const conversorPorDefecto: Conversor = cadenaPorDefecto();
 
 /**
  * Copia del proceso con `clp`, `fechaValor` y `fuente` completos en cada monto no CLP, usando el día del

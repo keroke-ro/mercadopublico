@@ -1,0 +1,452 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1422824-11-LR26",
+  "nombre": "CONTRATO DE SUMINISTRO DE INSUMOS DE ACCESOS EN CONSIGNACION PARA NEURORRADIOLOGÍA INTERVENCIONAL DEL HOSPITAL CARLOS VAN BUREN",
+  "descripcion": "CONTRATO DE SUMINISTRO DE INSUMOS DE ACCESOS EN CONSIGNACION PARA NEURORRADIOLOGÍA INTERVENCIONAL DEL HOSPITAL CARLOS VAN BUREN",
+  "estado": "adjudicada",
+  "estadoGlosa": "Adjudicada",
+  "comprador": {
+    "codigoOrganismo": "1468521",
+    "nombreOrganismo": "SERVICIO NACIONAL DE SALUD HOSPITAL CARLOS VAN BUREN",
+    "rutUnidad": "61.602.054-4",
+    "codigoUnidad": "1422824",
+    "nombreUnidad": "Insumos y Reactivos",
+    "region": 5,
+    "comuna": "Valparaíso"
+  },
+  "fechas": {
+    "creacion": "2026-04-15T00:00:00-04:00",
+    "publicacion": "2026-06-16T10:39:36-04:00",
+    "cierre": "2026-07-17T16:00:00-04:00",
+    "adjudicacion": "2026-10-09T09:34:46-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 523049887,
+    "moneda": "CLP",
+    "clp": 523049887,
+    "fechaValor": "2026-06-16",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 42203403,
+      "nombre": "Juegos o catéteres introductores vasculares intervencionales o diagnósticos",
+      "descripcion": "[2220467]\tSistema de catéter guía 6F, con simmons 2 hidrofílico 5F incluido",
+      "cantidad": 82,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 240000,
+        "moneda": "CLP",
+        "clp": 240000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 19680000,
+        "moneda": "CLP",
+        "clp": 19680000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.462.810-1",
+        "nombre": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203403,
+      "nombre": "Juegos o catéteres introductores vasculares intervencionales o diagnósticos",
+      "descripcion": "[222P1157]\tCatéter guía 5 F, curva MP2, diámetro interno 0.056 pulgadas o más y de 90 cm o más de largo.",
+      "cantidad": 15,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 210000,
+        "moneda": "CLP",
+        "clp": 210000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 3150000,
+        "moneda": "CLP",
+        "clp": 3150000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.462.810-1",
+        "nombre": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203403,
+      "nombre": "Juegos o catéteres introductores vasculares intervencionales o diagnósticos",
+      "descripcion": "[222P1518]\tCatéter guía 6F, curva MP2, diámetro interno 0.070” o más, 90 cm o más de largo.",
+      "cantidad": 15,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 210000,
+        "moneda": "CLP",
+        "clp": 210000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 3150000,
+        "moneda": "CLP",
+        "clp": 3150000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.462.810-1",
+        "nombre": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1200]\tCatéter guía 7 F, curva MP, diámetro interno 0.073 pulgadas o más, 90-100 cm de largo.",
+      "cantidad": 5,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1292]\tCatéter guía 8 F, curva MP, diámetro interno 0.086 pulgadas, 90-100 cm de largo.",
+      "cantidad": 30,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1413]\tCatéter guía 7F diseñado para acceso radial, largos 95, 100 y 105 cm.",
+      "cantidad": 30,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 1197000,
+        "moneda": "CLP",
+        "clp": 1197000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 35910000,
+        "moneda": "CLP",
+        "clp": 35910000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "77.237.150-0",
+        "nombre": "COMERCIAL MEDTRONIC CHILE LTDA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1438]\tCatéter de acceso distal y de aspiración 6F, disponible en largos de 125 y 131 cm.",
+      "cantidad": 12,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 1050000,
+        "moneda": "CLP",
+        "clp": 1050000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 12600000,
+        "moneda": "CLP",
+        "clp": 12600000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.453.086-1",
+        "nombre": "CICLO MED CHILE SPA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1439]\tCatéter intermedio de 5F, de lumen interno de 0,055”, largos 115 y 125",
+      "cantidad": 40,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 1050000,
+        "moneda": "CLP",
+        "clp": 1050000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 42000000,
+        "moneda": "CLP",
+        "clp": 42000000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.453.086-1",
+        "nombre": "CICLO MED CHILE SPA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1482]\tCatéter intermedio de 5F-6F, de lumen interno de 0,058”, de largos de 105, 115, 125 y 130.",
+      "cantidad": 20,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 1050000,
+        "moneda": "CLP",
+        "clp": 1050000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 21000000,
+        "moneda": "CLP",
+        "clp": 21000000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.453.086-1",
+        "nombre": "CICLO MED CHILE SPA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1488]\tCatéter guía neurovascular 8 F, con balón en su punta.",
+      "cantidad": 10,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1580]\tMicrocatéter cerebral de lumen interno de 0,017\", de 150cm de largo, con dos marcadores distales y con extremos distales recto o preformados en 45° y 90°.",
+      "cantidad": 50,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 620000,
+        "moneda": "CLP",
+        "clp": 620000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 18600000,
+        "moneda": "CLP",
+        "clp": 18600000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.462.810-1",
+        "nombre": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1580]\tMicrocatéter cerebral de lumen interno de 0,017\", de 150cm de largo, con dos marcadores distales y con extremos distales recto o preformados en 45° y 90°.",
+      "cantidad": 50,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 630000,
+        "moneda": "CLP",
+        "clp": 630000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 12600000,
+        "moneda": "CLP",
+        "clp": 12600000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.453.086-1",
+        "nombre": "CICLO MED CHILE SPA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1260]\tMicro catéter cerebral de lumen interno 0.021 pulgadas, diámetro externo proximal 2.5 F, distal 2.0 F, largo 150 cm, punta recta o anguladas.",
+      "cantidad": 30,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 640000,
+        "moneda": "CLP",
+        "clp": 640000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 19200000,
+        "moneda": "CLP",
+        "clp": 19200000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.462.810-1",
+        "nombre": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1566]\tMicro catéter cerebral de lumen interno 0.027 pulgadas, diámetro externo proximal 2.9 -3.1 F, distal 2.6-2.7 F, largo 150cm, punta recta o anguladas.",
+      "cantidad": 35,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 640000,
+        "moneda": "CLP",
+        "clp": 640000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 22400000,
+        "moneda": "CLP",
+        "clp": 22400000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.462.810-1",
+        "nombre": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1662]\tMicro catéter cerebral de lumen interno de disminución progresiva hasta 1.2 F, de 165 cm de largo, punta recta, para neuronavegación.",
+      "cantidad": 35,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 980000,
+        "moneda": "CLP",
+        "clp": 980000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 34300000,
+        "moneda": "CLP",
+        "clp": 34300000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.595.497-5",
+        "nombre": "VISALMED VIDA Y SALUD LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1599]\tMicro catéter cerebral de lumen interno de disminución progresiva hasta 1.5 F, de 165 cm de largo punta recta, para neuronavegación.",
+      "cantidad": 15,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P1676]\tMicro catéter cerebral de lumen interno distal 0,0165 pulgadas, con uno y dos marcadores, de largos de 156 y 167 cm.",
+      "cantidad": 15,
+      "unidad": "Unidad",
+      "precioUnitario": {
+        "valor": 850000,
+        "moneda": "CLP",
+        "clp": 850000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 12750000,
+        "moneda": "CLP",
+        "clp": 12750000,
+        "fechaValor": "2026-06-16",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "76.462.810-1",
+        "nombre": "COMERCIAL CMS MEDICAL CHILE LIMITADA",
+        "codigo": null
+      }
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P2047]\tMicro catéter cerebral de lumen interno de 0.025 pulgadas, diámetro externo proximal 2.9 F, distal 2.7 F. De 130 cm de largo. Incluye micro guía compatible.",
+      "cantidad": 10,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42203402,
+      "nombre": "Catéteres o juegos vasculares intervencional o diagnósticos",
+      "descripcion": "[222P2223]\tMicro catéter cerebral de flujo, recubierto de PTFE, de 1.5 F de diámetro, compatible con micro guía 0.010 pulgadas, DMSO y Onyx.",
+      "cantidad": 5,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42203403,
+      "nombre": "Juegos o catéteres introductores vasculares intervencionales o diagnósticos",
+      "descripcion": "[222P1503]\tMicro catéter cerebral de flujo, con punta desprendible, de 1.5 F de diámetro, compatible con Onyx, DMSO y micro guía.",
+      "cantidad": 10,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 8,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LR",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 5.000 UTM"
+}

@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1627-114-LP26",
+  "nombre": "ARRIENDO DE SERVIDORES PARA INFRAESTRUCTURA TECNOLÓGICA DEL HOSPITAL DE SAN FERNANDO",
+  "descripcion": "ARRIENDO DE SERVIDORES PARA INFRAESTRUCTURA TECNOLÓGICA DEL HOSPITAL DE SAN FERNANDO",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "7448",
+    "nombreOrganismo": "SERVICIO DE SALUD HOSPITAL DE SAN FERNANDO",
+    "rutUnidad": "61.602.145-1",
+    "codigoUnidad": "2623",
+    "nombreUnidad": "Hospital de San Fernando Abastecimiento",
+    "region": 6,
+    "comuna": "San Fernando"
+  },
+  "fechas": {
+    "creacion": "2026-10-09T00:00:00-03:00",
+    "publicacion": "2026-10-09T14:36:54-03:00",
+    "cierre": "2026-10-29T10:02:00-03:00",
+    "adjudicacion": "2027-02-10T10:03:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 43211501,
+      "nombre": "Servidores",
+      "descripcion": "ARRIENDO DE SERVIDORES PARA INFRAESTRUCTURA TECNOLÓGICA DEL HOSPITAL DE SAN FERNANDO",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LP",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

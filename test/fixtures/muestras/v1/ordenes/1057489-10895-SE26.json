@@ -1,0 +1,112 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:38:01.7644703Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1057489-10895-SE26",
+      "Nombre": "SERVICIO DE RESIDENCIA MEDICINA PARA EL HDS  AGOSTO 2026 ",
+      "CodigoEstado": 9,
+      "Estado": "Cancelada",
+      "CodigoLicitacion": "1057489-466-LR25",
+      "Descripcion": "1057489-466-LR25\r\nSERVICIO DE RESIDENCIA MEDICINA PARA EL HDS \r\n12 MESES\r\n 01-01-2026 AL 30-12-2026\r\nAGOSTO  2026\r\nTODAS LAS FACTURAS DEBEN SER EMITIDAS DETALLANDO CORRECTAMENTE EL ID DE LA ORDEN DE COMPRA DE MERCADO PUBLICO Y DEBEN ENVIARSE A LA CASILLA [oculto]\r\nSE RECLAMARÁ TODA FACTURA QUE NO CUMPLE CON ESTA INDICACION Y QUE NO CUENTAN CON RECEPCION CONFORME ANTES DE 7 DIAS CORRIDOS A PARTIR DE LA FECHA DE EMISION\r\n",
+      "CodigoTipo": "8",
+      "Tipo": "SE",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 5,
+      "EstadoProveedor": "Cancelada",
+      "Fechas": {
+        "FechaCreacion": "2026-09-23T18:22:32.717",
+        "FechaEnvio": "2026-09-30T16:22:29.383",
+        "FechaAceptacion": "2026-10-08T13:25:44.413",
+        "FechaCancelacion": "2026-10-09T09:04:05.81",
+        "FechaUltimaModificacion": "2026-10-08T13:26:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 46847040,
+      "PorcentajeIva": 0,
+      "Impuestos": 0,
+      "Total": 46847040,
+      "Financiamiento": "",
+      "Pais": "CL",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7428",
+        "NombreOrganismo": "SERVICIO DE SALUD ORIENTE HOSPITAL DEL SALVADOR",
+        "RutUnidad": "61.608.406-2",
+        "CodigoUnidad": "1057489",
+        "NombreUnidad": "Bienes y Servicios",
+        "Actividad": "Servicio Público",
+        "DireccionUnidad": "AV SALVADOR 364",
+        "ComunaUnidad": "* ",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "1272732",
+        "Nombre": "LAYNER MEDICAL",
+        "Actividad": "ESTABLECIMIENTOS MEDICOS DE ATENCION AMBULATORIA (",
+        "CodigoSucursal": "670785",
+        "NombreSucursal": "LAYNER MEDICAL",
+        "RutSucursal": "76.179.729-8",
+        "Direccion": "GANDARILLAS 80",
+        "Comuna": "Puente Alto",
+        "Region": "Región Metropolitana de Santiago",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 2,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 80111600,
+            "Categoria": "Servicios profesionales, administrativos y consultorías de gestión empresarial / Servicios de recursos humanos / Servicios de personal temporal",
+            "CodigoProducto": 80111606,
+            "Producto": "Personal médico temporal",
+            "EspecificacionComprador": "5301800014 \tREMPLAZO HORAS MÉDICAS ESPECIALISTA ",
+            "EspecificacionProveedor": "5301800014 \tREMPLAZO HORAS MÉDICAS ESPECIALISTA ",
+            "Cantidad": 483,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 34880,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 16847040
+          },
+          {
+            "Correlativo": 2,
+            "CodigoCategoria": 80111600,
+            "Categoria": "Servicios profesionales, administrativos y consultorías de gestión empresarial / Servicios de recursos humanos / Servicios de personal temporal",
+            "CodigoProducto": 80111606,
+            "Producto": "Personal médico temporal",
+            "EspecificacionComprador": "5301800006 \tHORAS MEDICAS PARA REEMPLAZO DE MEDICOS ",
+            "EspecificacionProveedor": "5301800006 \tHORAS MEDICAS PARA REEMPLAZO DE MEDICOS ",
+            "Cantidad": 1000,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 30000,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 30000000
+          }
+        ]
+      }
+    }
+  ]
+}

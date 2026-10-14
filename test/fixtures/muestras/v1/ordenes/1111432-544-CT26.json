@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:35.7645262Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1111432-544-CT26",
+      "Nombre": "\tSERVICIO DE NUTRICIONISTA PARA ESPACIOS AMIGABLES",
+      "CodigoEstado": 6,
+      "Estado": "Aceptada",
+      "CodigoLicitacion": "",
+      "Descripcion": "SERVICIO DE NUTRICIONISTA PARA ESPACIOS AMIGABLES DEL CESFAM SAN FELIPE EL REAL, DESDE EL 13 .10.2026 AL 31/12/2026 PROVENIENTE DE REMANENTE DE CONTRATO TERMINADO CON ANTICIPACION DE LICITACION PUBLICA ID 1111432-22-LE26.",
+      "CodigoTipo": "17",
+      "Tipo": "CT",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 4,
+      "EstadoProveedor": "Aceptada",
+      "Fechas": {
+        "FechaCreacion": "2026-10-08T15:42:13.04",
+        "FechaEnvio": "2026-10-09T14:38:46.09",
+        "FechaAceptacion": "2026-10-09T17:35:03.037",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-09T14:38:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 1374975,
+      "PorcentajeIva": 0,
+      "Impuestos": 0,
+      "Total": 1374975,
+      "Financiamiento": "1177",
+      "Pais": "CL",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "1688781",
+        "NombreOrganismo": "CONSULTORIO GENERAL URBANO SAN FELIPE",
+        "RutUnidad": "69.287.560-5",
+        "CodigoUnidad": "1111432",
+        "NombreUnidad": "BIENES Y SERVICIOS",
+        "Actividad": "ADMINISTRACION PUBLICA EN GENERAL",
+        "DireccionUnidad": "Cajales Nº1900 ",
+        "ComunaUnidad": "San Felipe",
+        "RegionUnidad": "Región de Valparaíso ",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "[oculto]",
+        "Nombre": "[oculto]",
+        "Actividad": "SERVICIOS PRESTADOS DE FORMA INDEPENDIENTE POR OTR",
+        "CodigoSucursal": "[oculto]",
+        "NombreSucursal": "[oculto]",
+        "RutSucursal": "[oculto]",
+        "Direccion": "[oculto]",
+        "Comuna": "San Felipe",
+        "Region": "Región de Valparaíso ",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 80111700,
+            "Categoria": "Servicios profesionales, administrativos y consultorías de gestión empresarial / Servicios de recursos humanos / Contratación de personal",
+            "CodigoProducto": 80111715,
+            "Producto": "Profesionales",
+            "EspecificacionComprador": "SERVICIO DE NUTRICIONISTA PARA ESPACIOS AMIGABLES DEL CESFAM SAN FELIPE EL REAL, DESDE EL 13.10.2026 AL 31/12/2026 PROVENIENTE DE REMANENTE DE CONTRATO TERMINADO CON ANTICIPACION DE LICITACION PUBLICA ID 1111432-22-LE26.",
+            "EspecificacionProveedor": "SERVICIO DE NUTRICIONISTA PARA ESPACIOS AMIGABLES DEL CESFAM SAN FELIPE EL REAL, DESDE EL 13.10.2026 AL 31/12/2026 PROVENIENTE DE REMANENTE DE CONTRATO TERMINADO CON ANTICIPACION DE LICITACION PUBLICA ID 1111432-22-LE26.",
+            "Cantidad": 175,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 7857,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 1374975
+          }
+        ]
+      }
+    }
+  ]
+}

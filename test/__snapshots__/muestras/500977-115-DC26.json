@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "500977-115-DC26",
+  "nombre": "Prueba - No ofertar",
+  "descripcion": "Prueba - No ofertar",
+  "estado": "revocada",
+  "estadoGlosa": "Revocada",
+  "comprador": {
+    "codigoOrganismo": "1001725",
+    "nombreOrganismo": "Entidad Compradora de Pruebas DCCP",
+    "rutUnidad": "60.808.000-7",
+    "codigoUnidad": "500977",
+    "nombreUnidad": "MpOperacionesC",
+    "region": 13,
+    "comuna": "Bulnes"
+  },
+  "fechas": {
+    "creacion": "2026-09-11T11:18:07-03:00",
+    "publicacion": "2026-09-11T11:27:48-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 43231505,
+      "nombre": "Software de gestión de recursos humanos",
+      "descripcion": "Prueba - No ofertar",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "DC",
+  "tipoLicitacionGlosa": null
+}

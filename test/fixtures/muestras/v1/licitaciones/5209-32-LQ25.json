@@ -1,0 +1,266 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:35:55.9366096Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "CodigoExterno": "5209-32-LQ25",
+      "Nombre": "SUMINISTRO DE ANTIVIRALES ORALES",
+      "CodigoEstado": 8,
+      "Descripcion": "La Universidad de Chile, para su Hospital Clínico de la Universidad de Chile, en adelante e indistintamente el “Hospital Clínico” o el “HOSPITAL”, establecimiento docente-asistencial de medicina de alta complejidad, llama a licitación pública para la adquisición, por sistema de suministro, de ANTIVIRALES ORALES, la cual se regulará por las presentes Bases.",
+      "FechaCierre": null,
+      "Estado": "Adjudicada",
+      "Comprador": {
+        "CodigoOrganismo": "7251",
+        "NombreOrganismo": "UNIVERSIDAD DE CHILE",
+        "RutUnidad": "60.910.000-1",
+        "CodigoUnidad": "6122",
+        "NombreUnidad": "Hospital Clínico Univ. de Chile - Unidad de Medicamentos",
+        "DireccionUnidad": "DR. CARLOS LORCA 999",
+        "ComunaUnidad": "Independencia",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "RutUsuario": "",
+        "CodigoUsuario": "[oculto]",
+        "NombreUsuario": "[oculto]",
+        "CargoUsuario": "[oculto]"
+      },
+      "DiasCierreLicitacion": "0",
+      "Informada": 0,
+      "CodigoTipo": 1,
+      "Tipo": "LQ",
+      "TipoConvocatoria": "1",
+      "Moneda": "CLP",
+      "Etapas": 1,
+      "EstadoEtapas": "1",
+      "TomaRazon": "0",
+      "EstadoPublicidadOfertas": 1,
+      "JustificacionPublicidad": "",
+      "Contrato": "0",
+      "Obras": "0",
+      "CantidadReclamos": 8056,
+      "Fechas": {
+        "FechaCreacion": "2025-06-02T12:24:05.42",
+        "FechaCierre": "2025-06-23T16:00:00",
+        "FechaInicio": "2025-06-02T16:01:00",
+        "FechaFinal": "2025-06-09T17:00:00",
+        "FechaPubRespuestas": "2025-06-16T16:00:00",
+        "FechaActoAperturaTecnica": "2025-06-24T16:01:00",
+        "FechaActoAperturaEconomica": "2025-06-24T16:01:00",
+        "FechaPublicacion": "2025-06-02T13:46:47.26",
+        "FechaAdjudicacion": "2026-10-07T17:42:41.863",
+        "FechaEstimadaAdjudicacion": "2025-12-18T16:18:00",
+        "FechaSoporteFisico": null,
+        "FechaTiempoEvaluacion": null,
+        "FechaEstimadaFirma": null,
+        "FechasUsuario": null,
+        "FechaVisitaTerreno": null,
+        "FechaEntregaAntecedentes": null
+      },
+      "UnidadTiempoEvaluacion": 1,
+      "DireccionVisita": "",
+      "DireccionEntrega": "",
+      "Estimacion": 1,
+      "FuenteFinanciamiento": "PRESUPUESTO DISPONIBLE",
+      "VisibilidadMonto": 0,
+      "MontoEstimado": null,
+      "Tiempo": "36",
+      "UnidadTiempo": "1",
+      "Modalidad": 1,
+      "TipoPago": "2",
+      "NombreResponsablePago": "[oculto]",
+      "EmailResponsablePago": "",
+      "NombreResponsableContrato": "[oculto]",
+      "EmailResponsableContrato": "",
+      "FonoResponsableContrato": "",
+      "ProhibicionContratacion": "",
+      "SubContratacion": "0",
+      "UnidadTiempoDuracionContrato": 4,
+      "TiempoDuracionContrato": "36",
+      "TipoDuracionContrato": " ",
+      "JustificacionMontoEstimado": "",
+      "ObservacionContract": null,
+      "ExtensionPlazo": 0,
+      "EsBaseTipo": 0,
+      "UnidadTiempoContratoLicitacion": "2",
+      "ValorTiempoRenovacion": "0",
+      "PeriodoTiempoRenovacion": " ",
+      "EsRenovable": 0,
+      "CodigoBIP": null,
+      "Adjudicacion": {
+        "Tipo": 2,
+        "Fecha": "2026-10-01T00:00:00",
+        "Numero": "1214",
+        "NumeroOferentes": 7,
+        "UrlActa": "http://www.mercadopublico.cl/Procurement/Modules/RFB/StepsProcessAward/PreviewAwardAct.aspx?qs=IeZb5hhQxmli7p0EvZ2P5E+jfAx9x4/Fgx6wgjjgM/c="
+      },
+      "Items": {
+        "Cantidad": 12,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoProducto": 51102301,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Aciclovir",
+            "Descripcion": "Línea de Productos Nº1: ACICLOVIR 200 MG",
+            "UnidadMedida": "Comprimido",
+            "Cantidad": 90000,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 2,
+            "CodigoProducto": 51102310,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Lamivudina",
+            "Descripcion": "Línea de Productos Nº2: LAMIVUDINA – ZIDOVUDINA 150-300 MG",
+            "UnidadMedida": "Comprimido",
+            "Cantidad": 3600,
+            "Adjudicacion": {
+              "RutProveedor": "85.025.700-0",
+              "NombreProveedor": "GLAXOSMITHKLINE CHILE FARMACEUTICA LIMITADA",
+              "Cantidad": 3600,
+              "MontoUnitario": 712
+            }
+          },
+          {
+            "Correlativo": 3,
+            "CodigoProducto": 51102314,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Ritonavir",
+            "Descripcion": "Línea de Productos Nº3: OSELTAMIVIR 75 MG  ",
+            "UnidadMedida": "Comprimido",
+            "Cantidad": 10800,
+            "Adjudicacion": {
+              "RutProveedor": "76.237.266-5",
+              "NombreProveedor": "LABORATORIOS ANDROMACO S.A.",
+              "Cantidad": 10800,
+              "MontoUnitario": 1577.8
+            }
+          },
+          {
+            "Correlativo": 4,
+            "CodigoProducto": 51102314,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Ritonavir",
+            "Descripcion": "Línea de Productos Nº4: OSELTAMIVIR 6 - 12 MG / ML 55 ML - 75 ML",
+            "UnidadMedida": "Frasco",
+            "Cantidad": 360,
+            "Adjudicacion": {
+              "RutProveedor": "76.237.266-5",
+              "NombreProveedor": "LABORATORIOS ANDROMACO S.A.",
+              "Cantidad": 360,
+              "MontoUnitario": 35650
+            }
+          },
+          {
+            "Correlativo": 5,
+            "CodigoProducto": 51102332,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Tenofovir disoproxil fumarato",
+            "Descripcion": "Línea de Productos Nº5: TENOFOVIR 300 - EMTRICITABINA 200",
+            "UnidadMedida": "Comprimido",
+            "Cantidad": 4320,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 6,
+            "CodigoProducto": 51102333,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Clorhidrato de valganciclovir",
+            "Descripcion": "Línea de Productos Nº6: RALTEGRAVIR 400 MG",
+            "UnidadMedida": "Comprimido",
+            "Cantidad": 4320,
+            "Adjudicacion": {
+              "RutProveedor": "59.043.540-6",
+              "NombreProveedor": "MERCK SHARP & DOHME (I.A) LLC,AGENCIA EN CHILE",
+              "Cantidad": 4320,
+              "MontoUnitario": 5650
+            }
+          },
+          {
+            "Correlativo": 7,
+            "CodigoProducto": 51102333,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Clorhidrato de valganciclovir",
+            "Descripcion": "Línea de Productos Nº7: VALGANCICLOVIR 450 MG   ",
+            "UnidadMedida": "Comprimido",
+            "Cantidad": 8640,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 8,
+            "CodigoProducto": 51102332,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Tenofovir disoproxil fumarato",
+            "Descripcion": "Línea de Productos Nº8:TENOFOVIR-LAMIVUDINA-DOLUTEGRAVIR 300/300/50 MG",
+            "UnidadMedida": "Comprimido",
+            "Cantidad": 18000,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 9,
+            "CodigoProducto": 51102305,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Famciclovir",
+            "Descripcion": "Línea de Productos Nº9:ENTECAVIR 0.5 MG",
+            "UnidadMedida": "Comprimido",
+            "Cantidad": 2160,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 10,
+            "CodigoProducto": 51102311,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Nevirapina",
+            "Descripcion": "Línea de Productos Nº10:NEVIRAPINA 50 MG / 5 ML  240 ML",
+            "UnidadMedida": "Frasco",
+            "Cantidad": 72,
+            "Adjudicacion": null
+          },
+          {
+            "Correlativo": 11,
+            "CodigoProducto": 51102321,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Zidovudina",
+            "Descripcion": "Línea de Productos Nº11:ZIDOVUDINA 50 MG / 5 ML 200 ML",
+            "UnidadMedida": "Frasco",
+            "Cantidad": 72,
+            "Adjudicacion": {
+              "RutProveedor": "85.025.700-0",
+              "NombreProveedor": "GLAXOSMITHKLINE CHILE FARMACEUTICA LIMITADA",
+              "Cantidad": 72,
+              "MontoUnitario": 34443
+            }
+          },
+          {
+            "Correlativo": 12,
+            "CodigoProducto": 51102318,
+            "CodigoCategoria": "51102300",
+            "Categoria": "Medicamentos y productos farmacéuticos / Medicamentos anti infecciosos / Medicamentos antivirales",
+            "NombreProducto": "Hidrocloruro de valaciclovir",
+            "Descripcion": "Línea de Productos Nº12:VALACICLOVIR 500 MG  ",
+            "UnidadMedida": "Comprimido",
+            "Cantidad": 1080,
+            "Adjudicacion": {
+              "RutProveedor": "76.175.092-5",
+              "NombreProveedor": "ASCEND LABORATORIES SPA",
+              "Cantidad": 1080,
+              "MontoUnitario": 453
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

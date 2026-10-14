@@ -1,8 +1,9 @@
-import { mkdtempSync, readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { main } from "../src/cli.js";
+import { diaSantiago } from "../src/fecha.js";
 
 const fixture = (n: string) => readFileSync(new URL(`./fixtures/v1/${n}.json`, import.meta.url), "utf8");
 
@@ -49,6 +50,35 @@ describe("cli", () => {
     const guardada = readFileSync(join(r.home, "cuota.json"), "utf8");
     expect(JSON.parse(guardada)).toMatchObject({ usadas: 1 });
     expect(guardada).not.toContain("T-SECRETO");
+  });
+
+  it("suma lo suyo a lo que haya en el archivo al terminar: otro proceso que gastó a la vez no se pierde", async () => {
+    const home = mkdtempSync(join(tmpdir(), "mp-cli-"));
+    const ruta = join(home, "cuota.json");
+    const dia = diaSantiago(new Date());
+    writeFileSync(ruta, JSON.stringify({ dia, usadas: 10 }));
+    const codigo = await main(["licitaciones", "--sin-conversion"], {
+      stdout: { write: () => true },
+      stderr: { write: () => true },
+      env: { MP_TICKET: "T", MERCADOPUBLICO_HOME: home },
+      fetch: async () => {
+        writeFileSync(ruta, JSON.stringify({ dia, usadas: 15 })); // otro CLI gastó 5 mientras tanto
+        return new Response(fixture("licitaciones-listado"));
+      },
+    });
+    expect(codigo).toBe(0);
+    expect(JSON.parse(readFileSync(ruta, "utf8"))).toEqual({ dia, usadas: 16 });
+  });
+
+  it("sync: muestra el margen de reintentos, guarda el cursor y suelta el lock del store", async () => {
+    const store = join(mkdtempSync(join(tmpdir(), "mp-cli-")), "mp.json");
+    const vacio = JSON.stringify({ Cantidad: 0, Listado: [] });
+    const r = await correr(["sync", "--desde", "2026-06-01", "--hasta", "2026-06-01", "--fuentes", "licitaciones", "--store", store, "--sin-conversion"], { cuerpo: vacio });
+    expect(r.codigo).toBe(0);
+    expect(r.err).toMatch(/margen por reintentos/);
+    expect(JSON.parse(readFileSync(store, "utf8")).cursores).toEqual({ licitaciones: "2026-06-01" });
+    expect(existsSync(`${store}.lock`)).toBe(false);
+    expect(readFileSync(store, "utf8")).not.toContain("T-SECRETO");
   });
 
   it("sin ticket: error claro", async () => {

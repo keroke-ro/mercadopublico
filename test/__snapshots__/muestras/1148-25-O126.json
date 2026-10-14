@@ -1,0 +1,46 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1148-25-O126",
+  "nombre": "OBRA CONSERVACIÓN SSR VILLA CURACO, COMUNA COLLIPULLI",
+  "descripcion": "OBRA CONSERVACIÓN SSR VILLA CURACO, COMUNA COLLIPULLI, SAFI N°435.538.-",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "7242",
+    "nombreOrganismo": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO PP DCYF",
+    "rutUnidad": "61.202.000-0",
+    "codigoUnidad": "2144",
+    "nombreUnidad": "Dirección de Obras Hidráulicas  - IX Región",
+    "region": 9,
+    "comuna": "Temuco"
+  },
+  "fechas": {
+    "creacion": "2026-10-02T16:08:42-03:00",
+    "publicacion": "2026-10-09T12:08:32-03:00",
+    "cierre": "2026-10-23T08:00:00-03:00",
+    "adjudicacion": "2026-12-31T19:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 101101001,
+      "nombre": "Licitación Pública de Obra",
+      "descripcion": "Licitación Pública de Obra",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "O1",
+  "tipoLicitacionGlosa": "Licitación Pública MOP"
+}

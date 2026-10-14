@@ -156,6 +156,68 @@ describe("sync v1", () => {
     expect(await store.cursor("licitaciones")).toBe("2026-06-19");
   });
 
+  it("margen de reintentos: (consultas − listadas)·t/(1−t) cuenta en cabeHoy y en ejecutar", async () => {
+    const o = { desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones" as const] };
+    const { mp, detalles } = cliente(v1(dias, estados), 5);
+    const plan = await mp.sync.planificar({ ...o, store: storeMemoria() });
+    expect(plan).toMatchObject({ consultas: 5, listadas: 2, restante: 3, margenReintentos: 1, cabeHoy: false }); // 3 detalles + 1
+    await expect(mp.sync.ejecutar(plan)).rejects.toMatchObject({ tipo: "cuota_insuficiente" });
+    expect(detalles()).toBe(0);
+
+    const sin = cliente(v1(dias, estados), 5);
+    expect(await sin.mp.sync.planificar({ ...o, store: storeMemoria(), tasaRechazo: 0 })).toMatchObject({ margenReintentos: 0, cabeHoy: true });
+    expect((await cliente(v1(dias, estados)).mp.sync.planificar({ ...o, store: storeMemoria(), tasaRechazo: 0.5 })).margenReintentos).toBe(3);
+    await expect(sin.mp.sync.planificar({ ...o, store: storeMemoria(), tasaRechazo: 1 })).rejects.toMatchObject({ tipo: "parametros" });
+  });
+
+  it("cancelar a mitad: guarda lo pedido, no mueve el cursor y devuelve detenido: cancelado", async () => {
+    const ac = new AbortController();
+    const ruta = v1(dias, estados);
+    const { mp } = cliente((u) => {
+      if (u.searchParams.get("codigo") === "B") ac.abort(); // se cancela con B en vuelo
+      return ruta(u);
+    });
+    const store = storeMemoria();
+    const o = { desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones" as const], store };
+    const r = await mp.sync.ejecutar(await mp.sync.planificar(o), { signal: ac.signal });
+    expect(r.detenido).toBe("cancelado");
+    expect(r.errores).toEqual([]);
+    expect(await store.obtener("A")).toBeDefined();
+    expect(await store.cursor("licitaciones")).toBeUndefined();
+
+    const r2 = await mp.sync.ejecutar(await mp.sync.planificar(o));
+    expect(r2).toMatchObject({ actualizados: 1, nuevos: 1 }); // A sigue abierta: se vuelve a pedir; B no tiene detalle
+    expect(r2.detenido).toBeUndefined();
+    expect(await store.cursor("licitaciones")).toBe("2026-06-02");
+  });
+
+  it("con el signal ya cancelado, planificar rechaza sin gastar y ejecutar no pide nada", async () => {
+    const { mp, pedidos } = cliente(v1(dias, estados));
+    const o = { desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones" as const], store: storeMemoria() };
+    await expect(mp.sync.planificar({ ...o, signal: AbortSignal.abort() })).rejects.toMatchObject({ tipo: "cancelada" });
+    expect(pedidos).toHaveLength(0);
+    const plan = await mp.sync.planificar(o);
+    expect(await mp.sync.ejecutar(plan, { signal: AbortSignal.abort() })).toMatchObject({ detenido: "cancelado", consultas: 2 });
+    expect(pedidos).toHaveLength(2);
+  });
+
+  it("con guardarConCursor, cada día es una sola escritura y el cursor va con sus datos", async () => {
+    const { mp } = cliente(v1(dias, estados));
+    const base = storeMemoria();
+    const llamadas: string[] = [];
+    const store: Store = {
+      ...base,
+      obtener: (c) => base.obtener(c),
+      cursor: (c) => base.cursor(c),
+      todos: () => base.todos(),
+      guardar: async (ps) => (llamadas.push("guardar"), base.guardar(ps)),
+      fijarCursor: async (c, v) => (llamadas.push("fijarCursor"), base.fijarCursor(c, v)),
+      guardarConCursor: async (ps, c, v) => (llamadas.push(`${ps.map((p) => p.codigo).join("")}@${v}`), await base.guardar(ps), base.fijarCursor(c, v)),
+    };
+    await mp.sync.ejecutar(await mp.sync.planificar({ desde: "2026-06-01", hasta: "2026-06-02", fuentes: ["licitaciones"], store }));
+    expect(llamadas).toEqual(["A@2026-06-01", "C@2026-06-02"]);
+  });
+
   it("ticket inválido aborta después de guardar lo hecho", async () => {
     const ruta = v1(dias, { A: 5 });
     const { mp } = cliente((u) => (u.searchParams.get("codigo") === "B" ? new Response("{}", { status: 401 }) : ruta(u)));

@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1642-24-LP26",
+  "nombre": "SS. DE DETERMINACIONES DE DIMERO D",
+  "descripcion": "SS. DE DETERMINACIONES DE DIMERO D EN ANALIZADOR POINT OF CARE (POC)",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "7455",
+    "nombreOrganismo": "SERVICIO DE SALUD METROPOLITANO OCCIDENTE HOSPITAL DE CURACAVI",
+    "rutUnidad": "61.602.125-7",
+    "codigoUnidad": "2638",
+    "nombreUnidad": "Hospital de Curacaví",
+    "region": 13,
+    "comuna": "Curacaví"
+  },
+  "fechas": {
+    "creacion": "2026-10-08T13:08:37-03:00",
+    "publicacion": "2026-10-09T10:15:17-03:00",
+    "cierre": "2026-10-19T15:23:00-03:00",
+    "adjudicacion": "2026-10-29T13:24:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 41116005,
+      "nombre": "Reactivos de analizadores de coagulación",
+      "descripcion": "SERVICIOS DE DETERMINACIONES DE DIMERO D EN ANALIZADOR POINT OF CARE (POC)",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LP",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

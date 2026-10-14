@@ -1,8 +1,9 @@
 // OCDS → modelo, en streaming: los archivos de OCP llegan a 2,9 GB. Ver docs/api-notes.md §5.
 import { MercadoPublicoError } from "./errores.js";
+import type { Aviso } from "./eventos.js";
 import { normalizarFecha } from "./fecha.js";
 import type { Comprador, Item, Licitacion, OrdenCompra, Proceso, Proveedor } from "./modelo.js";
-import { monto, num, str } from "./util.js";
+import { avisador, entero, exigir, monto, num, revisar, str, type Avisar, type Esquema } from "./util.js";
 import { ESTADO_LICITACION, ESTADO_OC, TIPO_LICITACION, estado, glosa, regionCodigo, tipoDesdeCodigo } from "./v1/codigos.js";
 
 const PREFIJO = "ocds-70d2nz-";
@@ -28,6 +29,8 @@ export interface OpcionesOcds {
   signal?: AbortSignal;
   /** Línea que no se pudo leer o traducir; se salta y se sigue. `numero` parte en 1. */
   alError?: (linea: string, error: unknown, numero: number) => void;
+  /** Cambios de forma que el parser note en cada release (campos nuevos o faltantes, tipos, códigos). */
+  avisar?: (a: Aviso) => void;
 }
 
 /**
@@ -44,7 +47,7 @@ export async function* leerOcds(
     if (!linea.trim()) continue;
     let ps: Proceso[];
     try {
-      ps = desdeOcds(JSON.parse(linea));
+      ps = desdeOcds(JSON.parse(linea), opciones);
     } catch (e) {
       opciones.alError?.(linea, e, n);
       continue;
@@ -54,11 +57,76 @@ export async function* leerOcds(
 }
 
 /** Un JSON OCDS ya parseado → procesos. Sirve para los `{codigo}.json` del 7z del publisher. Lanza si no es OCDS. */
-export function desdeOcds(json: unknown): Proceso[] {
+export function desdeOcds(json: unknown, opciones: Pick<OpcionesOcds, "avisar"> = {}): Proceso[] {
   const o = obj(json);
-  if (Array.isArray(o.records)) return lista(o.records).map((r) => proceso(obj(r.compiledRelease)));
-  if (Array.isArray(o.releases)) return lista(o.releases).map(proceso);
-  return [proceso(o)];
+  const avisar = opciones?.avisar;
+  if (Array.isArray(o.records)) return lista(o.records).map((r) => proceso(obj(r.compiledRelease), avisar));
+  if (Array.isArray(o.releases)) return lista(o.releases).map((r) => proceso(r, avisar));
+  return [proceso(o, avisar)];
+}
+
+// ── Campos conocidos (test/fixtures/ocds, docs/api-notes.md §5 y el estándar OCDS 1.1) ─────────────────────────────
+// OCDS es extensible: solo la raíz de la release está cerrada (avisa `campo_nuevo`); el resto se abre con "…" y
+// solo se revisan los tipos de lo que el parser lee. Las rutas son relativas a la release.
+
+const ABIERTO = { "…": "*" } as const;
+const VALOR: Esquema = { amount: "n", amountGross: "n", currency: "m", ...ABIERTO };
+const ORG: Esquema = { id: "*", name: "s", ...ABIERTO };
+const ITEM: Esquema = {
+  description: "s",
+  quantity: "n",
+  unit: { name: "s", value: VALOR, ...ABIERTO },
+  classification: { id: "sn", description: "s", ...ABIERTO },
+  valueBreakdown: [{ value: VALOR, ...ABIERTO }],
+  ...ABIERTO,
+};
+
+export const ESQUEMA_OCDS: Esquema = {
+  id: "*",
+  date: "s",
+  ocid: "s",
+  tag: "*",
+  initiationType: "*",
+  language: "*",
+  planning: "*",
+  contracts: "*",
+  bids: "*",
+  parties: [{ name: "s", identifier: { id: "sn", ...ABIERTO }, address: { region: "s", locality: "s", ...ABIERTO }, ...ABIERTO }],
+  buyer: ORG,
+  tender: {
+    id: "s",
+    title: "s",
+    description: "s",
+    status: "s",
+    statusDetails: "s",
+    procurementMethodDetails: "s",
+    numberOfTenderers: "n",
+    value: VALOR,
+    tenderPeriod: { startDate: "s", endDate: "s", ...ABIERTO },
+    procuringEntity: ORG,
+    tenderers: [ORG],
+    items: [ITEM],
+    ...ABIERTO,
+  },
+  awards: [{ date: "s", status: "s", statusDetails: "s", title: "s", description: "s", value: VALOR, suppliers: [ORG], items: [ITEM], ...ABIERTO }],
+  relatedProcesses: [{ identifier: "s", ...ABIERTO }],
+};
+
+/** `tender.status` del estándar OCDS. */
+const ESTADOS_TENDER: ReadonlySet<string> = new Set(["planning", "planned", "active", "cancelled", "unsuccessful", "complete", "withdrawn"]);
+
+function vigilar(r: Obj, esOC: boolean, av: Avisar) {
+  revisar(r, ESQUEMA_OCDS, "", av);
+  exigir(r, ["ocid", "tender.id", "date"], "", av);
+  const t = obj(r.tender);
+  const s = str(t.status);
+  if (s !== null && !ESTADOS_TENDER.has(s)) av("valor_desconocido", "tender.status", `status ${s.slice(0, 40)}`);
+  // "8-Adjudicada": el número tiene que estar en la tabla.
+  const detalles: [string, unknown][] = esOC ? lista(r.awards).map((a) => ["awards[].statusDetails", a.statusDetails]) : [["tender.statusDetails", t.statusDetails]];
+  for (const [ruta, d] of detalles) {
+    const n = /^(\d+)\s*-/.exec(str(d) ?? "")?.[1];
+    if (str(d) !== null && (n === undefined || !Object.hasOwn(esOC ? ESTADO_OC : ESTADO_LICITACION, n))) av("valor_desconocido", ruta, `statusDetails ${str(d)!.slice(0, 40)}`);
+  }
 }
 
 async function cuerpo(fuente: ReadableStream<Uint8Array> | Response | string, o: OpcionesOcds): Promise<ReadableStream<Uint8Array>> {
@@ -176,7 +244,7 @@ function item(x: Obj, dia: string | null, prov: Proveedor | null = null, adj: Ob
   const unitario = obj(obj(adj.unit).value);
   const neto = obj(lista(adj.valueBreakdown).find((b) => b.id === "net")?.value);
   return {
-    codigoProducto: num(c.id) || null, // en CM viene "0"
+    codigoProducto: entero(c.id) || null, // en CM viene "0"
     nombre: str(c.description) ?? str(x.description), // en tender.items, la glosa UNSPSC
     descripcion: str(adj.description) ?? str(x.description), // en el award, lo que pidió el comprador
     cantidad: num(x.quantity),
@@ -187,7 +255,7 @@ function item(x: Obj, dia: string | null, prov: Proveedor | null = null, adj: Ob
   };
 }
 
-function proceso(r: Obj): Proceso {
+function proceso(r: Obj, avisar?: (a: Aviso) => void): Proceso {
   const t = obj(r.tender);
   const codigo = str(t.id) ?? str(r.ocid)?.replace(PREFIJO, "");
   if (!codigo) throw new TypeError("No es una release OCDS: falta tender.id y ocid");
@@ -198,6 +266,13 @@ function proceso(r: Obj): Proceso {
   const a0 = awards[0] ?? {};
   // Hay sufijos de OC fuera de TD/CM (p. ej. CT); el award de una OC dice "N-Orden de Compra …".
   const esOC = (tipo !== null && TIPOS_OC.has(tipo)) || /orden de compra/i.test(str(a0.statusDetails) ?? "");
+  const av = avisador("ocds", codigo, avisar);
+  if (av)
+    try {
+      vigilar(r, esOC, av);
+    } catch {
+      // un aviso nunca detiene el parseo
+    }
   const periodo = obj(t.tenderPeriod);
   const fechas = {
     creacion: esOC ? fecha(a0.date) : null,
@@ -285,14 +360,14 @@ function proceso(r: Obj): Proceso {
     ...estadoOcds(
       ESTADO_LICITACION,
       t.statusDetails ?? a0.statusDetails,
-      ESTADO_TENDER[String(t.status)] ?? (a0.status === "active" ? 8 : undefined),
+      (Object.hasOwn(ESTADO_TENDER, str(t.status) ?? "") ? ESTADO_TENDER[str(t.status)!] : undefined) ?? (a0.status === "active" ? 8 : undefined),
     ),
     monto: monto(v.amount, v.currency, dia),
     items: lista(t.items).map((it) => {
       const ad = adjudicados.get(it.id);
       return item(it, dia, ad?.prov ?? null, ad?.it);
     }),
-    oferentes: num(t.numberOfTenderers) ?? (Array.isArray(t.tenderers) ? t.tenderers.length : null),
+    oferentes: entero(t.numberOfTenderers) ?? (Array.isArray(t.tenderers) ? t.tenderers.length : null),
     tipoLicitacion,
     tipoLicitacionGlosa: str(t.procurementMethodDetails) ?? glosa(TIPO_LICITACION, tipoLicitacion),
   } satisfies Licitacion;

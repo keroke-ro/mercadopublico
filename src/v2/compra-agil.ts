@@ -1,6 +1,6 @@
-import { MercadoPublicoError } from "../errores.js";
+import { exigirCodigo, exigirUno, MercadoPublicoError } from "../errores.js";
 import { desdeHoraSantiago } from "../fecha.js";
-import type { Transporte } from "../http.js";
+import type { Cancelable, Transporte } from "../http.js";
 import type { CompraAgil, Enriquecer } from "../modelo.js";
 import { num } from "../util.js";
 import { parseCompraAgil, type EstadoCompraAgil } from "./parse.js";
@@ -40,6 +40,8 @@ export interface PaginaCompraAgil {
 }
 
 const fallo = (m: string) => new MercadoPublicoError("parametros", m);
+// Record y no lista: si EstadoCompraAgil gana un valor, TypeScript obliga a agregarlo aquí.
+const ESTADOS = Object.keys({ publicada: 1, cerrada: 1, desierta: 1, cancelada: 1, proveedor_seleccionado: 1, oc_emitida: 1 } satisfies Record<EstadoCompraAgil, 1>);
 const rut = (x: string | null) => x?.replace(/[.\s]/g, "").toUpperCase();
 
 function iso(x: Date | string | undefined, campo: string): string | undefined {
@@ -59,6 +61,8 @@ function params(f: FiltrosCompraAgil, numero: number) {
   const tamano = f.tamanoPagina ?? 50;
   if (!Number.isInteger(tamano) || tamano < 10 || tamano > 50) throw fallo("`tamanoPagina` va de 10 a 50");
   if (f.region?.some((r) => !Number.isInteger(r) || r < 1 || r > 16)) throw fallo("`region` va de 1 a 16");
+  for (const e of f.estado ?? []) exigirUno(e, ESTADOS, "estado");
+  if (f.id !== undefined) exigirCodigo(f.id, "`id`");
   return {
     estado: f.estado,
     region: f.region,
@@ -82,10 +86,10 @@ export class CompraAgilApi {
   ) {}
 
   /** Una página. Cuesta 1 consulta. */
-  async pagina(filtros: FiltrosCompraAgil, numero: number): Promise<PaginaCompraAgil> {
-    const p = (await this.t.v2("compra-agil", params(filtros, numero))) as { items?: unknown; paginacion?: Record<string, unknown> } | null;
+  async pagina(filtros: FiltrosCompraAgil, numero: number, { signal }: Cancelable = {}): Promise<PaginaCompraAgil> {
+    const p = (await this.t.v2("compra-agil", params(filtros, numero), { signal })) as { items?: unknown; paginacion?: Record<string, unknown> } | null;
     const pag = p?.paginacion ?? {};
-    let items = (Array.isArray(p?.items) ? p.items : []).map((x) => parseCompraAgil(x, { detalle: false }));
+    let items = (Array.isArray(p?.items) ? p.items : []).map((x) => parseCompraAgil(x, { detalle: false, avisar: this.t.avisar }));
     const buscado = rut(filtros.rutOrganismo ?? null);
     if (buscado) items = items.filter((ca) => rut(ca.comprador?.rutUnidad ?? null) === buscado);
     return {
@@ -97,23 +101,22 @@ export class CompraAgilApi {
   }
 
   /** Recorre todas las páginas; cuesta `totalPaginas` consultas. */
-  async *listar(filtros: FiltrosCompraAgil = {}): AsyncGenerator<CompraAgil, void, undefined> {
+  async *listar(filtros: FiltrosCompraAgil = {}, { signal }: Cancelable = {}): AsyncGenerator<CompraAgil, void, undefined> {
     for (let n = 1; ; n++) {
-      const p = await this.pagina(filtros, n);
+      const p = await this.pagina(filtros, n, { signal });
       yield* p.items;
       if (n >= p.totalPaginas) return;
     }
   }
 
   /** Detalle; null si no existe (igual que `porCodigo` en la v1). */
-  async detalle(codigo: string): Promise<CompraAgil | null> {
-    if (!codigo?.trim()) throw fallo("Falta el código de la Compra Ágil");
-    const p = await this.t.v2(`compra-agil/${encodeURIComponent(codigo.trim())}`).catch((e: unknown) => {
+  async detalle(codigo: string, { signal }: Cancelable = {}): Promise<CompraAgil | null> {
+    const p = await this.t.v2(`compra-agil/${encodeURIComponent(exigirCodigo(codigo, "código de la Compra Ágil"))}`, {}, { signal }).catch((e: unknown) => {
       if (e instanceof MercadoPublicoError && e.tipo === "no_encontrado") return null;
       throw e;
     });
     if (p === null) return null;
     if (!p || typeof p !== "object") throw new MercadoPublicoError("respuesta_invalida", `La API no devolvió el detalle de ${codigo}`);
-    return this.enriquecer(parseCompraAgil(p, { detalle: true }));
+    return this.enriquecer(parseCompraAgil(p, { detalle: true, avisar: this.t.avisar }));
   }
 }

@@ -1,0 +1,54 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1057472-121-LR26",
+  "nombre": "ARRIENDO EQUIPAMIENTO DE UNIDAD DE PACIENTE",
+  "descripcion": "Aprueba bases licitación pública y sus anexos para la contratación del servicio de ARRIENDO DE EQUIPAMIENTO DE UNIDAD DE PACIENTE POR PROYECTO CLIMA, para el Hospital El Carmen Dr. Luis Valentín Ferrada",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "1379869",
+    "nombreOrganismo": "HOSPITAL CLINICO METROPOLITANO EL CARMEN DOCTOR LUIS VALENTIN FERRADA",
+    "rutUnidad": "61.980.320-5",
+    "codigoUnidad": "1057472",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 13,
+    "comuna": "Maipú"
+  },
+  "fechas": {
+    "creacion": "2026-08-07T14:16:31-04:00",
+    "publicacion": "2026-10-09T11:22:09-03:00",
+    "cierre": "2026-11-10T17:00:00-03:00",
+    "adjudicacion": "2027-02-08T17:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 716490000,
+    "moneda": "CLP",
+    "clp": 716490000,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 42191807,
+      "nombre": "Camas de cuidado del paciente o accesorios de uso general",
+      "descripcion": "ARRIENDO DE EQUIPAMIENTO DE UNIDAD DE PACIENTE, SEGÚN BASES DE LICITACIÓN",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LR",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 5.000 UTM"
+}

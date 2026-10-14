@@ -1,0 +1,52 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1480074-14-L126",
+  "nombre": "PTR N°E-166 - CONTRATACION CURSO EN COMUNICACION DE CRISIS EN INSTITUCIONES EDUCATIVAS PARA PROFESIONALES DE COLEGIOS MUNICIPALES Y DEPTO. DE EDUACION",
+  "descripcion": "CONTRATACION DE CURSO EN COMUNICACION DE CRISIS EN INSTITUCIONES EDUCATIVAS PARA PROFESIONALES DE COLEGIOS MUNICIPALES Y DEPTO. DE EDUACION. VER DETALLES DE LO REQUERIDO Y SOLICITADO EN BASES DE LICITACION EN ARCHIVOS ADJUNTO.",
+  "estado": "revocada",
+  "estadoGlosa": "Revocada",
+  "comprador": {
+    "codigoOrganismo": "98462",
+    "nombreOrganismo": "I MUNICIPALIDAD DE VITACURA",
+    "rutUnidad": "69.255.600-3",
+    "codigoUnidad": "1480074",
+    "nombreUnidad": "DEPARTAMENTO DE EDUCACION 074",
+    "region": 13,
+    "comuna": "Vitacura"
+  },
+  "fechas": {
+    "creacion": "2026-09-25T09:07:53-03:00",
+    "publicacion": "2026-09-25T10:04:00-03:00",
+    "cierre": "2026-10-06T11:00:00-03:00",
+    "adjudicacion": "2026-10-26T20:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 3500000,
+    "moneda": "CLP",
+    "clp": 3500000,
+    "fechaValor": "2026-09-25",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 80111504,
+      "nombre": "Formación, capacitación y entrenamiento de personal",
+      "descripcion": "VALOR UNITARIO NETO POR PARTICIPANTE. CONTRATACION DE CURSO EN COMUNICACION DE CRISIS EN INSTITUCIONES EDUCATIVAS. VER DETALLES DE LO REQUERIDO Y SOLICITADO EN BASES DE LICITACION EN ARCHIVO ADJUNTO.",
+      "cantidad": 16,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "L1",
+  "tipoLicitacionGlosa": "Licitación Pública menor a 100 UTM"
+}

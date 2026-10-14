@@ -14,12 +14,13 @@ export function glosa(tabla: object, codigo: unknown): string | null {
 /** [slug, glosa]. */
 type Estado = readonly [string, string];
 
-// Corrección: [W] dice Revocada=18 y Suspendida=19; [OCDS] usa 15 y 16. Se aceptan los cuatro.
+// Corrección: [W] dice Revocada=18 y Suspendida=19; [OCDS] y la API real usan 15 y 16 (18 y 19 no se han visto). Se aceptan los cuatro.
+// La glosa de 7 es la que manda la API real.
 // 9, 11, 12 y 14 solo aparecen en [OCDS] (statusDetails "9-Adjudicada", "11-Cerrada"…).
 export const ESTADO_LICITACION = {
   5: ["publicada", "Publicada"],
   6: ["cerrada", "Cerrada"],
-  7: ["desierta", "Desierta"],
+  7: ["desierta", "Desierta (o art. 3 ó 9 Ley 19.886)"],
   8: ["adjudicada", "Adjudicada"],
   9: ["adjudicada", "Adjudicada"],
   11: ["cerrada", "Cerrada"],
@@ -109,10 +110,17 @@ export const TIPO_LICITACION = {
   SE: "Orden de compra sin emisión automática",
 } as const;
 
-/** Tipo desde el código del proceso ("1509-5-L114" → "L1"), para listados que no traen `Tipo`. */
+/**
+ * Tipo desde el código del proceso ("1509-5-L114" → "L1"), solo como respaldo para listados que no traen `Tipo`.
+ * El sufijo no siempre es el tipo: "1469-227-R126" es L1 y los "-R226" son LE o LP, así que R1/R2 dan null.
+ */
 export function tipoDesdeCodigo(codigo: unknown): string | null {
-  return /^\d+-\d+-([A-Z]+\d?)\d{2}$/.exec(str(codigo) ?? "")?.[1] ?? null;
+  const t = /^\d+-\d+-([A-Z]+\d?)\d{2}$/.exec(str(codigo) ?? "")?.[1] ?? null;
+  return t === null || /^R\d$/.test(t) ? null : t;
 }
+
+// Corrección: [PL] dice 2=Privada, pero la API real manda 3 para las privadas (CO, I2, B2, E2). Se aceptan ambos.
+export const CODIGO_TIPO_LICITACION = { 1: "Pública", 2: "Privada", 3: "Privada" } as const;
 
 // Corrección: en la tabla de OC de [W] las glosas de UTM y EUR están invertidas; vale [PL]/[PO].
 export const MONEDA = { CLP: "Peso", CLF: "Unidad de Fomento", USD: "Dólar", UTM: "Unidad Tributaria Mensual", EUR: "Euro" } as const;
@@ -162,7 +170,13 @@ export const TIPO_OC = {
   12: ["MC", "Microcompra"],
   13: ["AG", "Compra Ágil"],
   14: ["CC", "Compra Coordinada"],
+  // 16 y 17 solo en la API real: TD ("Orden de Compra generada por Trato Directo ID …-FTD26") y CT (sin glosa documentada).
+  16: ["TD", "Trato directo"],
+  17: ["CT", "CT (sin glosa documentada)"],
 } as const satisfies Record<number, readonly [string, string]>;
+
+/** `CodigoEstadoProveedor` de OC, según la API real (no está en [W] ni [PO]). */
+export const ESTADO_PROVEEDOR_OC = { 1: "Nueva orden de compra", 2: "En proceso", 4: "Aceptada", 5: "Cancelada", 7: "Recepción Conforme" } as const;
 
 export const TIPO_DESPACHO = {
   7: "Despachar a dirección de envío",

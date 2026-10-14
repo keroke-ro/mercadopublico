@@ -1,0 +1,62 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1110404-212-L126",
+  "nombre": "PROVISIÓN DE EQUIPOS DE CONECTIVIDAD PARA ESTABLECIMIENTO EDUCACIONAL LICEO ANTONIO VARAS DE LA BARRA, PERTENECIENTES AL SLEP CHINCHORRO, ARICA",
+  "descripcion": "PROVISIÓN DE EQUIPOS DE CONECTIVIDAD PARA ESTABLECIMIENTO EDUCACIONAL LICEO ANTONIO VARAS DE LA BARRA, PERTENECIENTES AL SLEP CHINCHORRO, ARICA",
+  "estado": "adjudicada",
+  "estadoGlosa": "Adjudicada",
+  "comprador": {
+    "codigoOrganismo": "1675210",
+    "nombreOrganismo": "SERVICIO LOCAL DE EDUCACION DE CHINCHORRO",
+    "rutUnidad": "62.000.660-2",
+    "codigoUnidad": "1110404",
+    "nombreUnidad": "SLEPCH - EE - Programa 02",
+    "region": 15,
+    "comuna": "Arica"
+  },
+  "fechas": {
+    "creacion": "2026-09-24T09:48:41-03:00",
+    "publicacion": "2026-09-25T08:14:10-03:00",
+    "cierre": "2026-10-01T10:00:00-03:00",
+    "adjudicacion": "2026-10-09T10:24:59-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 43201410,
+      "nombre": "Tarjetas o puertos de conmutación",
+      "descripcion": "PROVISIÓN DE EQUIPOS DE CONECTIVIDAD PARA ESTABLECIMIENTO EDUCACIONAL LICEO ANTONIO VARAS DE LA BARRA, PERTENECIENTES AL SLEP CHINCHORRO, ARICA",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": {
+        "valor": 1286002,
+        "moneda": "CLP",
+        "clp": 1286002,
+        "fechaValor": "2026-09-25",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 1286002,
+        "moneda": "CLP",
+        "clp": 1286002,
+        "fechaValor": "2026-09-25",
+        "fuente": "identidad"
+      },
+      "proveedor": {
+        "rut": "77.786.239-1",
+        "nombre": "SOLTICOF SPA",
+        "codigo": null
+      }
+    }
+  ],
+  "oferentes": 3,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "L1",
+  "tipoLicitacionGlosa": "Licitación Pública menor a 100 UTM"
+}

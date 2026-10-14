@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:13.795816Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1002584-335-AG26",
+      "Nombre": "CAJAS MEGA BOX 1002584-93-COT26",
+      "CodigoEstado": 12,
+      "Estado": "Recepción Conforme",
+      "CodigoLicitacion": "",
+      "Descripcion": "Orden de Compra codigo: 1002584-335-AG26 dirigida a SOCIEDAD DE INVERSIONES LUCY ALARCON FUENTES SPA\r\n\r\nPara coordinar retiro:\r\n[oculto]; [oculto] [oculto] [oculto]\r\n\r\n",
+      "CodigoTipo": "13",
+      "Tipo": "AG",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 7,
+      "EstadoProveedor": "Recepción Conforme",
+      "Fechas": {
+        "FechaCreacion": "2026-10-09T08:38:54.577",
+        "FechaEnvio": "2026-10-09T10:12:56.113",
+        "FechaAceptacion": "2026-10-09T12:04:45.33",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-09T12:05:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 597500,
+      "PorcentajeIva": 19,
+      "Impuestos": 113525,
+      "Total": 711025,
+      "Financiamiento": "",
+      "Pais": "Other",
+      "TipoDespacho": "22",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "1593363",
+        "NombreOrganismo": "DIRECCION DE EDUCACION PUBLICA",
+        "RutUnidad": "65.154.016-k",
+        "CodigoUnidad": "1002584",
+        "NombreUnidad": "Dirección de Educación Pública",
+        "Actividad": "Administración Pública",
+        "DireccionUnidad": "",
+        "ComunaUnidad": "Santiago",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "1988821",
+        "Nombre": "SOCIEDAD DE INVERSIONES LUCY ALARCON FUENTES SPA",
+        "Actividad": "OTRAS ACTIVIDADES ESPECIALIZADAS DE DISEÑO N.C.P.",
+        "CodigoSucursal": "1407510",
+        "NombreSucursal": "MULTILICIT SPA",
+        "RutSucursal": "77.945.906-3",
+        "Direccion": "I GANDARILLAS 451",
+        "Comuna": "Maipú",
+        "Region": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 24112500,
+            "Categoria": "Equipamiento para manejo y estiba de materiales / Recipientes para almacenamiento / Cartón corrugado y otros materiales para embalaje",
+            "CodigoProducto": 24112503,
+            "Producto": "Cartones acanalados de transporte cortados con troquel de tapas separadas",
+            "EspecificacionComprador": "Medidas: Alto 29,5 cms. - Ancho 36 cms. – Largo 45 cms.\r\nColor:\tCafé\r\nMaterial: Cartón\r\nModelo:\tMega box\r\n",
+            "EspecificacionProveedor": "",
+            "Cantidad": 250,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 2390,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 0
+          }
+        ]
+      }
+    }
+  ]
+}

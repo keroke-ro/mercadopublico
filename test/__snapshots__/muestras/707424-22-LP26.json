@@ -1,0 +1,184 @@
+{
+  "tipo": "licitacion",
+  "codigo": "707424-22-LP26",
+  "nombre": "ADQUISICIÓN DE UNIFORMES PARA LAS Y LOS TRABAJADOR",
+  "descripcion": "Fundación Integra, requiere la confección de uniformes, pecheras y cofias para las y los trabajadores que desempeñan funciones en los jardines infantiles y salas cuna de Fundación Integra, Región de Los Ríos, de conformidad a lo señalado en las presentes Bases Administrativas Especiales, Bases Administrativas Generales, Bases Técnicas y Anexos.",
+  "estado": "suspendida",
+  "estadoGlosa": "Suspendida",
+  "comprador": {
+    "codigoOrganismo": "1172700",
+    "nombreOrganismo": "FUNDACION EDUCACIONAL PARA EL DESAROLLO INTEGRAL DE LA NIÑEZ",
+    "rutUnidad": "70.574.900-0",
+    "codigoUnidad": "707424",
+    "nombreUnidad": "Regional Los Rios",
+    "region": 14,
+    "comuna": "Valdivia"
+  },
+  "fechas": {
+    "creacion": "2026-07-23T08:55:44-04:00",
+    "publicacion": "2026-07-23T15:52:55-04:00",
+    "cierre": "2026-08-12T15:00:00-04:00",
+    "adjudicacion": "2026-09-09T14:19:19-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 83113000,
+    "moneda": "CLP",
+    "clp": 83113000,
+    "fechaValor": "2026-07-23",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "TRAJE CLINICO - ASISTENTES DE PARVULOS, SEGÚN ANEXO 8- A",
+      "cantidad": 681,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "TRAJE CLINICO - EDUCADORAS, SEGÚN ANEXO 8- A",
+      "cantidad": 212,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "TRAJE CLINICO - AUXILIAR DE SERVICIOS, SEGÚN ANEXO 8- A",
+      "cantidad": 131,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "POLERA MANGA CORTA - ASISTENTES ADMINISTRATIVAS, SEGÚN ANEXO 08-B1",
+      "cantidad": 86,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "POLERA MANGA CORTA - ASISTENTES DE PARVULOS, SEGÚN ANEXO 08-B1",
+      "cantidad": 1362,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "POLERA MANGA CORTA - EDUCADORAS, SEGÚN ANEXO 08-B2",
+      "cantidad": 424,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "POLERA MANGA CORTA - AUXILIAR DE SERVICIOS, SEGÚN ANEXO 08-B1",
+      "cantidad": 262,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "POLERON ALGODÓN - ASISTENTES ADMINISTRATIVAS, SEGÚN ANEXO 08-C",
+      "cantidad": 43,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "CALZA - ASISTENTES ADMINISTRATIVAS, SEGÚN ANEXO 08-D",
+      "cantidad": 43,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "PECHERAS - NIVEL SALA CUNA, SEGÚN ANEXO 08-E",
+      "cantidad": 576,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "COFIAS - NIVEL SALA CUNA, SEGÚN ANEXO 08-F",
+      "cantidad": 576,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "CAMISA VARON - ASISTENTE ADMINISTRATIVO, SEGÚN ANEXO 08-G",
+      "cantidad": 2,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "SWEATER VARON - ASISTENTE ADMINISTRATIVO, SEGÚN ANEXO 08-H",
+      "cantidad": 2,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 53102710,
+      "nombre": "Uniformes corporativos",
+      "descripcion": "POLERA PIQUE VARON - ASISTENTE ADMINISTRATIVO, SEGÚN ANEXO 08-I",
+      "cantidad": 4,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LP",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

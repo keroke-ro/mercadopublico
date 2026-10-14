@@ -1,0 +1,68 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1002772-9838-CM26",
+  "nombre": "TAPA OBTURACION SIN GOMA PARA PUNCION UNIDAD ROJA (1-33) (CM,TRANSVERSAL,2204005003,RRC)",
+  "descripcion": "Orden de Compra codigo: 1002772-9838-CM26 dirigida a ARTICULOS MEDICOS Y QUIRURGICOS CHILE S.A.",
+  "estado": "enviada_proveedor",
+  "estadoGlosa": "Enviada a Proveedor",
+  "comprador": {
+    "codigoOrganismo": "7383",
+    "nombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+    "rutUnidad": "61.608.205-1",
+    "codigoUnidad": "1002772",
+    "nombreUnidad": "INSUMOS CLINICOS",
+    "region": null,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": "2026-10-06T12:25:46-03:00",
+    "publicacion": "2026-10-09T15:15:27-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-06T12:29:00-03:00"
+  },
+  "monto": {
+    "valor": 1057910,
+    "moneda": "CLP",
+    "clp": 1057910,
+    "fechaValor": "2026-10-09",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": null,
+      "nombre": "TAPA DE OBTURACIÓN BLUCARE ROJA LUER LOCK MACHO-HEMBRA CAJA 100 UNIDADES",
+      "descripcion": "(2233818) TAPA DE OBTURACIÓN BLUCARE ROJA LUER LOCK MACHO-HEMBRA CAJA 100 UNIDADES",
+      "cantidad": 500,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 1778,
+        "moneda": "CLP",
+        "clp": 1778,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 889000,
+        "moneda": "CLP",
+        "clp": 889000,
+        "fechaValor": "2026-10-09",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "CM",
+  "proveedor": {
+    "rut": "76.209.836-9",
+    "nombre": "ARTICULOS MEDICOS Y QUIRURGICOS CHILE S.A.",
+    "codigo": "1312302"
+  },
+  "procesoOrigen": null
+}

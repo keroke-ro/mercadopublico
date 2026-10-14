@@ -30,7 +30,8 @@ export type Evento =
   | { tipo: "cuota"; usadas: number; limite: number; restante: number }
   /** Un monto no se pudo convertir con una fuente y se pasó a la siguiente (o a ninguna). */
   | { tipo: "conversion"; fuente: Fuente; ok: boolean; moneda: string; dia: string }
-  | ({ tipo: "aviso" } & Aviso);
+  /** Un parser notó algo raro. Plano como `Aviso`, pero su `tipo` va en `aviso` (`{ tipo: "aviso" } & Aviso` sería never). */
+  | ({ tipo: "aviso"; aviso: Aviso["tipo"] } & Omit<Aviso, "tipo">);
 
 export type AlEvento = (e: Evento) => void;
 

@@ -2,7 +2,7 @@
 // de las respuestas contra test/fixtures. Autocontenido (solo fetch) para correr sin build:
 //   MP_TICKET=… node --experimental-strip-types scripts/contrato.ts
 // Imprime un reporte markdown y sale con 1 si algo cambió o falló.
-import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -174,14 +174,19 @@ const directo = (() => {
   }
 })();
 
-/** Suma las consultas al mismo archivo de cuota que usa la CLI (~/.mercadopublico/cuota.json), para que la cuenta del día sea una. */
+/**
+ * Suma las consultas al mismo archivo de cuota que usa la CLI (~/.mercadopublico/cuota.json), para que la cuenta del día
+ * sea una. Igual que la CLI: suma a lo que hay ahora y escribe atómico (tmp + rename), sin lock (ver guardarCuota en src/cli.ts).
+ */
 function sumarCuota(n: number) {
   try {
     const ruta = join(process.env.MERCADOPUBLICO_HOME ?? join(homedir(), ".mercadopublico"), "cuota.json");
     const dia = new Date().toLocaleDateString("en-CA", { timeZone: "America/Santiago" });
     const previa = existsSync(ruta) ? (JSON.parse(readFileSync(ruta, "utf8")) as { dia?: string; usadas?: number }) : {};
     mkdirSync(join(ruta, ".."), { recursive: true });
-    writeFileSync(ruta, JSON.stringify({ dia, usadas: (previa.dia === dia ? (previa.usadas ?? 0) : 0) + n }));
+    const tmp = `${ruta}.${process.pid}.tmp`;
+    writeFileSync(tmp, JSON.stringify({ dia, usadas: (previa.dia === dia ? (previa.usadas ?? 0) : 0) + n }));
+    renameSync(tmp, ruta);
   } catch {
     // sin cuenta persistente no se rompe el contrato
   }

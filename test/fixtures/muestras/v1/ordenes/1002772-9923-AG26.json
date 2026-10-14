@@ -1,0 +1,112 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:45.7645202Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1002772-9923-AG26",
+      "Nombre": "SONDA FOLEY 10 FR CON BALON 5ML 100% SILICONA(1-30) ID:\t1002772-2689-COT26 (AG,TRANSVERSAL,2204005003,MTM)",
+      "CodigoEstado": 4,
+      "Estado": "Enviada a proveedor",
+      "CodigoLicitacion": "",
+      "Descripcion": "INSUMO TRANSVERSAL\r\n          ***      DESPACHO PARCIALIZADO DE ACUERDO A REQUERIMIENTO DE BODEGA      ***\r\nDESPACHO SÓLO CON GUÍA DE DESPACHO Y ORDEN DE COMPRA ACEPTADA A: GALVARINO #1509, CERRO NAVIA, PISO -1, BODEGA DE ABASTECIMIENTO.\r\nENVIAR DOCUMENTOS TRIBUTARIOS ELECTRÓNICOS EN FORMATO XML A LA CASILLA [oculto] y CONDICION DE PAGO “CRÉDITO”\r\nCONTACTO BODEGA: [oculto]:  [oculto], [oculto] \r\nINSUMOS SERÁN REVISADOS POR UNIDAD DE BODEGA AL MOMENTO DE RECEPCIONAR.\r\n\r\n\r\nJustificación selección de cotización menos económica: Los productos o servicios cotizados cumplen de mejor manera con los requisitos técnicos solicitados.",
+      "CodigoTipo": "13",
+      "Tipo": "AG",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 1,
+      "EstadoProveedor": "Nueva orden de compra",
+      "Fechas": {
+        "FechaCreacion": "2026-10-08T15:46:17.227",
+        "FechaEnvio": "2026-10-09T14:05:20.063",
+        "FechaAceptacion": null,
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-08T15:48:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 0,
+      "CantidadEvaluacion": 0,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 957000,
+      "PorcentajeIva": 19,
+      "Impuestos": 181830,
+      "Total": 1138830,
+      "Financiamiento": "",
+      "Pais": "Other",
+      "TipoDespacho": "7",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7383",
+        "NombreOrganismo": "SERVICIO SALUD OCCIDENTE HOSPITAL DR FELIX BULNES CERDA",
+        "RutUnidad": "61.608.205-1",
+        "CodigoUnidad": "1002772",
+        "NombreUnidad": "INSUMOS CLINICOS",
+        "Actividad": "Hospital ",
+        "DireccionUnidad": "",
+        "ComunaUnidad": "Cerro Navia",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "2031908",
+        "Nombre": "DIPRO MEDICAL DEVICE SPA",
+        "Actividad": "VENTA AL POR MAYOR DE PRODUCTOS FARMACEUTICOS Y MEDICINALES",
+        "CodigoSucursal": "1450438",
+        "NombreSucursal": "DIPRO MEDICAL DEVICE",
+        "RutSucursal": "78.041.826-5",
+        "Direccion": "HUERFANOS 1044 DP 74",
+        "Comuna": "Santiago",
+        "Region": "Región Metropolitana de Santiago",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 2,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 42293600,
+            "Categoria": "Equipamiento y suministros médicos / Productos quirúrgicos / Bougies quirúrgicos, sondas, obturadores y productos relacionados",
+            "CodigoProducto": 42293603,
+            "Producto": "Sondas quirúrgicas",
+            "EspecificacionComprador": "342080048 SONDA FOLEY 10 FR CON BALON 5ML 100% SILICONA \r\n",
+            "EspecificacionProveedor": "SONDA FOLEY 10 FR CON BALON 5ML 100% SILICONA ",
+            "Cantidad": 80,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 1650,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 0
+          },
+          {
+            "Correlativo": 2,
+            "CodigoCategoria": 42293600,
+            "Categoria": "Equipamiento y suministros médicos / Productos quirúrgicos / Bougies quirúrgicos, sondas, obturadores y productos relacionados",
+            "CodigoProducto": 42293603,
+            "Producto": "Sondas quirúrgicas",
+            "EspecificacionComprador": "342080048 SONDA FOLEY 10 FR CON BALON 5ML 100% SILICONA",
+            "EspecificacionProveedor": "SONDA FOLEY 10 FR CON BALON 5ML 100% SILICONA",
+            "Cantidad": 500,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 1650,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 0
+          }
+        ]
+      }
+    }
+  ]
+}

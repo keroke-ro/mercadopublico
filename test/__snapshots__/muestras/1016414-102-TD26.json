@@ -1,0 +1,70 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1016414-102-TD26",
+  "nombre": "Orden de Compra generada por Trato Directo ID 1016414-13-FTD26",
+  "descripcion": "Adquisición de dispositivos pendrive requeridos ante la solicitud de la Corte de acompañar los dispositivos físicos por los recursos ingresados al tribunal.",
+  "estado": "aceptada",
+  "estadoGlosa": "Aceptada",
+  "comprador": {
+    "codigoOrganismo": "1606467",
+    "nombreOrganismo": "CONSEJO NACIONAL DE TELEVISION",
+    "rutUnidad": "60.909.000-6",
+    "codigoUnidad": "1016414",
+    "nombreUnidad": "CNTV",
+    "region": 13,
+    "comuna": "Providencia"
+  },
+  "fechas": {
+    "creacion": "2026-10-07T16:00:17-03:00",
+    "publicacion": "2026-10-08T18:54:50-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-07T16:07:00-03:00"
+  },
+  "monto": {
+    "valor": 930520,
+    "moneda": "CLP",
+    "clp": 930520,
+    "fechaValor": "2026-10-08",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 32101622,
+      "nombre": "Memoria flash",
+      "descripcion": "KINGSTON USB3.2 Gen1 DataTraveler Exodia M Negro +\r\nAzul",
+      "cantidad": 130,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 6015,
+        "moneda": "CLP",
+        "clp": 6015,
+        "fechaValor": "2026-10-08",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 781950,
+        "moneda": "CLP",
+        "clp": 781950,
+        "fechaValor": "2026-10-08",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "TD",
+  "proveedor": {
+    "rut": "76.139.769-9",
+    "nombre": "[oculto]",
+    "codigo": "1437323"
+  },
+  "procesoOrigen": "1016414-13-FTD26"
+}

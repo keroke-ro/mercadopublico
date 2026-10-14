@@ -22,6 +22,11 @@ export interface OpcionesSync {
    * aparece el 12), así que recorrer los días ya trae los cambios de estado. Requiere `detalle`. Ver REFRESCO_DIAS.
    */
   refrescar?: boolean;
+  /**
+   * Fracción de consultas que se espera que la API rechace (10500) y haya que reintentar; cada reintento gasta cuota.
+   * Por defecto 0.25 (medido: entre 15% y 30%). Da `PlanSync.margenReintentos`. 0 = sin margen.
+   */
+  tasaRechazo?: number;
   store: Store;
 }
 
@@ -54,6 +59,11 @@ export interface PlanSync {
   hasta: string;
   /** Consultas de listado previstas (1 por día v1 y la página 1 de la v2), sin contar reintentos. */
   listadas: number;
+  /**
+   * Consultas extra estimadas por reintentos de lo que falta: (consultas − listadas)·t/(1 − t), con t = `tasaRechazo`.
+   * `cabeHoy` y `ejecutar` lo suman a lo que falta.
+   */
+  margenReintentos?: number;
 }
 
 export interface ResultadoSync {
@@ -63,7 +73,10 @@ export interface ResultadoSync {
   /** Procesos ya guardados que no se volvieron a consultar: en estado final o (v2) sin cambios desde la última vez. */
   omitidos: number;
   errores: { codigo: string; error: string }[];
-  /** Si se detuvo antes de terminar porque se acabó la cuota local; lo hecho quedó guardado. */
+  /**
+   * Si se detuvo antes de terminar: `"cancelado"` si se disparó el `signal`, o por qué (se acabó la cuota local).
+   * Lo hecho quedó guardado y los cursores nunca quedan adelante de lo guardado: la próxima vuelta sigue desde ahí.
+   */
   detenido?: string;
 }
 
@@ -74,7 +87,9 @@ export interface ResultadoSync {
  * aparece después en el detalle) y cerrada.
  */
 const FINALES: ReadonlySet<string> = new Set(["adjudicada", "desierta", "revocada", "cancelada", "recepcion_conforme", "oc_emitida"]);
-const ABORTAN: ReadonlySet<string> = new Set(["cuota_agotada", "cuota_insuficiente", "ticket_invalido"]);
+const ABORTAN: ReadonlySet<string> = new Set(["cuota_agotada", "cuota_insuficiente", "ticket_invalido", "circuito_abierto", "cancelada"]);
+/** Medido el 2026-10-13: la API rechaza con 10500 entre 15% y 30% de las consultas seriales. */
+const TASA_RECHAZO = 0.25;
 
 /** ¿Hay que pedir (o, sin detalle, volver a guardar) este proceso? */
 function necesita(s: Proceso | undefined, item: Proceso, detalle: boolean): boolean {
@@ -100,9 +115,12 @@ export class Sync {
     return this.mp.cuota.toJSON().dia; // respeta el reloj inyectado al cliente
   }
 
-  async planificar(opciones: OpcionesSync): Promise<PlanSync> {
+  /** Con `signal`, cancelar rechaza con tipo "cancelada" (planificar no guarda nada; los listados pedidos ya se gastaron). */
+  async planificar(opciones: OpcionesSync & { signal?: AbortSignal }): Promise<PlanSync> {
     const dia = this.hoy();
-    const { store, desde, hasta = dia, fuentes = ["licitaciones", "ordenes", "compra_agil"], detalle = true, refrescar = false } = opciones;
+    const { signal, ...op } = opciones;
+    const { store, desde, hasta = dia, fuentes = ["licitaciones", "ordenes", "compra_agil"], detalle = true, refrescar = false, tasaRechazo = TASA_RECHAZO } = op;
+    if (!(tasaRechazo >= 0 && tasaRechazo < 1)) throw new MercadoPublicoError("parametros", `tasaRechazo debe estar en [0, 1): ${tasaRechazo}`);
     const cuota = this.mp.cuota;
     const antes = cuota.usadas;
     const dias = new Map<FuenteSync, string[]>();
@@ -122,7 +140,7 @@ export class Sync {
     for (const f of fuentes) {
       if (f === "compra_agil") {
         const cambioDesde = (await store.cursor(f)) ?? desde;
-        const p = await this.mp.compraAgil.pagina(filtrosCA(cambioDesde, hasta), 1);
+        const p = await this.mp.compraAgil.pagina(filtrosCA(cambioDesde, hasta), 1, { signal });
         listados.push({ fuente: f, desde: cambioDesde, items: p.items, paginas: p.totalPaginas });
         const det = detalle ? ` + hasta ${p.totalResultados} detalles (se saltan los sin cambios y los cerrados)` : "";
         desglose.push({ fuente: f, consultas: Math.max(1, p.totalPaginas) + (detalle ? p.totalResultados : 0), nota: `cota superior: ${p.totalPaginas} páginas${det}, cambios desde ${cambioDesde}` });
@@ -133,7 +151,7 @@ export class Sync {
       const ds = dias.get(f)!;
       const listados0 = new Set<string>();
       for (const d of ds) {
-        const items: Proceso[] = await (f === "licitaciones" ? this.mp.licitaciones : this.mp.ordenes).delDia(d);
+        const items: Proceso[] = await (f === "licitaciones" ? this.mp.licitaciones : this.mp.ordenes).delDia(d, { signal });
         listados.push({ fuente: f, desde: d, items, paginas: 1 });
         for (const it of items) (listados0.add(it.codigo), necesita(await store.obtener(it.codigo), it, detalle) ? pedir++ : omitidos++);
       }
@@ -156,22 +174,33 @@ export class Sync {
     }
     const consultas = desglose.reduce((a, d) => a + d.consultas, 0);
     const gastadas = cuota.usadas - antes;
-    return { opciones, consultas, gastadas, desglose, cabeHoy: consultas - listadas <= cuota.restante, restante: cuota.restante, listados, dia, hasta, listadas };
+    const margenReintentos = Math.ceil(((consultas - listadas) * tasaRechazo) / (1 - tasaRechazo));
+    const cabeHoy = consultas - listadas + margenReintentos <= cuota.restante;
+    return { opciones: op, consultas, gastadas, desglose, cabeHoy, restante: cuota.restante, listados, dia, hasta, listadas, margenReintentos };
   }
 
-  async ejecutar(plan: PlanSync, o: { store?: Store; alAvanzar?: (p: { fuente: FuenteSync; hechas: number; total: number }) => void } = {}): Promise<ResultadoSync> {
+  /**
+   * Con `signal`, cancelar guarda lo ya pedido y devuelve con `detenido: "cancelado"` (no rechaza). Cada lote (un día
+   * o una página) se guarda antes de mover su cursor, en una sola escritura si el store tiene `guardarConCursor`.
+   */
+  async ejecutar(
+    plan: PlanSync,
+    o: { store?: Store; alAvanzar?: (p: { fuente: FuenteSync; hechas: number; total: number }) => void; signal?: AbortSignal } = {},
+  ): Promise<ResultadoSync> {
     const store = o.store ?? plan.opciones.store;
+    const { signal } = o;
     const { detalle = true } = plan.opciones;
     const cuota = this.mp.cuota;
-    cuota.exigir(plan.consultas - plan.listadas, "el sync");
+    cuota.exigir(plan.consultas - plan.listadas + (plan.margenReintentos ?? 0), "el sync");
     const antes = cuota.usadas;
     const r: ResultadoSync = { consultas: 0, nuevos: 0, actualizados: 0, omitidos: 0, errores: [] };
     let reintentar = 0; // errores reintentables vistos
     const fin = () => ({ ...r, consultas: plan.gastadas + cuota.usadas - antes });
-    const sinCuota = () => {
-      if (cuota.restante >= 1) return false;
-      r.detenido = `se acabó la cuota del día (se reinicia ${cuota.reinicia}); lo hecho quedó guardado`;
-      return true;
+    /** ¿Hay que parar ya? Anota por qué. */
+    const parar = () => {
+      if (signal?.aborted) r.detenido = "cancelado";
+      else if (cuota.restante < 1) r.detenido = `se acabó la cuota del día (se reinicia ${cuota.reinicia}); lo hecho quedó guardado`;
+      return !!r.detenido;
     };
 
     let actual: FuenteSync | undefined;
@@ -180,9 +209,17 @@ export class Sync {
     const avanzar = () =>
       o.alAvanzar?.({ fuente: actual!, hechas: base + cuota.usadas - inicio, total: plan.desglose.find((d) => d.fuente === actual)?.consultas ?? 0 });
 
-    /** Procesa y guarda un lote (un día o una página). false = hay que parar. */
-    const lote = async (items: Proceso[]): Promise<boolean> => {
+    /** Lo pedido de un lote, y el cursor si el lote terminó. Datos antes que cursor, o los dos juntos. */
+    const guardar = async (ps: Proceso[], clave?: FuenteSync, valor?: string) => {
+      if (clave && valor && store.guardarConCursor) return store.guardarConCursor(ps, clave, valor);
+      if (ps.length) await store.guardar(ps);
+      if (clave && valor) await store.fijarCursor(clave, valor);
+    };
+
+    /** Pide lo que falte de un lote (un día o una página). undefined = hay que parar; lo pedido ya quedó guardado. */
+    const lote = async (items: Proceso[]): Promise<Proceso[] | undefined> => {
       const listos: Proceso[] = [];
+      let completo = false;
       try {
         for (const it of items) {
           const s = await store.obtener(it.codigo);
@@ -190,24 +227,27 @@ export class Sync {
             r.omitidos++;
             continue;
           }
-          if (detalle && sinCuota()) return false;
+          if (detalle && parar()) return undefined;
           try {
-            listos.push(detalle ? await this.detalle(actual!, it.codigo) : it);
+            listos.push(detalle ? await this.detalle(actual!, it.codigo, signal) : it);
             if (s) r.actualizados++;
             else r.nuevos++;
           } catch (e) {
+            if (signal?.aborted) return (parar(), undefined);
             if (e instanceof MercadoPublicoError && ABORTAN.has(e.tipo)) throw e;
             if (e instanceof MercadoPublicoError && e.reintentable) reintentar++;
             r.errores.push({ codigo: it.codigo, error: e instanceof Error ? e.message : String(e) });
           }
           if (detalle) avanzar();
         }
-        return true;
+        completo = true;
+        return listos;
       } finally {
-        await store.guardar(listos); // también si se aborta: lo pedido no se pierde
+        if (!completo) await guardar(listos); // también si se aborta: lo pedido no se pierde
       }
     };
 
+    if (parar()) return fin();
     // Un cursor solo avanza mientras todo lo anterior de su fuente salió sin errores reintentables (red, 5xx), para
     // reintentarlos la próxima vez. Los permanentes (no_encontrado, parametros…) se anotan y no lo frenan.
     const conErrores = new Set<FuenteSync>();
@@ -219,37 +259,48 @@ export class Sync {
       }
       const e0 = reintentar;
       if (l.fuente !== "compra_agil") {
-        if (!(await lote(l.items))) return fin();
-        if (l.refresco) continue;
-        if (reintentar > e0) conErrores.add(l.fuente);
+        const listos = await lote(l.items);
+        if (!listos) return fin();
+        if (reintentar > e0 && !l.refresco) conErrores.add(l.fuente);
         // El día en que se planificó no estaba completo: no se marca, la próxima vez se vuelve a listar.
-        if (!conErrores.has(l.fuente) && l.desde < plan.dia) await store.fijarCursor(l.fuente, l.desde);
-        avanzar();
+        const marca = !l.refresco && !conErrores.has(l.fuente) && l.desde < plan.dia;
+        await guardar(listos, l.fuente, marca ? l.desde : undefined);
+        if (!l.refresco) avanzar();
         continue;
       }
       // ponytail: la v2 ordena por último cambio descendente, así que el cursor recién puede avanzar al terminar
       // todas las páginas. Si se corta, la próxima vez se re-listan las páginas, pero los detalles ya guardados se
       // saltan (mismo fecha_ultimo_cambio). Para reanudar sin re-listar haría falta un segundo cursor con cambio_hasta.
       let max = await store.cursor(l.fuente);
-      for (let n = 1, items = l.items, total = l.paginas; ; ) {
-        if (!(await lote(items))) return fin();
+      for (let n = 1, items = l.items, total = l.paginas; ; n++) {
+        const listos = await lote(items);
+        if (!listos) return fin();
         for (const it of items) {
           const u = it.fechas.ultimoCambio;
           if (u && (!max || Date.parse(u) > Date.parse(max))) max = u;
         }
-        if (++n > total) break;
-        if (sinCuota()) return fin();
-        ({ items, totalPaginas: total } = await this.mp.compraAgil.pagina(filtrosCA(l.desde, plan.hasta), n));
+        if (n >= total) {
+          // La última página va junto con el cursor.
+          await guardar(listos, l.fuente, reintentar === e0 ? max : undefined);
+          break;
+        }
+        await guardar(listos);
+        if (parar()) return fin();
+        try {
+          ({ items, totalPaginas: total } = await this.mp.compraAgil.pagina(filtrosCA(l.desde, plan.hasta), n + 1, { signal }));
+        } catch (e) {
+          if (signal?.aborted) return (parar(), fin());
+          throw e;
+        }
         avanzar();
       }
-      if (reintentar === e0 && max) await store.fijarCursor(l.fuente, max);
       avanzar();
     }
     return fin();
   }
 
-  private async detalle(f: FuenteSync, codigo: string): Promise<Proceso> {
-    const p = f === "compra_agil" ? await this.mp.compraAgil.detalle(codigo) : await (f === "licitaciones" ? this.mp.licitaciones : this.mp.ordenes).porCodigo(codigo);
+  private async detalle(f: FuenteSync, codigo: string, signal?: AbortSignal): Promise<Proceso> {
+    const p = f === "compra_agil" ? await this.mp.compraAgil.detalle(codigo, { signal }) : await (f === "licitaciones" ? this.mp.licitaciones : this.mp.ordenes).porCodigo(codigo, { signal });
     if (!p) throw new MercadoPublicoError("no_encontrado", `${codigo} no tiene detalle`);
     return p;
   }

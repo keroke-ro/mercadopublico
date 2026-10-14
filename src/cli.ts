@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // CLI: `npx mercadopublico <comando>`. Salida json, csv o tabla; datos personales ocultos salvo --incluir-personales.
 import { createReadStream, realpathSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { Readable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -175,12 +175,23 @@ async function leerCuota(env: IO["env"]): Promise<EstadoCuota | undefined> {
   }
 }
 
-// ponytail: dos CLI en paralelo se pisan la cuenta (gana el último); bastaría un lock si llega a importar.
-async function guardarCuota(env: IO["env"], c: Cuota) {
+/**
+ * Suma lo gastado por este proceso a lo que haya en el archivo ahora (no lo que había al empezar), así dos CLI o la
+ * CLI y scripts/contrato.ts no se pisan la cuenta. Escritura atómica (tmp + rename) para no dejar un JSON a medias.
+ * ponytail: sin lock; dos procesos que terminan en el mismo milisegundo pueden perder lo de uno. Lock con `wx` si importa.
+ */
+async function guardarCuota(env: IO["env"], c: Cuota, inicial: EstadoCuota | undefined) {
   const ruta = archivoCuota(env);
+  const { dia, usadas } = c.toJSON();
+  const delta = usadas - (inicial?.dia === dia ? inicial.usadas : 0);
+  if (delta <= 0) return;
   try {
-    await mkdir(join(ruta, ".."), { recursive: true });
-    await writeFile(ruta, JSON.stringify({ dia: c.toJSON().dia, usadas: c.usadas }));
+    await mkdir(dirname(ruta), { recursive: true });
+    const ahora = await leerCuota(env);
+    const base = Math.max(ahora?.dia === dia ? ahora.usadas : 0, inicial?.dia === dia ? inicial.usadas : 0);
+    const tmp = `${ruta}.${process.pid}.tmp`;
+    await writeFile(tmp, JSON.stringify({ dia, usadas: base + delta }));
+    await rename(tmp, ruta);
   } catch {
     // Sin cuenta persistente no se rompe el comando.
   }
@@ -188,6 +199,7 @@ async function guardarCuota(env: IO["env"], c: Cuota) {
 
 export async function main(argv: string[], io: IO): Promise<number> {
   let mp: MercadoPublico | undefined;
+  let guardada: EstadoCuota | undefined;
   try {
     const { values: o, positionals } = parseArgs({ args: argv, options: OPCIONES, allowPositionals: true });
     const [comando, arg, ...sobra] = positionals;
@@ -222,7 +234,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
       return salir(ps);
     }
 
-    const guardada = await leerCuota(io.env);
+    guardada = await leerCuota(io.env);
     if (comando === "cuota") return salir(new Cuota(undefined, guardada).toJSON());
 
     const ticket = o.ticket ?? io.env.MP_TICKET;
@@ -231,7 +243,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
     mp = new MercadoPublico({
       ticket,
       fetch: f,
-      cuota: guardada,
+      cuota: guardada && { ...guardada }, // copia: Cuota la modifica y aquí hace falta la de partida
       conversor: o["sin-conversion"] ? false : f && conversorEncadenado(conversorMindicador({ fetch: f }), conversorParidadChileCompra({ fetch: f })),
     });
 
@@ -277,24 +289,36 @@ export async function main(argv: string[], io: IO): Promise<number> {
         if (!o.desde) throw new ErrorUso("sync necesita --desde AAAA-MM-DD");
         const ruta = o.store ?? "./mp.json";
         const fuentes = lista(o.fuentes)?.map((x) => uno<FuenteSync>(x, ["licitaciones", "ordenes", "compra_agil"], "fuentes")!);
-        const opciones = { desde: dia(o.desde, "desde")!, hasta: dia(o.hasta, "hasta"), fuentes, store: await storeArchivo(ruta) };
-        const plan = await mp.sync.planificar(opciones);
-        // Sin `listados`: son procesos crudos (con datos personales) que solo usa ejecutar.
-        const { listados: _, ...resumen } = plan;
-        const visible = { ...resumen, opciones: { ...opciones, store: ruta } };
-        if (o.plan) return salir(formato === "json" ? visible : plan.desglose);
-        io.stderr.write(
-          `Plan: ~${plan.consultas} consultas (${plan.gastadas} ya gastadas), quedan ${plan.restante} hoy\n` +
-            plan.desglose.map((x) => `  ${x.fuente}: ${x.consultas} (${x.nota})\n`).join(""),
-        );
-        const resultado = await mp.sync.ejecutar(plan, {
-          alAvanzar: ({ fuente, hechas, total }) => {
-            if (io.stderr.isTTY) io.stderr.write(`\r${fuente} ${hechas}/${total}   `);
-            else if (hechas === total) io.stderr.write(`${fuente} ${hechas}/${total}\n`);
-          },
-        });
-        if (io.stderr.isTTY) io.stderr.write("\n");
-        return salir(resultado);
+        const store = await storeArchivo(ruta);
+        // Ctrl-C cancela ordenado: se guarda lo hecho y la cuota; un segundo Ctrl-C mata como siempre.
+        const ac = new AbortController();
+        const cancelar = () => (io.stderr.write("\nCancelando: se guarda lo hecho…\n"), ac.abort());
+        process.once("SIGINT", cancelar);
+        try {
+          const opciones = { desde: dia(o.desde, "desde")!, hasta: dia(o.hasta, "hasta"), fuentes, store };
+          const plan = await mp.sync.planificar({ ...opciones, signal: ac.signal });
+          // Sin `listados`: son procesos crudos (con datos personales) que solo usa ejecutar.
+          const { listados: _, ...resumen } = plan;
+          const visible = { ...resumen, opciones: { ...opciones, store: ruta } };
+          if (o.plan) return salir(formato === "json" ? visible : plan.desglose);
+          io.stderr.write(
+            `Plan: ~${plan.consultas} consultas (${plan.gastadas} ya gastadas) + ~${plan.margenReintentos ?? 0} de margen por reintentos, quedan ${plan.restante} hoy\n` +
+              plan.desglose.map((x) => `  ${x.fuente}: ${x.consultas} (${x.nota})\n`).join(""),
+          );
+          const resultado = await mp.sync.ejecutar(plan, {
+            signal: ac.signal,
+            alAvanzar: ({ fuente, hechas, total }) => {
+              if (io.stderr.isTTY) io.stderr.write(`\r${fuente} ${hechas}/${total}   `);
+              else if (hechas === total) io.stderr.write(`${fuente} ${hechas}/${total}\n`);
+            },
+          });
+          if (io.stderr.isTTY) io.stderr.write("\n");
+          salir(resultado);
+          return resultado.detenido === "cancelado" ? 130 : 0;
+        } finally {
+          process.off("SIGINT", cancelar);
+          await store.cerrar?.();
+        }
       }
       default:
         throw new ErrorUso(`Comando desconocido: ${comando}`);
@@ -305,7 +329,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
     if (io.env.DEBUG) io.stderr.write(`${(e as Error).stack}\n`);
     return uso ? 2 : 1;
   } finally {
-    if (mp) await guardarCuota(io.env, mp.cuota);
+    if (mp) await guardarCuota(io.env, mp.cuota, guardada);
   }
 }
 

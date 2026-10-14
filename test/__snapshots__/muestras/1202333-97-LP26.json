@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1202333-97-LP26",
+  "nombre": "CONSTRUCCIÓN DE SERVICIOS HIGIÉNICOS PARA PLAYA INCLUSIVA EL MANZANO QUINTERO",
+  "descripcion": "La presente licitación tiene por objeto contratar la ejecución del proyecto denominado “CONSTRUCCIÓN DE SERVICIOS HIGIÉNICOS PARA PLAYA INCLUSIVA EL MANZANO, QUINTERO”, consistente en la construcción y habilitación de dos servicios higiénicos accesibles destinados a personas con movilidad reducida, además de una bodega para el almacenamiento y resguardo de sillas anfibias y equipamiento asociado a la playa inclusiva.",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "138454",
+    "nombreOrganismo": "I MUNICIPALIDAD DE QUINTERO",
+    "rutUnidad": "69.060.700-K",
+    "codigoUnidad": "1202333",
+    "nombreUnidad": "LICITACIONES",
+    "region": 5,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": "2026-10-09T00:00:00-03:00",
+    "publicacion": "2026-10-09T16:09:19-03:00",
+    "cierre": "2026-10-20T15:00:00-03:00",
+    "adjudicacion": "2026-11-23T14:25:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 72131702,
+      "nombre": "Construcción de obras civiles",
+      "descripcion": "CONSTRUCCIÓN DE SERVICIOS HIGIÉNICOS PARA PLAYA INCLUSIVA EL MANZANO QUINTERO",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LP",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 1.000 UTM e inferior a 2.000 UTM"
+}

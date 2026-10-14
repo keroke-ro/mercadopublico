@@ -1,0 +1,208 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1057402-160-LR26",
+  "nombre": "INSUMOS PARA CR. INMUNOLOGIA MANUAL  REACTIVOS CR. LABORATORIO CLINICO REPASO",
+  "descripcion": "El propósito de la licitación es contar con contratos de suministro por la adquisición de “INSUMOS PARA CR. INMUNOLOGIA MANUAL & REACTIVOS CR. LABORATORIO CLINICO (REPASO)”, que permitan el aprovisionamiento oportuno de los productos necesarios en la atención de los usuarios del Hospital para los años 2026- 2028, en las circunstancias que estos productos no fueran provistos por la Central Nacional de Abastecimiento de los Servicios de Salud, ni se encuentren disponibles en catálogos electrónicos del Convenio Marco, en las Compras Coordinadas y/o Compras Conjuntas del Ministerio de Salud, o bien su adquisición sea desventajosa respecto al resultado de la presente licitación, ni existen en propiedad de otros organismo del Estado o servicios compartidos que permitan satisfacer el requerimiento, cuyas condiciones más ventajosas serán informadas en la oportunidad correspondiente a la Dirección de Compras, en conformidad con lo dispuesto en el D.S. Nº 661, de 2024, del Ministerio de Hacienda.",
+  "estado": "cerrada",
+  "estadoGlosa": "Cerrada",
+  "comprador": {
+    "codigoOrganismo": "7297",
+    "nombreOrganismo": "HOSPITAL CLINICO DE MAGALLANES DR. LAUTARO NAVARRO AVARIA",
+    "rutUnidad": "61.607.901-8",
+    "codigoUnidad": "1057402",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 12,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": "2026-09-02T00:00:00-04:00",
+    "publicacion": "2026-09-08T16:12:54-03:00",
+    "cierre": "2026-10-09T15:00:00-03:00",
+    "adjudicacion": "2027-02-11T20:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "JERINGAS GASES HEPARINA DE LITIO 1 ML",
+      "cantidad": 7600,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "MEDIO DE MONTAJE PARA FLUORESCENCIA 15ML (244-0972)",
+      "cantidad": 5,
+      "unidad": "Frasco",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "PIANO CONTADOR DIGITAL DE CELULAS SANGUINEA DE 8 TECLAS PARA CELULAS + 4 TECLAS CON FUNIONES ESTANDAR, (TIPO MODELO DBC-8E/LEUCOCITOS), CON TOTALIZADOR, MICROPROCESADOR DE CONTROL, PANTALLA LED,0-999, ALARMA SONORA AL LLEGAR A  100, MUESTRA %,  (  MODELO",
+      "cantidad": 5,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "PLACAS DE VIDRIO PRENSADO DE MICROAGLUTINACIÓN V.D.R.L. CON 12 CAVIDADES NUMERADAS DE 1,5 MM DE PROFUNDIDAD Y 15 MM DE DIÁMETRO. CON RANURAS REBOSADERAS Y DIMENSIONES DE 89X57X4,5MM.",
+      "cantidad": 100,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "TBC MYCO DDR TRIDENT RESUSPENSION BUFFER (60X3 ML) REF TBRB 30-60",
+      "cantidad": 20,
+      "unidad": "Kit",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "PORTAOBJETOS PARA CONTROL DE TINCION BACILOSCOPIA ZIEHL NEELSEN (tipo BD BBL AFB SLIDE REF 231391)",
+      "cantidad": 40,
+      "unidad": "Kit",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "TIMER DIGITAL LABORATORIO RANGO 1 - 99 MINUTOS, SUJECION IMAN Y CLIP, TIEMPO ASCENDENTE Y DESCENDENTE, ALIMENTACION POR BATERIA AAA DC 1,5 V",
+      "cantidad": 40,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "BIOQ REACTIVO ACTIVADOR COBAS INTEGRA (9 X 12 ML (REF 04663632 190",
+      "cantidad": 20,
+      "unidad": "Kit",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "PANEL TETRA 2 AQUIOS CD 45/ CD 56 / CD 16 /CD 19 (REF B23534) DEBE SER COMPATIBLE CON EQUIPO AQUIOS CL (BECKMAN COULTER)",
+      "cantidad": 10,
+      "unidad": "Kit",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "CELLA VISION OIL PACK (CAJA 2 X 150 ML) COMPATIBLE CON SISTEMA AUTOMATIZADO DE FROTIS Y VISOR SANGUINEO DI-60",
+      "cantidad": 3,
+      "unidad": "Kit",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "INSUMOS DE OFERTA ECONOMICA MONTO NETO TOTAL, SEGUN ANEXO N°10",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "INSUMOS DE OFERTA ECONOMICA MONTO NETO TOTAL, SEGUN ANEXO N°11",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "INSUMOS DE OFERTA ECONOMICA MONTO NETO TOTAL, SEGUN ANEXO N°12",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "INSUMOS DE OFERTA ECONOMICA MONTO NETO TOTAL, SEGUN ANEXO N°13",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "INSUMOS DE OFERTA ECONOMICA MONTO NETO TOTAL, SEGUN ANEXO N°14",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "INSUMOS DE OFERTA ECONOMICA MONTO NETO TOTAL, SEGUN ANEXO N°15",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 42172017,
+      "nombre": "Kits para equipos médicos de campo o laboratorio, o productos relacionados",
+      "descripcion": "INSUMOS DE OFERTA ECONOMICA MONTO NETO TOTAL, SEGUN ANEXO N°16",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LR",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 5.000 UTM"
+}

@@ -1,0 +1,46 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1523-53-R226",
+  "nombre": "PPTA 55-26 SERV INSTALACIÓN CIERRE PERIMETRAL",
+  "descripcion": "El objeto de la presente contratación consiste en la suscripción de un contrato para el servicio de Provisión e instalación de cierro perimetral de Terreno ubicado en Sector Peu-Peu, predio El Avellano, Lote 7, comuna de Lautaro Región de La Araucanía del Hospital Dr. Abraham Godoy Peña, conforme al detalle de características Técnicas en el Anexo N°3, y Anexo N°2 Oferta Económica, teniendo ambos documentos carácter obligatorio para el adjudicatario para que la oferta sea admisible.",
+  "estado": "desierta",
+  "estadoGlosa": "Desierta (o art. 3 ó 9 Ley 19.886)",
+  "comprador": {
+    "codigoOrganismo": "7289",
+    "nombreOrganismo": "SERVICIO NACIONAL ARAUCANIA SUR HOSPITAL DR ABRAHAM GODOY PENA LAUTARO",
+    "rutUnidad": "61.602.236-9",
+    "codigoUnidad": "2519",
+    "nombreUnidad": "Hospital Dr. Abraham Godoy Peña",
+    "region": 9,
+    "comuna": "Lautaro"
+  },
+  "fechas": {
+    "creacion": "2026-04-28T11:05:35-04:00",
+    "publicacion": "2026-04-28T12:14:00-04:00",
+    "cierre": "2026-05-08T15:00:00-04:00",
+    "adjudicacion": "2026-10-09T15:24:24-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 60131403,
+      "nombre": "Panderetas",
+      "descripcion": "SERVICIO DE PROVISIÓN E INSTALACIÓN DE CIERRE PERIMETRAL, DEL HOSPITAL DR. ABRAHAM GODOY PEÑA DE LAUTARO SEGUN ANEXO 2.",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 5,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LE",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 100 UTM e inferior a 1.000 UTM"
+}

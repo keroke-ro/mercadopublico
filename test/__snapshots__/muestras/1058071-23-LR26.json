@@ -1,0 +1,208 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1058071-23-LR26",
+  "nombre": "Suministro de Fármacos Sueros",
+  "descripcion": "Suministro de Fármacos Sueros",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "1379869",
+    "nombreOrganismo": "HOSPITAL CLINICO METROPOLITANO EL CARMEN DOCTOR LUIS VALENTIN FERRADA",
+    "rutUnidad": "61.980.320-5",
+    "codigoUnidad": "1058071",
+    "nombreUnidad": "Fármarcos",
+    "region": 13,
+    "comuna": "Maipú"
+  },
+  "fechas": {
+    "creacion": "2026-10-02T13:05:48-03:00",
+    "publicacion": "2026-10-09T11:37:44-03:00",
+    "cierre": "2026-11-09T17:00:00-03:00",
+    "adjudicacion": "2027-01-11T18:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5552700\tAGUA BIDESTILADA ESTERIL\t5\tml\t \t \tInyectable",
+      "cantidad": 2000,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5554600\tAGUA BIDESTILADA ESTERIL\t1000\tml\t \t \tInyectable",
+      "cantidad": 500,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5554610\tAGUA BIDESTILADA ESTERIL\t500\tml\t \t \tInyectable",
+      "cantidad": 1500,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5554990\tAGUA BIDESTILADA ESTERIL\t10\tml\t \t \tInyectable",
+      "cantidad": 5500,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5554660\tGLUCOSA\t10\t%\t250\tml\tInyectable",
+      "cantidad": 100,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5554680\tGLUCOSA\t5\t%\t250\tml\tInyectable",
+      "cantidad": 750,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5556580\tGLUCOSA\t10\t%\t500\tml\tInyectable",
+      "cantidad": 350,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5556620\tGLUCOSA\t5\t%\t500\tml\tInyectable",
+      "cantidad": 900,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5558990\tGLUCOSA\t5\t%\t100\tml\tInyectable",
+      "cantidad": 250,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5554690\tGLUCOSALINO ISOTONICO\t2,5/0,45\t%\t1000\tml\tInyectable",
+      "cantidad": 200,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5556640\tGLUCOSALINO ISOTONICO\t2,5/0,45\t%\t500\tml\tInyectable",
+      "cantidad": 750,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5554720\tSODIO CLORURO\t0,9\t%\t100\tml\tInyectable",
+      "cantidad": 20160,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5554730\tSODIO CLORURO\t0,9\t%\t250\tml\tInyectable",
+      "cantidad": 7450,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5556700\tSODIO CLORURO\t0,9\t%\t1\tL\tInyectable",
+      "cantidad": 3300,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5556720\tSODIO CLORURO\t0,9\t%\t3\tL\tInyectable",
+      "cantidad": 1350,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5556740\tSODIO CLORURO\t0,9\t%\t500\tml\tInyectable",
+      "cantidad": 4050,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 73101701,
+      "nombre": "Servicios de producción de medicamentos o medicinas",
+      "descripcion": "5556870\tSODIO CLORURO\t0,9\t%\t20\tml\tInyectable",
+      "cantidad": 32350,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LR",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 5.000 UTM"
+}

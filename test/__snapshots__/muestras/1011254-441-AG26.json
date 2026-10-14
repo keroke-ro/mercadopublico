@@ -1,0 +1,70 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1011254-441-AG26",
+  "nombre": "REPUESTO PARA ELECTROCARDIOGRAFO MINDRAY",
+  "descripcion": "\"(Se solicita cumplir con el plazo de entrega establecido, de lo contrario se procederá a la cancelación de la Orden de compra). \r\nLa Recepción se realizará SÓLO CONTRA GUÍA DE DESPACHO en conformidad a Ley de Pago Oportuno N°21.131. Posterior a Recepción Conforme en Portal de Mercado Público, facturar y enviar dcto. Electrónico: [oculto] y [oculto]. Despachar en Avda. Videla s/n, Bodega de Economato, atención de Lunes a Jueves desde las 08 a 15:00 hrs y Viernes hasta las 12:00 hrs, llamar al fono [oculto] / [oculto].- IBM:  Unidad/Servicio:  (cc.0) \r\n\r\n\r\n                   [oculto]                                                          [oculto]\r\n  ENCARGADO DE COMPRAS SDGO                                      JEFE U. ABASTECIMIENTO\t\t\t\t\t\t\t\t\t\t\t\r\n\t\t\t\t\t\t\t\t\t\t\t\"",
+  "estado": "aceptada",
+  "estadoGlosa": "Aceptada",
+  "comprador": {
+    "codigoOrganismo": "7416",
+    "nombreOrganismo": "SERVICIO DE SALUD COQUIMBO HOSPITAL DE COQUIMBO",
+    "rutUnidad": "61.606.403-7",
+    "codigoUnidad": "1011254",
+    "nombreUnidad": "Obras y Mantenimientos",
+    "region": 4,
+    "comuna": "Coquimbo"
+  },
+  "fechas": {
+    "creacion": "2026-10-07T16:27:53-03:00",
+    "publicacion": "2026-10-08T15:35:36-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-08T10:53:00-03:00"
+  },
+  "monto": {
+    "valor": 245140,
+    "moneda": "CLP",
+    "clp": 245140,
+    "fechaValor": "2026-10-08",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 73152102,
+      "nombre": "Servicio de reparación de equipo de fabricación",
+      "descripcion": "ADQUISICION DE CABEZAL IMPRESION TERMICA 8 PUNTOS 72MM,60MM/ SEG, CABLE FPC ORIGINAL",
+      "cantidad": 1,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 206000,
+        "moneda": "CLP",
+        "clp": 206000,
+        "fechaValor": "2026-10-08",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 206000,
+        "moneda": "CLP",
+        "clp": 206000,
+        "fechaValor": "2026-10-08",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "AG",
+  "proveedor": {
+    "rut": "92.999.000-5",
+    "nombre": "IMPORTADORA Y DISTRIBUIDORA ARQUIMED LTDA",
+    "codigo": "71204"
+  },
+  "procesoOrigen": null
+}

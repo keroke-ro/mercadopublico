@@ -1,0 +1,48 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1049242-34-LE26",
+  "nombre": "SERVICIO DE PRODUCCION MES DE LA MUSICA",
+  "descripcion": "El objetivo de la presente licitación es la implementación de las actividades a desarrollar para la ejecución eficiente y efectiva de la actividad central titulada “Día de la música 2026” en la Comuna de San Carlos, el día 03 de octubre de 2026 y de los ciclos de difusión y circulación de música regional, que se realizará entre el 09 y el 15 de noviembre de 2026.",
+  "estado": "cerrada",
+  "estadoGlosa": "Cerrada",
+  "comprador": {
+    "codigoOrganismo": "7359",
+    "nombreOrganismo": "SUBSECRETARÍA DE LAS CULTURAS Y LAS ARTES",
+    "rutUnidad": "62.000.430-8",
+    "codigoUnidad": "1049242",
+    "nombreUnidad": "SEREMÍA DE LAS CULT , ARTES Y PAT REGIÓN DE ÑUBLE",
+    "region": 16,
+    "comuna": "Chillán"
+  },
+  "fechas": {
+    "creacion": "2026-09-17T00:00:00-03:00",
+    "publicacion": "2026-09-29T17:33:12-03:00",
+    "cierre": "2026-10-09T15:30:00-03:00",
+    "adjudicacion": "2026-10-22T20:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": null,
+  "items": [
+    {
+      "codigoProducto": 80141607,
+      "nombre": "Producción de eventos",
+      "descripcion": "\"SERVICIO DE PRODUCCIÓN INTEGRAL PARA LA EJECUCIÓN DE ACTIVIDADES EN EL MARCO DEL MES DE LA MÚSICA NACIONAL 2026\"",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LE",
+  "tipoLicitacionGlosa": "Licitación Pública igual o superior a 100 UTM e inferior a 1.000 UTM"
+}

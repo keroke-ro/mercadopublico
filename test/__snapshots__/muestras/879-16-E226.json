@@ -1,0 +1,54 @@
+{
+  "tipo": "licitacion",
+  "codigo": "879-16-E226",
+  "nombre": "CONTRATACIÓN SEGURO DE ACCIDENTES INNOMINATIVOS",
+  "descripcion": "Se requiere LA CONTRATACIÓN DE SERVICIO DE SEGURO DE ACCIDENTES PERSONALES DESTINADO A OTORGAR COBERTURA A PERSONAS NATURALES QUE PARTICIPEN EN ACTIVIDADES DE VOLUNTARIADO, ACCIONES SOCIALES Y DESPLIEGUES TERRITORIALES ORGANIZADOS POR EL INSTITUTO NACIONAL DE LA JUVENTUD, así como, por otros servicios públicos, gobiernos regionales y organizaciones de la sociedad civil, por un total estimado de 2.500 días persona.",
+  "estado": "cerrada",
+  "estadoGlosa": "Cerrada",
+  "comprador": {
+    "codigoOrganismo": "7197",
+    "nombreOrganismo": "INSTITUTO NACIONAL DE LA JUVENTUD",
+    "rutUnidad": "60.110.000-2",
+    "codigoUnidad": "1875",
+    "nombreUnidad": "Instituto Nacional de la Juventud - MIDESO",
+    "region": 13,
+    "comuna": "Santiago"
+  },
+  "fechas": {
+    "creacion": "2026-08-31T00:51:03-04:00",
+    "publicacion": "2026-09-29T11:19:16-03:00",
+    "cierre": "2026-10-09T17:00:00-03:00",
+    "adjudicacion": "2026-11-23T15:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 3000000,
+    "moneda": "CLP",
+    "clp": 3000000,
+    "fechaValor": "2026-09-29",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 84131603,
+      "nombre": "Seguros contra accidentes",
+      "descripcion": "SERVICIO DE SEGURO DE ACCIDENTES PERSONALES DESTINADO A OTORGAR COBERTURA A PERSONAS NATURALES QUE PARTICIPEN EN ACTIVIDADES DE VOLUNTARIADO, ACCIONES SOCIALES Y DESPLIEGUES TERRITORIALES ORGANIZADOS POR EL INJUV.",
+      "cantidad": 2500,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "E2",
+  "tipoLicitacionGlosa": "Licitación Privada menor a 100 UTM"
+}

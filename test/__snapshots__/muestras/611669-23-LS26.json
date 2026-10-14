@@ -1,0 +1,54 @@
+{
+  "tipo": "licitacion",
+  "codigo": "611669-23-LS26",
+  "nombre": "SUSCRIPCIÓN DE “CONVENIO DE LITIGACIÓN LABORAL”",
+  "descripcion": "CONTRATACIÓN DE “CONVENIO DE LITIGACIÓN LABORAL” DE LA SUPERINTENDENCIA DEL MEDIO AMBIENTE",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": "1203668",
+    "nombreOrganismo": "Superintendencia del Medio Ambiente",
+    "rutUnidad": "61.979.950-k",
+    "codigoUnidad": "611669",
+    "nombreUnidad": "Superintendencia del Medio Ambiente -Nivel Central",
+    "region": 13,
+    "comuna": "Santiago Centro"
+  },
+  "fechas": {
+    "creacion": "2026-10-07T00:00:00-03:00",
+    "publicacion": "2026-10-07T15:50:30-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 40000000,
+    "moneda": "CLP",
+    "clp": 40000000,
+    "fechaValor": "2026-10-07",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 80121707,
+      "nombre": "Especialistas legales en conflictos laborales",
+      "descripcion": "Servicios Jurídicos para externalizar el patrocinio y tramitación de causas laborales por 24 meses, a través de la suscripción de un “CONVENIO DE LITIGACIÓN LABORAL PARA LA SUPERINTENDENCIA DEL MEDIO AMBIENTE”",
+      "cantidad": 1,
+      "unidad": "Global",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "LS",
+  "tipoLicitacionGlosa": "Licitación Pública de servicios personales especializados"
+}

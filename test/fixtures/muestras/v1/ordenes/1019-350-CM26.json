@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:49.7645025Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1019-350-CM26",
+      "Nombre": "Orden de Compra: 1019-350-CM26 ADQUISICIÓN DE LAPTOP PARA LA DGA.ID: 4750937",
+      "CodigoEstado": 6,
+      "Estado": "Aceptada",
+      "CodigoLicitacion": "",
+      "Descripcion": "Orden de Compra codigo: 1019-350-CM26 dirigida a LECHNER S.A\nUSD (9 Oct) 981,609985351562\n\n45 unidades x 1.344,50 = 60.502,5\n",
+      "CodigoTipo": "9",
+      "Tipo": "CM",
+      "TipoMoneda": "USD",
+      "CodigoEstadoProveedor": 4,
+      "EstadoProveedor": "Aceptada",
+      "Fechas": {
+        "FechaCreacion": "2026-10-09T11:46:46.243",
+        "FechaEnvio": "2026-10-09T12:06:43.19",
+        "FechaAceptacion": "2026-10-09T12:56:43.31",
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-09T12:09:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 4.544897959183674,
+      "CantidadEvaluacion": 98,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 60502.5,
+      "PorcentajeIva": 19,
+      "Impuestos": 11495.48,
+      "Total": 71997.98,
+      "Financiamiento": "2906001",
+      "Pais": "CL",
+      "TipoDespacho": "12",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7247",
+        "NombreOrganismo": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO PP DCYF",
+        "RutUnidad": "61.202.000-0",
+        "CodigoUnidad": "2015",
+        "NombreUnidad": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO",
+        "Actividad": "GOBIERNO CENTRAL Y ADMINISTRACION PUBLICA",
+        "DireccionUnidad": "Morandé 59, piso 8",
+        "ComunaUnidad": "Santiago",
+        "RegionUnidad": "Región Metropolitana de Santiago",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "29788",
+        "Nombre": "LECHNER S.A",
+        "Actividad": "COMERCIO AL POR MENOR DE COMPUTADORAS, SOFTWARES Y SUMINISTROS",
+        "CodigoSucursal": "29867",
+        "NombreSucursal": "LECHNER S.A",
+        "RutSucursal": "78.114.650-1",
+        "Direccion": "RANCAGUA N° 554",
+        "Comuna": "",
+        "Region": "",
+        "Pais": "CL",
+        "NombreContacto": "",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 0,
+            "Categoria": "",
+            "CodigoProducto": 0,
+            "Producto": "COMPRA LAPTOP HP 200 G2I WINDOWS 11 PRO AI ULTRA 5 220H 16GB 1 TB",
+            "EspecificacionComprador": "(4750937) COMPRA LAPTOP HP 200 G2I WINDOWS 11 PRO AI ULTRA 5 220H 16GB 1 TB",
+            "EspecificacionProveedor": "(4750937) COMPRA LAPTOP HP 200 G2I WINDOWS 11 PRO AI ULTRA 5 220H 16GB 1 TB ; Región Metropolitana de Santiago; Santiago; Morandé 59, piso 8",
+            "Cantidad": 45,
+            "Unidad": null,
+            "Moneda": "USD",
+            "PrecioNeto": 1344.5,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 60502.5
+          }
+        ]
+      }
+    }
+  ]
+}

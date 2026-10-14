@@ -1,0 +1,70 @@
+{
+  "tipo": "orden_compra",
+  "codigo": "1057049-18088-TD26",
+  "nombre": "Orden de Compra generada por Trato Directo ID 1057049-86-FTD25",
+  "descripcion": "AUTORIZA CONTRATACIÓN DIRECTA POR PROCESO LICITATORIO ANTERIOR DESIERTO, PARA LA CONTRATACIÓN DEL SUMINISTRO DE EXAMEN EEG 32 CANALES Y/O EEG CON PRIVACIÓN DE SUEÑO PARA PACIENTES DEL HOSPITAL CLÍNICO SAN BORJA ARRIARÁN",
+  "estado": "recepcion_conforme",
+  "estadoGlosa": "Recepción Conforme",
+  "comprador": {
+    "codigoOrganismo": "7326",
+    "nombreOrganismo": "SERV SALUD METROPOLITANO CENTRAL HOSPITAL CLINICO SAN BORJA ARRIARAN",
+    "rutUnidad": "61.608.604-9",
+    "codigoUnidad": "1057049",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 13,
+    "comuna": "Santiago"
+  },
+  "fechas": {
+    "creacion": "2026-09-09T13:16:28-03:00",
+    "publicacion": "2026-09-24T15:30:25-03:00",
+    "cierre": null,
+    "adjudicacion": null,
+    "ultimoCambio": "2026-09-16T11:27:00-03:00"
+  },
+  "monto": {
+    "valor": 688790,
+    "moneda": "CLP",
+    "clp": 688790,
+    "fechaValor": "2026-09-24",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 85122201,
+      "nombre": "Exámenes médicos",
+      "descripcion": "400-1649 - EEG 32 CANALES Y EEG PRIVACION DE SUEÑO  \r\n\r\nRES.EX 977 INT. 432\r\nPERIODO DEL 04/05/2026 AL 29/05/2026\r\nMEMO 261",
+      "cantidad": 1,
+      "unidad": null,
+      "precioUnitario": {
+        "valor": 688790,
+        "moneda": "CLP",
+        "clp": 688790,
+        "fechaValor": "2026-09-24",
+        "fuente": "identidad"
+      },
+      "total": {
+        "valor": 688790,
+        "moneda": "CLP",
+        "clp": 688790,
+        "fechaValor": "2026-09-24",
+        "fuente": "identidad"
+      },
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.NombreContacto": "[oculto]",
+    "Comprador.CargoContacto": "[oculto]",
+    "Proveedor.NombreContacto": "[oculto]",
+    "Proveedor.CargoContacto": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoOrden": "TD",
+  "proveedor": {
+    "rut": "76.124.062-5",
+    "nombre": "SERVICIOS MEDICOS BICENTENARIO SPA",
+    "codigo": "1240734"
+  },
+  "procesoOrigen": "1057049-86-FTD25"
+}

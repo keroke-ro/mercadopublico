@@ -1,0 +1,54 @@
+{
+  "tipo": "licitacion",
+  "codigo": "1057500-78-CO26",
+  "nombre": "SERVICIOS DE CATERING PARA SALUD MENTAL",
+  "descripcion": "Servicio de Salud Metropolitano Sur Oriente requiere contratar los servicios de alimentación integral para Jornadas Programáticas de capacitación en salud mental APS 2026",
+  "estado": "cerrada",
+  "estadoGlosa": "Cerrada",
+  "comprador": {
+    "codigoOrganismo": "7203",
+    "nombreOrganismo": "SERVICIO DE SALUD METROPOLITANO SUR ORIENTE",
+    "rutUnidad": "61.608.500-K",
+    "codigoUnidad": "1057500",
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 13,
+    "comuna": "Puente Alto"
+  },
+  "fechas": {
+    "creacion": "2026-09-29T13:12:12-03:00",
+    "publicacion": "2026-09-29T13:35:22-03:00",
+    "cierre": "2026-10-09T15:00:00-03:00",
+    "adjudicacion": "2026-12-09T21:00:00-03:00",
+    "ultimoCambio": null
+  },
+  "monto": {
+    "valor": 9894505,
+    "moneda": "CLP",
+    "clp": 9894505,
+    "fechaValor": "2026-09-29",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 90101603,
+      "nombre": "Servicios de catering",
+      "descripcion": "Servicio de Catering",
+      "cantidad": 1,
+      "unidad": "Unidad",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": null,
+  "personales": {
+    "Comprador.CodigoUsuario": "[oculto]",
+    "Comprador.NombreUsuario": "[oculto]",
+    "Comprador.CargoUsuario": "[oculto]",
+    "NombreResponsablePago": "[oculto]",
+    "NombreResponsableContrato": "[oculto]"
+  },
+  "origen": "v1",
+  "tipoLicitacion": "CO",
+  "tipoLicitacionGlosa": "Licitación Privada igual o superior a 100 UTM e inferior a 1.000 UTM"
+}

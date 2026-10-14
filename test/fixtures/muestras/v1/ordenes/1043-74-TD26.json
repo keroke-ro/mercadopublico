@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:55.7645002Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1043-74-TD26",
+      "Nombre": "Orden de Compra generada por Trato Directo ID 1043-9-FTD26",
+      "CodigoEstado": 4,
+      "Estado": "Enviada a proveedor",
+      "CodigoLicitacion": "",
+      "Descripcion": "Que, esta Dirección de Aeropuertos requiere realizar servicio de mantención 250 hrs de Tractor Agrícola Jhon Deere placa patente LJBH89-0, año 2019, maquinaria que se debe mantener operativa para abordar trabajos que demanda la Administración Directa.\n",
+      "CodigoTipo": "16",
+      "Tipo": "TD",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 1,
+      "EstadoProveedor": "Nueva orden de compra",
+      "Fechas": {
+        "FechaCreacion": "2026-10-09T09:11:57",
+        "FechaEnvio": "2026-10-09T11:31:11.947",
+        "FechaAceptacion": null,
+        "FechaCancelacion": null,
+        "FechaUltimaModificacion": "2026-10-09T11:30:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 4,
+      "CantidadEvaluacion": 19,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 896738,
+      "PorcentajeIva": 19,
+      "Impuestos": 170380,
+      "Total": 1067118,
+      "Financiamiento": "",
+      "Pais": "Other",
+      "TipoDespacho": "7",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7243",
+        "NombreOrganismo": "MINISTERIO DE OBRAS PUBLICAS DIREC CION GRAL DE OO PP DCYF",
+        "RutUnidad": "61.202.000-0",
+        "CodigoUnidad": "2039",
+        "NombreUnidad": "Dirección de Aeropuertos - XI Región",
+        "Actividad": "GOBIERNO CENTRAL Y ADMINISTRACION PUBLICA",
+        "DireccionUnidad": "",
+        "ComunaUnidad": "Coyhaique",
+        "RegionUnidad": "Región Aysén del General Carlos Ibáñez del Campo",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "26778",
+        "Nombre": "SALINAS Y FABRES SOCIEDAD ANONIMA",
+        "Actividad": "COMERCIAL",
+        "CodigoSucursal": "1018140",
+        "NombreSucursal": "Salinas y Fabres S.A. -  Puerto Montt NB",
+        "RutSucursal": "91.502.000-3",
+        "Direccion": "RONDIZZONI 2130, SANTIAGO, ",
+        "Comuna": "SANTIAGO,",
+        "Region": " REGION METROPOLITANA",
+        "Pais": "Other",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 78180200,
+            "Categoria": "Servicios de transporte, almacenaje y correo / Servicios de mantención o reparaciones de transportes / Servicios de panel, chapa y pintura",
+            "CodigoProducto": 78180201,
+            "Producto": "Servicios de reparación o manutención del panel de instrumentos",
+            "EspecificacionComprador": "DIAGNOSTICO POR 5 HORAS INS_TALLER INSUMOS DE TALLER SERV REPUESTOS FILTROS  FILTRO ACEITE MOTOR 30 MI ELEMENTO FILTRO PRIMARIOFILTRO HIDRAULICO 741201 FILTRO COMBUSTIBLE 781326 * FILTRO RECIRCULACION AIRE FILTRO AIRE FRESCO CABINA SERV LUBRICANTES ACEITE HIDRAULICO HY-GARD  ACEITE MOTOR PLUS \r\n\r\n",
+            "EspecificacionProveedor": "",
+            "Cantidad": 1,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 896738,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 0
+          }
+        ]
+      }
+    }
+  ]
+}

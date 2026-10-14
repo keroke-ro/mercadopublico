@@ -1,0 +1,95 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-13",
+  "Cantidad": 1,
+  "FechaCreacion": "2026-10-14T01:37:30.6551587Z",
+  "Version": "v1",
+  "Listado": [
+    {
+      "Codigo": "1057511-499-CC26",
+      "Nombre": "INSUMOS CLINICOS ABR 26",
+      "CodigoEstado": 9,
+      "Estado": "Cancelada",
+      "CodigoLicitacion": "1057508-24-LQ25",
+      "Descripcion": "ID 1057508-24-LQ25  N°5235 14.11.2025\r\nRequisitos al momento de emitir una factura:\r\n1.- Dirección envió “DTE” a la casilla de intercambio [oculto] el DTE que no se encuentre direccionado a dicha\r\ncasilla será reclamado de forma automática transcurrida 72 horas desde la recepción del DTE en SII. (Envió formato XML)\r\n2.- El DTE debe contener el campo 801 o campo de referencia con el número de la orden de compra correctamente. Ej. 1058104-XX-SE22\r\n(Con Mayúscula)\r\n3.- Orden de compra en estado aceptada en www.mercadopublico.cl\r\n4.- Método de pago de un DTE “al crédito\"\r\n5.- Al momento de facturar debe considerar los siguientes puntos:\r\n• Modelo ( si corresponde)\r\n• N° Lote/ serie\r\n• Fecha de vencimiento si corresponde.\r\n• Fecha de elaboración si corresponde\r\n• Fecha de elaboración si corresponde\r\n",
+      "CodigoTipo": "14",
+      "Tipo": "CC",
+      "TipoMoneda": "CLP",
+      "CodigoEstadoProveedor": 5,
+      "EstadoProveedor": "Cancelada",
+      "Fechas": {
+        "FechaCreacion": "2026-04-13T12:18:41.697",
+        "FechaEnvio": "2026-04-13T12:36:51.86",
+        "FechaAceptacion": "2026-04-13T12:55:08.103",
+        "FechaCancelacion": "2026-10-09T11:57:44.893",
+        "FechaUltimaModificacion": "2026-04-13T12:32:00"
+      },
+      "TieneItems": "1",
+      "PromedioCalificacion": 4.109090909090909,
+      "CantidadEvaluacion": 33,
+      "Descuentos": 0,
+      "Cargos": 0,
+      "TotalNeto": 165750,
+      "PorcentajeIva": 19,
+      "Impuestos": 31492,
+      "Total": 197242,
+      "Financiamiento": "",
+      "Pais": "CL",
+      "TipoDespacho": "7",
+      "FormaPago": "2",
+      "Comprador": {
+        "CodigoOrganismo": "7137",
+        "NombreOrganismo": "HOSPITAL COMUNITARIO DE SALUD FAMILIAR DE BULNES",
+        "RutUnidad": "61.607.003-7",
+        "CodigoUnidad": "1057511",
+        "NombreUnidad": "Bienes y Servicios",
+        "Actividad": "Servicio Público",
+        "DireccionUnidad": "BALMACEDA N° 431 BULNES.",
+        "ComunaUnidad": "* ",
+        "RegionUnidad": "Región del Ñuble",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Proveedor": {
+        "Codigo": "39998",
+        "Nombre": "DROGUERIA HOFMANN SAC",
+        "Actividad": "VENTA AL POR MAYOR DE PRODUCTOS QUIMICOS| VENTA AL",
+        "CodigoSucursal": "40634",
+        "NombreSucursal": "Drogueria Hofmann",
+        "RutSucursal": "92.288.000-k",
+        "Direccion": "LOS GOBELINOS N° 2507",
+        "Comuna": "Renca",
+        "Region": "Región Metropolitana de Santiago",
+        "Pais": "CL",
+        "NombreContacto": "[oculto]",
+        "CargoContacto": "[oculto]",
+        "FonoContacto": "",
+        "MailContacto": ""
+      },
+      "Items": {
+        "Cantidad": 1,
+        "Listado": [
+          {
+            "Correlativo": 1,
+            "CodigoCategoria": 42142600,
+            "Categoria": "Equipamiento y suministros médicos / Suministros y productos clínicos / Jeringas y accesorios",
+            "CodigoProducto": 42142611,
+            "Producto": "Jeringas tuberculinas",
+            "EspecificacionComprador": "JERINGA DESECHABLE PARA TUBERCULINA 1 CC CON AGUJA INTERCAMBIABLE 26-27 G X 1/2\" CAJA X150UN\r\n",
+            "EspecificacionProveedor": "JERINGA DESECHABLE PARA TUBERCULINA 1 CC CON AGUJA INTERCAMBIABLE 26-27 G X 1/2\" CAJA X150UN\r\n",
+            "Cantidad": 13,
+            "Unidad": null,
+            "Moneda": "CLP",
+            "PrecioNeto": 12750,
+            "TotalCargos": 0,
+            "TotalDescuentos": 0,
+            "TotalImpuestos": 0,
+            "Total": 165750
+          }
+        ]
+      }
+    }
+  ]
+}
