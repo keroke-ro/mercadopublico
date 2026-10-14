@@ -331,6 +331,16 @@ Según [W] (Codigo, Abreviación):
 - **No existe** `codigo_organismo`; hay que filtrar por `region` y luego localmente por `institucion.rut` (V: CA).
 - `oc_emitida` "no se usa en la práctica": esos casos salen como `proveedor_seleccionado`. Para saber si hay OC, revisar `orden_compra.id_orden_compra != null` en el detalle (V: CA §8.6).
 
+**Verificado con la API real el 2026-10-14** (contradice partes de la guía):
+
+- Un listado sin ningún filtro (solo `numero_pagina`/`tamano_pagina`) responde **500 `ERROR_INTERNO`**, y sin ningún parámetro, 400. Con cualquier filtro (`publicado_desde`, `region`, `estado`…) responde bien.
+- `estado=oc_emitida` responde 400: "Valores permitidos: publicada, cerrada, desierta, cancelada, proveedor_seleccionado".
+- `estado=proveedor_seleccionado` devuelve 0 resultados aunque existan Compras Ágiles en ese estado.
+- **Las fechas son hora de pared de Santiago aunque lleven `Z`.** El mismo instante llega como `"2026-10-14 11:44"` (sin `T` ni zona) en `fecha_publicacion` y como `"2026-10-14T11:45:00.463Z"` en `fecha_ultimo_cambio`, y hay cierres a las `"08:30"`. Los filtros de fecha se leen en el mismo reloj: `publicado_desde=…T11:44:00Z` devuelve lo publicado a las 11:44 de Santiago.
+- Listado: `fechas` trae además `fecha_cierre_primer_llamado` y `fecha_cierre_segundo_llamado`, no trae `fecha_cancelacion`, y `documentos[].id` es number. `motivos` trae `motivo_seleccion`.
+- Detalle: la OC llega como `id_orden_compra` (number o null) **en la raíz**; no hay objeto `orden_compra`. En `proveedores_cotizando[]`, la selección llega como `proveedor_seleccionado: 0|1` (no dentro de `seleccion`), y además vienen `estado` (number) e `id_oc`.
+- Los detalles de Compras Ágiles `cerrada` respondieron 504 (timeout del gateway) en varios intentos.
+
 ### Envelope
 
 ```

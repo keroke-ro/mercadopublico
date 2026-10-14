@@ -1,0 +1,108 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "success": "OK",
+  "trace": null,
+  "payload": {
+    "codigo": "1057539-228-COT26",
+    "nombre": "ESTADIA PACIENTE_TEMUCO",
+    "descripcion": "SE SOLICITA COTIZACION DE ESTADIA PARA PACIENTE EN HAB. DOBLE DESDE EL 20 AL 21 DE ENERO.-",
+    "estado": {
+      "id_estado": 4,
+      "codigo": "proveedor_seleccionado",
+      "glosa": "Proveedor seleccionado"
+    },
+    "convocatoria": {
+      "estado_convocatoria": 1,
+      "descripcion": "Primer llamado",
+      "fecha_cierre_primer_llamado": "2026-01-20 13:55",
+      "fecha_cierre_segundo_llamado": "2026-01-21 13:57"
+    },
+    "fechas": {
+      "fecha_publicacion": "2026-01-19 13:52",
+      "fecha_cierre": "2026-01-20 13:55",
+      "fecha_ultimo_cambio": "2026-01-20 02:10",
+      "fecha_cancelacion": null
+    },
+    "entrega": {
+      "direccion_entrega": "LOS AROMOS 65",
+      "plazo_entrega_dias": 1
+    },
+    "documentos": [],
+    "presupuesto": {
+      "tipo_presupuesto": "Estimado",
+      "moneda": "CLP",
+      "presupuesto_estimado": 68000,
+      "monto_disponible": 68000,
+      "monto_disponible_clp": 68000,
+      "valor_cambio_moneda": null,
+      "fecha_cambio_moneda": null
+    },
+    "id_orden_compra": 54184770,
+    "institucion": {
+      "organismo_comprador": "HOSPITAL PUERTO MONTT SERVICIO DE SALUD DEL RELONCAVI",
+      "rut": "61.975.100-0",
+      "unidad_compra": "Bienes y Servicios",
+      "region": 10,
+      "nombre_region": "Región de los Lagos "
+    },
+    "productos_solicitados": [
+      {
+        "codigo_producto": 90111501,
+        "nombre": "Hoteles",
+        "descripcion": "9229511 \tESTADIA ",
+        "cantidad": 1,
+        "unidad_medida": "000"
+      }
+    ],
+    "proveedores_cotizando": [
+      {
+        "id_cotizacion": 571132185,
+        "codigo_sucursal_empresa": "1301391",
+        "codigo_empresa": "1886551",
+        "es_emt": 1,
+        "razon_social": "[oculto]",
+        "rut_proveedor": "[oculto]",
+        "descripcion": "Estadia paciente y acompanante, 01 doble, 02 camas, con desayuno buffet incluido, servicio camareras, ascensor, tv color cable, wi fi",
+        "fecha_vigencia": "2026-02-18T14:31:11Z",
+        "fecha_creacion": "2026-01-19T14:33:29.263Z",
+        "valor_neto": 57143,
+        "total_impuesto": 10857,
+        "monto_despacho": 0,
+        "monto_total": 68000,
+        "proveedor_seleccionado": 1,
+        "descripcion_cotizacion": "Estadia paciente y acompanante, 01 doble, 02 camas, con desayuno buffet incluido, servicio camareras, ascensor, tv color cable, wi fi",
+        "productos_cotizados": [
+          {
+            "codigo_producto": 90111501,
+            "nombre_producto": "Hoteles",
+            "descripcion": "9229511 \tESTADIA ",
+            "cantidad": 1,
+            "precio_unitario": 57143,
+            "monto_total_producto": 57143
+          }
+        ],
+        "estado": 2,
+        "justificacion_inadmisibilidad": null,
+        "estado_por_comprador": 1,
+        "activo": 1,
+        "id_oc": 54184770,
+        "nombre_impuesto": "IVA",
+        "porcentaje_impuesto": 19
+      }
+    ],
+    "resumen": {
+      "multa_sancion": 0,
+      "total_ofertas_recibidas": 1,
+      "total_demandas": 0
+    },
+    "motivos": {
+      "motivo_cancelacion": null,
+      "motivo_desierta": null
+    },
+    "flags": {
+      "considera_requisitos_medioambientales": false,
+      "considera_requisitos_impacto_social_economico": false
+    }
+  },
+  "errors": null
+}

@@ -220,8 +220,8 @@ describe("cancelación", () => {
     await expect(new Licitaciones(t).delDia("2026-10-01", { signal: abortar() })).rejects.toMatchObject(cancelada);
     await expect(new OrdenesCompra(t).porCodigo("1-1-SE26", { signal: AbortSignal.abort() })).rejects.toMatchObject(cancelada);
     await expect(new Empresas(t).buscarComprador({ signal: AbortSignal.abort() })).rejects.toMatchObject(cancelada);
-    await expect(new CompraAgilApi(t).pagina({}, 1, { signal: AbortSignal.abort() })).rejects.toMatchObject(cancelada);
-    await expect(new CompraAgilApi(t).listar({}, { signal: AbortSignal.abort() }).next()).rejects.toMatchObject(cancelada);
+    await expect(new CompraAgilApi(t).pagina({ ttlCambioMs: 60_000 }, 1, { signal: AbortSignal.abort() })).rejects.toMatchObject(cancelada);
+    await expect(new CompraAgilApi(t).listar({ ttlCambioMs: 60_000 }, { signal: AbortSignal.abort() }).next()).rejects.toMatchObject(cancelada);
   });
 });
 

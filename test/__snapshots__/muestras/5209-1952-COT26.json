@@ -1,0 +1,48 @@
+{
+  "tipo": "compra_agil",
+  "codigo": "5209-1952-COT26",
+  "nombre": "DARATUMUMAB 100 MG 5 ML",
+  "descripcion": "SE SOLICITA EN COTIZACIÓN INDICAR VENCIMIENTO DEL PRODUCTO MAYOR A 12 MESES, FACTOR DE EMPAQUE, CONDICIÓN DE PAGO, FICHA REGISTRO ISP, MONTO MINIMO Y TIEMPO DE DEMORA EN DESPACHO (PRIORIDAD EN 24 HRS)",
+  "estado": "publicada",
+  "estadoGlosa": "Publicada",
+  "comprador": {
+    "codigoOrganismo": null,
+    "nombreOrganismo": "UNIVERSIDAD DE CHILE",
+    "rutUnidad": "60.910.000-1",
+    "codigoUnidad": null,
+    "nombreUnidad": "Hospital Clínico Univ. de Chile - Unidad de Medicamentos",
+    "region": 13,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": null,
+    "publicacion": "2026-10-14T11:54:00-03:00",
+    "cierre": "2026-10-15T12:00:00-03:00",
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-14T11:55:00-03:00"
+  },
+  "monto": {
+    "valor": 5140000,
+    "moneda": "CLP",
+    "clp": 5140000,
+    "fechaValor": "2026-10-14",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 51151823,
+      "nombre": "Clorhidrato de labetalol",
+      "descripcion": "DARATUMUMAB 100 MG 5 ML",
+      "cantidad": 13,
+      "unidad": "VI",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 0,
+  "personales": null,
+  "origen": "v2",
+  "ordenCompra": null,
+  "cotizaciones": []
+}

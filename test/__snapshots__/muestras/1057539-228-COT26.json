@@ -1,0 +1,78 @@
+{
+  "tipo": "compra_agil",
+  "codigo": "1057539-228-COT26",
+  "nombre": "ESTADIA PACIENTE_TEMUCO",
+  "descripcion": "SE SOLICITA COTIZACION DE ESTADIA PARA PACIENTE EN HAB. DOBLE DESDE EL 20 AL 21 DE ENERO.-",
+  "estado": "proveedor_seleccionado",
+  "estadoGlosa": "Proveedor seleccionado",
+  "comprador": {
+    "codigoOrganismo": null,
+    "nombreOrganismo": "HOSPITAL PUERTO MONTT SERVICIO DE SALUD DEL RELONCAVI",
+    "rutUnidad": "61.975.100-0",
+    "codigoUnidad": null,
+    "nombreUnidad": "Bienes y Servicios",
+    "region": 10,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": null,
+    "publicacion": "2026-01-19T13:52:00-03:00",
+    "cierre": "2026-01-20T13:55:00-03:00",
+    "adjudicacion": null,
+    "ultimoCambio": "2026-01-20T02:10:00-03:00"
+  },
+  "monto": {
+    "valor": 68000,
+    "moneda": "CLP",
+    "clp": 68000,
+    "fechaValor": "2026-01-19",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 90111501,
+      "nombre": "Hoteles",
+      "descripcion": "9229511 \tESTADIA",
+      "cantidad": 1,
+      "unidad": "000",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 1,
+  "personales": null,
+  "origen": "v2",
+  "ordenCompra": "54184770",
+  "cotizaciones": [
+    {
+      "proveedor": {
+        "rut": "[oculto]",
+        "nombre": "[oculto]",
+        "codigo": "1886551"
+      },
+      "monto": {
+        "valor": 68000,
+        "moneda": "CLP",
+        "clp": 68000,
+        "fechaValor": "2026-01-19",
+        "fuente": "identidad"
+      },
+      "seleccionada": true,
+      "productos": [
+        {
+          "codigoProducto": 90111501,
+          "nombre": "Hoteles",
+          "cantidad": 1,
+          "precioUnitario": {
+            "valor": 57143,
+            "moneda": "CLP",
+            "clp": 57143,
+            "fechaValor": "2026-01-19",
+            "fuente": "identidad"
+          }
+        }
+      ]
+    }
+  ]
+}

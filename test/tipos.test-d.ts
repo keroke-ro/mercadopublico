@@ -32,7 +32,7 @@ describe("cliente", () => {
   });
 
   test("compraAgil.listar es un AsyncIterable<CompraAgil>", () => {
-    expectTypeOf(mp.compraAgil.listar()).toMatchTypeOf<AsyncIterable<CompraAgil>>();
+    expectTypeOf(mp.compraAgil.listar({ region: [13] })).toMatchTypeOf<AsyncIterable<CompraAgil>>();
   });
 
   test("el ticket es obligatorio", () => {

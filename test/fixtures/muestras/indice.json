@@ -1,6 +1,6 @@
 {
-  "_fixture": "grabado de la API real el 2026-10-13",
-  "consultas": 85,
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "consultas": 219,
   "cobertura": {
     "licitaciones": {
       "tipos": [
@@ -52,9 +52,18 @@
       ]
     },
     "compraAgil": {
-      "tipos": [],
-      "estados": [],
-      "monedas": []
+      "tipos": [
+        "COT"
+      ],
+      "estados": [
+        "cancelada",
+        "desierta",
+        "proveedor_seleccionado",
+        "publicada"
+      ],
+      "monedas": [
+        "CLP"
+      ]
     }
   },
   "muestras": [
@@ -570,10 +579,43 @@
       "moneda": "CLP",
       "items": 1,
       "adjudicada": null
+    },
+    {
+      "archivo": "v2/1057539-228-COT26.json",
+      "tipo": "COT",
+      "estado": "proveedor_seleccionado",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": true
+    },
+    {
+      "archivo": "v2/2381-896-COT26.json",
+      "tipo": "COT",
+      "estado": "desierta",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false
+    },
+    {
+      "archivo": "v2/3482-155-COT26.json",
+      "tipo": "COT",
+      "estado": "cancelada",
+      "moneda": "CLP",
+      "items": 3,
+      "adjudicada": false
+    },
+    {
+      "archivo": "v2/5209-1952-COT26.json",
+      "tipo": "COT",
+      "estado": "publicada",
+      "moneda": "CLP",
+      "items": 1,
+      "adjudicada": false
     }
   ],
   "notas": [
     "licitación 500977-114-CI26: sin detalle (HTTP 500 String or binary data would be truncated. The statement has been terminated.)",
-    "v2 listado: HTTP 500 [{\"codigo\":\"ERROR_INTERNO\",\"mensaje\":\"Servicio no disponible, intente nuevamente más tarde\",\"detalle\":\"\"}]"
+    "v2 619578-118-COT26: HTTP 504 {\"message\":\"Endpoint request timed out\"}",
+    "v2 550574-45-COT26: HTTP 504 {\"message\":\"Endpoint request timed out\"}"
   ]
 }

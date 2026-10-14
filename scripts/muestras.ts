@@ -184,6 +184,15 @@ function guardar(rel: string, cuerpo: unknown) {
 const indice: Record<string, unknown>[] = [];
 const notas: string[] = [];
 
+// --solo-v2: no vuelve a pedir la v1 y suma las muestras de Compra Ágil al índice que ya existe.
+const SOLO_V2 = process.argv.includes("--solo-v2");
+let base = 0;
+if (SOLO_V2) {
+  const previo = JSON.parse(readFileSync(new URL("indice.json", SALIDA), "utf8"));
+  indice.push(...previo.muestras.filter((m: any) => !String(m.archivo).startsWith("v2/")));
+  notas.push(...previo.notas.filter((n: string) => !n.startsWith("v2")));
+  base = previo.consultas; // solo para el índice: el tope cuenta lo de este caché
+} else {
 // Licitaciones
 const lics = new Map<string, Cand>();
 for (const f of dias(5)) {
@@ -262,14 +271,22 @@ for (const c of elegir([...ocs.values()], N_OC, new Set())) {
   indice.push({ archivo: `v1/ordenes/${c.codigo}.json`, tipo: `${o.CodigoTipo} ${o.Tipo}`, estado: `${o.CodigoEstado} ${o.Estado}`, moneda: o.TipoMoneda, items: o.Items?.Cantidad ?? o.Items?.Listado?.length ?? 0, adjudicada: null });
 }
 
-// Compra Ágil v2: estuvo respondiendo 500; máximo 2 intentos en el listado.
-const lista = await pedir("v2", "compra-agil?numero_pagina=1&tamano_pagina=10", ticket, 2);
-if (lista.cuerpo?.success === "OK") {
-  guardar("v2/listado-p1.json", lista.cuerpo);
-  const items: any[] = lista.cuerpo.payload?.items ?? [];
-  const porEstado = new Map<string, any>();
-  for (const it of items) if (!porEstado.has(it.estado?.codigo)) porEstado.set(it.estado?.codigo, it);
-  const elegidos = [...porEstado.values(), ...items.filter((i) => ![...porEstado.values()].includes(i))].slice(0, 4);
+}
+
+// Compra Ágil v2: sin filtros el listado responde 500, así que se pide un listado por estado (últimos 30 días)
+// y el detalle de los primeros de cada uno: los estados con proveedor elegido traen cotizaciones.
+const desde = `${new Date(Date.now() - 30 * 864e5).toLocaleDateString("en-CA", { timeZone: "America/Santiago" })}T00:00:00Z`; // hora de pared, como la lee la API
+// `estado=proveedor_seleccionado` devuelve 0 resultados aunque existan (2026-10-14) y `oc_emitida` da 400:
+// las muestras con cotizaciones salen de códigos conocidos.
+const POR_ESTADO: Record<string, number> = { publicada: 1, cerrada: 2, desierta: 1, cancelada: 1 };
+const CON_COTIZACIONES = ["1057539-228-COT26"];
+for (const [estado, n] of [...Object.entries(POR_ESTADO), ["", 0] as const]) {
+  const lista = estado ? await pedir("v2", `compra-agil?estado=${estado}&publicado_desde=${desde}&numero_pagina=1&tamano_pagina=10`, ticket, 2) : { status: 200, cuerpo: { success: "OK", payload: { items: CON_COTIZACIONES.map((codigo) => ({ codigo })) } } };
+  if (lista.cuerpo?.success !== "OK") {
+    notas.push(`v2 listado ${estado}: HTTP ${lista.status} ${JSON.stringify(lista.cuerpo?.errors ?? lista.cuerpo).slice(0, 200)}`);
+    continue;
+  }
+  const elegidos: any[] = (lista.cuerpo.payload?.items ?? []).slice(0, n || undefined);
   for (const it of elegidos) {
     const r = await pedir("v2", `compra-agil/${encodeURIComponent(it.codigo)}`, ticket, 2);
     if (r.cuerpo?.success !== "OK") {
@@ -280,13 +297,13 @@ if (lista.cuerpo?.success === "OK") {
     guardar(`v2/${it.codigo}.json`, r.cuerpo);
     indice.push({ archivo: `v2/${it.codigo}.json`, tipo: "COT", estado: p?.estado?.codigo, moneda: p?.presupuesto?.moneda, items: p?.productos_solicitados?.length ?? 0, adjudicada: (p?.proveedores_cotizando?.length ?? 0) > 0 });
   }
-} else notas.push(`v2 listado: HTTP ${lista.status} ${JSON.stringify(lista.cuerpo?.errors ?? lista.cuerpo).slice(0, 200)}`);
+}
 
 const cobertura = (pref: string) => {
   const de = (k: string) => [...new Set(indice.filter((i) => String(i.archivo).startsWith(pref)).map((i) => String(i[k])))].sort();
   return { tipos: de("tipo"), estados: de("estado"), monedas: de("moneda") };
 };
-writeFileSync(new URL("indice.json", SALIDA), `${JSON.stringify({ _fixture: marca, consultas, cobertura: { licitaciones: cobertura("v1/licitaciones"), ordenes: cobertura("v1/ordenes"), compraAgil: cobertura("v2") }, muestras: indice.sort((a, b) => String(a.archivo).localeCompare(String(b.archivo))), notas }, null, 2)}\n`);
+writeFileSync(new URL("indice.json", SALIDA), `${JSON.stringify({ _fixture: marca, consultas: base + consultas, cobertura: { licitaciones: cobertura("v1/licitaciones"), ordenes: cobertura("v1/ordenes"), compraAgil: cobertura("v2") }, muestras: indice.sort((a, b) => String(a.archivo).localeCompare(String(b.archivo))), notas }, null, 2)}\n`);
 
 // Misma cuenta diaria que la CLI y scripts/contrato.ts.
 try {

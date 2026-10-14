@@ -1,0 +1,73 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "success": "OK",
+  "trace": null,
+  "payload": {
+    "codigo": "2381-896-COT26",
+    "nombre": "SERVICIO DE COFFEE BREAK PARA CAPACITACIÓN MHGAP DEL CESFAM ROSARIO",
+    "descripcion": "SERVICIO DE COFFEE BREAK PARA CAPACITACIÓN MHGAP DEL CESFAM ROSARIO",
+    "estado": {
+      "id_estado": 6,
+      "codigo": "desierta",
+      "glosa": "Desierta"
+    },
+    "convocatoria": {
+      "estado_convocatoria": 1,
+      "descripcion": "Primer llamado",
+      "fecha_cierre_primer_llamado": "2026-10-14 11:00",
+      "fecha_cierre_segundo_llamado": null
+    },
+    "fechas": {
+      "fecha_publicacion": "2026-10-13 10:35",
+      "fecha_cierre": "2026-10-14 11:00",
+      "fecha_ultimo_cambio": "2026-10-14 11:50",
+      "fecha_cancelacion": null
+    },
+    "entrega": {
+      "direccion_entrega": "A Convenir",
+      "plazo_entrega_dias": 1
+    },
+    "documentos": [],
+    "presupuesto": {
+      "tipo_presupuesto": "Estimado",
+      "moneda": "CLP",
+      "presupuesto_estimado": 250000,
+      "monto_disponible": 250000,
+      "monto_disponible_clp": 250000,
+      "valor_cambio_moneda": null,
+      "fecha_cambio_moneda": null
+    },
+    "id_orden_compra": null,
+    "institucion": {
+      "organismo_comprador": "I MUNICIPALIDAD DE COPIAPO",
+      "rut": "69.030.200-4",
+      "unidad_compra": "DEPARTAMENTO DE ADQUISICIONES DASM",
+      "region": 3,
+      "nombre_region": "Región de Atacama "
+    },
+    "productos_solicitados": [
+      {
+        "codigo_producto": 90101601,
+        "nombre": "Banquetes",
+        "descripcion": "SERVICIO DE COFFEE BREAK PARA 15 PERSONAS, PARA EL DÍA 15 DE OCTUBRE, PARA CAPACITACIÓN MHGAP DEL CESFAM ROSARIO. DEBE SER SALUDABLE, BAJO EN AZÚCAR, BAJO EN GRASAS E INCLUIR TÉ, CAFÉ, AGUA, JUGOS, PRODUCTOS DULCES Y SALADOS SALUDABLES Y FRUTAS. DEBE ADJUNTAR COTIZACIÓN FORMAL PARA CONSIDERAR LA OFERTA.",
+        "cantidad": 1,
+        "unidad_medida": "EA"
+      }
+    ],
+    "proveedores_cotizando": [],
+    "resumen": {
+      "multa_sancion": 0,
+      "total_ofertas_recibidas": 0,
+      "total_demandas": 0
+    },
+    "motivos": {
+      "motivo_cancelacion": null,
+      "motivo_desierta": "SIN OFERTAS"
+    },
+    "flags": {
+      "considera_requisitos_medioambientales": false,
+      "considera_requisitos_impacto_social_economico": false
+    }
+  },
+  "errors": null
+}

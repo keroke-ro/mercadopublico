@@ -1,0 +1,73 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "success": "OK",
+  "trace": null,
+  "payload": {
+    "codigo": "5209-1952-COT26",
+    "nombre": "DARATUMUMAB 100 MG 5 ML",
+    "descripcion": "SE SOLICITA EN COTIZACIÓN INDICAR VENCIMIENTO DEL PRODUCTO MAYOR A 12 MESES, FACTOR DE EMPAQUE, CONDICIÓN DE PAGO, FICHA REGISTRO ISP, MONTO MINIMO Y TIEMPO DE DEMORA EN DESPACHO (PRIORIDAD EN 24 HRS)",
+    "estado": {
+      "id_estado": 2,
+      "codigo": "publicada",
+      "glosa": "Publicada"
+    },
+    "convocatoria": {
+      "estado_convocatoria": 1,
+      "descripcion": "Primer llamado",
+      "fecha_cierre_primer_llamado": "2026-10-15 12:00",
+      "fecha_cierre_segundo_llamado": "2026-10-16 12:05"
+    },
+    "fechas": {
+      "fecha_publicacion": "2026-10-14 11:54",
+      "fecha_cierre": "2026-10-15 12:00",
+      "fecha_ultimo_cambio": "2026-10-14 11:55",
+      "fecha_cancelacion": null
+    },
+    "entrega": {
+      "direccion_entrega": "DR CARLOS LORCA TOBAR 999 (EX SANTOS DUMONT )",
+      "plazo_entrega_dias": 1
+    },
+    "documentos": [],
+    "presupuesto": {
+      "tipo_presupuesto": "Estimado",
+      "moneda": "CLP",
+      "presupuesto_estimado": 5140000,
+      "monto_disponible": 5140000,
+      "monto_disponible_clp": 5140000,
+      "valor_cambio_moneda": null,
+      "fecha_cambio_moneda": null
+    },
+    "id_orden_compra": null,
+    "institucion": {
+      "organismo_comprador": "UNIVERSIDAD DE CHILE",
+      "rut": "60.910.000-1",
+      "unidad_compra": "Hospital Clínico Univ. de Chile - Unidad de Medicamentos",
+      "region": 13,
+      "nombre_region": "Región Metropolitana de Santiago"
+    },
+    "productos_solicitados": [
+      {
+        "codigo_producto": 51151823,
+        "nombre": "Clorhidrato de labetalol",
+        "descripcion": "DARATUMUMAB 100 MG 5 ML",
+        "cantidad": 13,
+        "unidad_medida": "VI"
+      }
+    ],
+    "proveedores_cotizando": [],
+    "resumen": {
+      "multa_sancion": 0,
+      "total_ofertas_recibidas": 0,
+      "total_demandas": 0
+    },
+    "motivos": {
+      "motivo_cancelacion": null,
+      "motivo_desierta": null
+    },
+    "flags": {
+      "considera_requisitos_medioambientales": false,
+      "considera_requisitos_impacto_social_economico": false
+    }
+  },
+  "errors": null
+}

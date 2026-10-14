@@ -125,7 +125,7 @@ ca?.cotizaciones; // [{ proveedor, monto, seleccionada, productos }]
 ca?.ordenCompra; // código o id de la OC; ver nota abajo
 ```
 
-Filtros (`FiltrosCompraAgil`): `estado`, `region` (1 a 16), `publicadoDesde`/`publicadoHasta`, `cambioDesde`/`cambioHasta` o `ttlCambioMs`, `q` o `id`, `ordenarPor`, `tamanoPagina` (10 a 50, por defecto 50: la API real rechaza menos de 10) y `rutOrganismo`. Las fechas aceptan `Date` o ISO; sin offset se leen como hora de Santiago.
+Filtros (`FiltrosCompraAgil`): `estado`, `region` (1 a 16), `publicadoDesde`/`publicadoHasta`, `cambioDesde`/`cambioHasta` o `ttlCambioMs`, `q` o `id`, `ordenarPor`, `tamanoPagina` (10 a 50, por defecto 50: la API real rechaza menos de 10) y `rutOrganismo`. Las fechas aceptan `Date` o ISO; sin offset se leen como hora de Santiago. Hace falta al menos un filtro que llegue a la API (todos menos `ordenarPor`, `tamanoPagina` y `rutOrganismo`): sin ninguno, la API responde 500. `estado` no acepta `oc_emitida`, porque la API lo rechaza.
 
 - Las combinaciones que la API rechaza (`q` con `id`, `ttlCambioMs` con `cambioDesde`) y los valores fuera de rango (`region`, `tamanoPagina`, fechas inválidas, estados desconocidos) fallan en local con `parametros`, sin gastar consulta.
 - `rutOrganismo` no existe en la API: se filtra después de bajar cada página y no ahorra consultas. Combínalo con `region`.

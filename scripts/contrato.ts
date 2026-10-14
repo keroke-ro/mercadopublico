@@ -158,7 +158,9 @@ async function contrato(ticket: string) {
   // No hay fixture de BuscarComprador: comparte forma con BuscarProveedor ({listaEmpresas: [{CodigoEmpresa, NombreEmpresa}]}).
   await caso("v1 BuscarComprador", "v1/empresas-proveedor", async () => [await pedir("Publico/Empresas/BuscarComprador", ticket, "v1")]);
   let cas: unknown;
-  await caso("v2 Compra Ágil listado", "v2/listado-p1", async () => [(cas = await pedir("compra-agil?numero_pagina=1&tamano_pagina=10", ticket, "v2"))]);
+  // Sin ningún filtro la v2 responde 500 ERROR_INTERNO (visto el 2026-10-14); con publicado_desde responde.
+  const desde = new Date(Date.now() - 864e5).toISOString();
+  await caso("v2 Compra Ágil listado", "v2/listado-p1", async () => [(cas = await pedir(`compra-agil?numero_pagina=1&tamano_pagina=10&publicado_desde=${desde}`, ticket, "v2"))]);
   if (cas) await caso("v2 Compra Ágil detalle", "v2/detalle", async () => {
     const r = [];
     for (const c of codigos(cas, "codigo")) r.push(await pedir(`compra-agil/${encodeURIComponent(c)}`, ticket, "v2"));

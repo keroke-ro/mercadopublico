@@ -303,16 +303,16 @@ describe("sync v2 (Compra Ágil)", () => {
     const plan = await mp.sync.planificar({ desde: "2026-06-01", hasta: HOY, fuentes: ["compra_agil"], store });
     expect(plan).toMatchObject({ consultas: 2 + 3, gastadas: 1, cabeHoy: true });
     expect(plan.desglose[0]!.nota).toMatch(/cota superior/);
-    expect(new Date(pedidos[0]!.searchParams.get("cambio_desde")!).toISOString()).toBe("2026-06-01T04:00:00.000Z");
+    expect(new Date(pedidos[0]!.searchParams.get("cambio_desde")!).toISOString()).toBe("2026-06-01T00:00:00.000Z");
 
     const r = await mp.sync.ejecutar(plan);
     expect(r).toMatchObject({ consultas: 3, nuevos: 1, omitidos: 2, errores: [] }); // página 1 + página 2 + detalle de R
     expect(detalles()).toBe(1);
     const cursor = await store.cursor("compra_agil");
-    expect(Date.parse(cursor!)).toBe(Date.parse("2026-06-11T12:00:00Z"));
+    expect(Date.parse(cursor!)).toBe(Date.parse("2026-06-11T12:00:00-04:00"));
 
     await mp.sync.planificar({ desde: "2026-06-01", hasta: HOY, fuentes: ["compra_agil"], store });
-    expect(pedidos.at(-1)!.searchParams.get("cambio_desde")).toBe("2026-06-11T12:00:00.000Z");
+    expect(pedidos.at(-1)!.searchParams.get("cambio_desde")).toBe("2026-06-11T12:00:00Z");
   });
 
   it("las páginas 2+ usan el mismo cambio_hasta que la 1 aunque se ejecute pasada la medianoche", async () => {
@@ -331,7 +331,7 @@ describe("sync v2 (Compra Ágil)", () => {
     const store = await storeConPyQ();
     const r = await mp.sync.ejecutar(await mp.sync.planificar({ desde: "2026-06-01", hasta: HOY, fuentes: ["compra_agil"], store }));
     expect(r.errores.map((e) => e.codigo)).toEqual(["R"]);
-    expect(Date.parse((await store.cursor("compra_agil"))!)).toBe(Date.parse("2026-06-11T12:00:00Z"));
+    expect(Date.parse((await store.cursor("compra_agil"))!)).toBe(Date.parse("2026-06-11T12:00:00-04:00"));
   });
 
   it("un detalle con error pasajero queda pendiente, el cursor avanza igual y la vuelta siguiente lo trae", async () => {
@@ -341,7 +341,7 @@ describe("sync v2 (Compra Ágil)", () => {
     const o = { desde: "2026-06-01", hasta: HOY, fuentes: ["compra_agil" as const], store };
     const r = await mp.sync.ejecutar(await mp.sync.planificar(o));
     expect(r.errores.map((e) => e.codigo)).toEqual(["R"]);
-    expect(Date.parse((await store.cursor("compra_agil"))!)).toBe(Date.parse("2026-06-11T12:00:00Z"));
+    expect(Date.parse((await store.cursor("compra_agil"))!)).toBe(Date.parse("2026-06-11T12:00:00-04:00"));
     expect(await store.cursor("compra_agil:pendientes")).toBe('{"R":1}');
 
     caido = false;

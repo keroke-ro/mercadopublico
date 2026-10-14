@@ -1,0 +1,68 @@
+{
+  "tipo": "compra_agil",
+  "codigo": "3482-155-COT26",
+  "nombre": "ADQUISICIÓN DE EQUIPAMIENTO PARA EL FUNCIONAMIENTO DE LA COMISIÓN EDUCACIÓN FÍSICA DEL PERSONAL DE PLANTA DE ESTA UNIDAD REGIMENTARIA.",
+  "descripcion": "SOLICITA COTIZAR EQUIPAMIENTO PARA EL FUNCIONAMIENTO DE LA COMISIÓN EDUCACIÓN FÍSICA DEL PERSONAL DE PLANTA DE ESTA UNIDAD REGIMENTARIA. NO INCLUIR VALOR POR ENVÍO.",
+  "estado": "cancelada",
+  "estadoGlosa": "Cancelada",
+  "comprador": {
+    "codigoOrganismo": null,
+    "nombreOrganismo": "Ejercito de Chile",
+    "rutUnidad": "61.962.200-6",
+    "codigoUnidad": null,
+    "nombreUnidad": "Regimiento N° 9 \"Chillán\"",
+    "region": 16,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": null,
+    "publicacion": "2026-10-14T11:51:00-03:00",
+    "cierre": "2026-10-16T10:00:00-03:00",
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-14T11:55:00-03:00"
+  },
+  "monto": {
+    "valor": 350000,
+    "moneda": "CLP",
+    "clp": 350000,
+    "fechaValor": "2026-10-14",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 40101604,
+      "nombre": "Ventiladores",
+      "descripcion": "VENTILADOR INDUSTRIAL DE PIE, DE 30\" DE ALTA POTENCIA.",
+      "cantidad": 5,
+      "unidad": "EA",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 39111521,
+      "nombre": "Plafones",
+      "descripcion": "PANEL PLAFÓN REDONDO SOBREPUESTO LED 18W.",
+      "cantidad": 1,
+      "unidad": "EA",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    },
+    {
+      "codigoProducto": 30181513,
+      "nombre": "Tapas de inodoro",
+      "descripcion": "TAPA DE WC ASIENTO UNIVERSAL REDONDO PLÁSTICO.",
+      "cantidad": 2,
+      "unidad": "EA",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 0,
+  "personales": null,
+  "origen": "v2",
+  "ordenCompra": null,
+  "cotizaciones": []
+}
