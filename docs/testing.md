@@ -46,7 +46,7 @@ Si una propiedad falla, fast-check imprime el contraejemplo mínimo junto con `s
 
 ## Corpus real y snapshots
 
-`test/fixtures/muestras` tiene 59 respuestas reales anonimizadas (41 licitaciones y 18 órdenes de compra, grabadas el 2026-10-13 con 85 consultas), elegidas para cubrir tipos, estados y monedas. `indice.json` resume la cobertura y las notas de la grabación. Todavía no hay muestras de la v2: esa noche respondía 500.
+`test/fixtures/muestras` tiene 59 respuestas reales anonimizadas (41 licitaciones y 18 órdenes de compra, grabadas el 2026-10-13 con 85 consultas), elegidas para cubrir tipos, estados y monedas. `indice.json` resume la cobertura y las notas de la grabación. Las 4 muestras de Compra Ágil (`v2/`) se agregaron el 2026-10-14 con `--solo-v2`. Los detalles `cerrada` dieron 504, y `estado=proveedor_seleccionado` no devuelve nada, así que la muestra con cotizaciones sale de un código conocido.
 
 `test/muestras.test.ts` pasa cada muestra por el parser público y exige que no lance, que el código calce, que el estado sea conocido (o la glosa que mandó la API), que las fechas tengan offset, que los montos sean finitos y que cada ruta de `personales` exista en `raw`. El resultado, sin `raw`, queda en `test/__snapshots__/muestras/<codigo>.json`: cualquier cambio de un parser aparece como diff en el PR.
 
@@ -68,6 +68,7 @@ rm -rf "$MUESTRAS_CACHE"
 
 - Lista días hábiles recientes, elige códigos que sumen tipos, estados y monedas nuevos, y pide su detalle. Escribe las muestras elegidas y reescribe `indice.json`; no borra las que ya estaban.
 - **Presupuesto:** 120 consultas como máximo, sumando todas las corridas. La cuenta vive en `$MUESTRAS_CACHE/consultas.json`. Va de a una, con 2 s de pausa y hasta 3 intentos. Lo que gasta se suma a `~/.mercadopublico/cuota.json`, igual que la CLI.
+- **`--solo-v2`:** no vuelve a pedir la v1. Pide un listado de Compra Ágil por estado y algunos detalles (unas 10 consultas), y suma las muestras al `indice.json` que ya existe.
 - **Caché:** cada respuesta cruda se guarda en `$MUESTRAS_CACHE` (por defecto `mercadopublico-muestras` dentro de `os.tmpdir()`), así que volver a correrlo no gasta cuota. Un fallo también queda en caché: borra ese archivo para reintentarlo.
 - **Borra el caché al terminar.** Tiene las respuestas sin anonimizar, con nombres, RUT, correos y teléfonos de funcionarios. Ojo: borrarlo también reinicia la cuenta del tope.
 

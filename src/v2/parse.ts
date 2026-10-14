@@ -23,7 +23,7 @@ const GLOSAS: Record<EstadoCompraAgil, string> = {
  */
 export const CAMPOS_PERSONALES_V2: readonly string[] = ["rut_proveedor", "razon_social"];
 
-// ── Campos conocidos (docs/api-notes.md §3 y test/fixtures/v2; la v2 aún no tiene fixtures grabados de la API real) ──
+// ── Campos conocidos (docs/api-notes.md §3 y test/fixtures/v2/*.real.json, grabados el 2026-10-14) ──
 // Un mismo esquema para listado (`payload.items[]`) y detalle (`payload`): los del detalle no aparecen en el listado.
 
 export const ESQUEMA_COMPRA_AGIL: Esquema = {
@@ -33,7 +33,7 @@ export const ESQUEMA_COMPRA_AGIL: Esquema = {
   estado: { id_estado: "*", codigo: "s", glosa: "s" },
   convocatoria: "*",
   documentos: "*",
-  fechas: { fecha_publicacion: "s", fecha_cierre: "s", fecha_ultimo_cambio: "s", fecha_cancelacion: "*" },
+  fechas: { fecha_publicacion: "s", fecha_cierre: "s", fecha_ultimo_cambio: "s", fecha_cancelacion: "*", fecha_cierre_primer_llamado: "*", fecha_cierre_segundo_llamado: "*" },
   montos: { moneda: "m", monto_disponible: "n", monto_disponible_clp: "*" },
   presupuesto: {
     tipo_presupuesto: "*",
@@ -50,7 +50,8 @@ export const ESQUEMA_COMPRA_AGIL: Esquema = {
   links: "*",
   entrega: "*",
   flags: "*",
-  orden_compra: { id_orden_compra: "sn", id_oc: "sn", codigo_orden_compra: "s", estado_orden_compra: "*" },
+  id_orden_compra: "*", // así llega en la API real: en la raíz y numérico
+  orden_compra: { id_orden_compra: "sn", id_oc: "sn", codigo_orden_compra: "s", estado_orden_compra: "*" }, // forma de la guía
   productos_solicitados: [{ codigo_producto: "sn", nombre: "s", descripcion: "s", cantidad: "sn", unidad_medida: "s" }],
   proveedores_cotizando: [
     {
@@ -65,7 +66,7 @@ export const ESQUEMA_COMPRA_AGIL: Esquema = {
       ...Object.fromEntries(
         ["es_emt", "id_cotizacion", "codigo_sucursal_empresa", "estado_por_comprador", "activo", "fecha_vigencia", "valor_neto", "total_impuesto",
           "monto_despacho", "nombre_impuesto", "porcentaje_impuesto", "descripcion_cotizacion", "descripcion", "justificacion_inadmisibilidad",
-          "estado_cotizacion"].map((k) => [k, "*"]),
+          "estado_cotizacion", "estado", "id_oc", "proveedor_seleccionado"].map((k) => [k, "*"]),
       ),
     },
   ],
@@ -87,9 +88,13 @@ type Obj = Record<string, unknown>;
 const obj = (x: unknown): Obj => (x && typeof x === "object" && !Array.isArray(x) ? (x as Obj) : {});
 const arr = (x: unknown): unknown[] => (Array.isArray(x) ? x : []);
 
+/**
+ * La v2 da hora de pared de Santiago aunque a veces le pegue una Z ("2026-10-14 11:44" y "2026-10-14T11:45:00.463Z"
+ * son el mismo instante; hay cierres a las "08:30Z"). Se descarta la Z y se lee como hora de Santiago.
+ */
 function fecha(x: unknown): string | null {
   try {
-    return normalizarFecha(str(x));
+    return normalizarFecha(str(x)?.replace(" ", "T").replace(/Z$/, ""));
   } catch {
     return null;
   }
@@ -138,7 +143,9 @@ export function parseCompraAgil(raw: unknown, { detalle, avisar }: { detalle: bo
     const m = c.moneda ?? mon;
     const d = fecha(c.fecha_creacion)?.slice(0, 10) ?? dia;
     const precio = (v: unknown): Monto | null => monto(v, m, d);
-    const sel = obj(c.seleccion).proveedor_seleccionado;
+    // La API real manda `proveedor_seleccionado: 0|1` en la cotización; la guía, un booleano dentro de `seleccion`.
+    const s = c.proveedor_seleccionado ?? obj(c.seleccion).proveedor_seleccionado;
+    const sel = s === 0 || s === 1 ? s === 1 : s;
     return {
       proveedor: { rut: str(c.rut_proveedor), nombre: str(c.razon_social), codigo: str(c.codigo_empresa) },
       monto: precio(c.monto_total), // con impuesto y despacho; el neto queda en raw.valor_neto
@@ -176,8 +183,8 @@ export function parseCompraAgil(raw: unknown, { detalle, avisar }: { detalle: bo
     oferentes: entero(obj(r.resumen).total_ofertas_recibidas) ?? (detalle ? cotizaciones.length : null),
     personales: null,
     origen: "v2",
-    // `codigo_orden_compra` llega null aunque la OC exista; `id_orden_compra` es el indicador confiable.
-    ordenCompra: str(oc.codigo_orden_compra) ?? str(oc.id_orden_compra) ?? str(oc.id_oc),
+    // La API real manda `id_orden_compra` en la raíz; la guía, dentro de `orden_compra` (con `codigo_orden_compra` en null).
+    ordenCompra: str(r.id_orden_compra) ?? str(oc.codigo_orden_compra) ?? str(oc.id_orden_compra) ?? str(oc.id_oc),
     cotizaciones,
     raw,
   };

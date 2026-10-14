@@ -1,12 +1,13 @@
 import { exigirCodigo, exigirUno, MercadoPublicoError } from "../errores.js";
-import { desdeHoraSantiago } from "../fecha.js";
+import { desdeHoraSantiago, isoSantiago } from "../fecha.js";
 import type { Cancelable, Transporte } from "../http.js";
 import type { CompraAgil, Enriquecer } from "../modelo.js";
 import { num } from "../util.js";
 import { parseCompraAgil, type EstadoCompraAgil } from "./parse.js";
 
 export interface FiltrosCompraAgil {
-  estado?: EstadoCompraAgil[];
+  /** `oc_emitida` no sirve como filtro: la API lo rechaza con 400. */
+  estado?: Exclude<EstadoCompraAgil, "oc_emitida">[];
   /** Códigos de región, 1 a 16. */
   region?: number[];
   /** Date o ISO. Sin offset se entiende como hora de Santiago. */
@@ -41,13 +42,15 @@ export interface PaginaCompraAgil {
 
 const fallo = (m: string) => new MercadoPublicoError("parametros", m);
 // Record y no lista: si EstadoCompraAgil gana un valor, TypeScript obliga a agregarlo aquí.
-const ESTADOS = Object.keys({ publicada: 1, cerrada: 1, desierta: 1, cancelada: 1, proveedor_seleccionado: 1, oc_emitida: 1 } satisfies Record<EstadoCompraAgil, 1>);
+// La API real acepta todos menos `oc_emitida` (400 "Valores permitidos: …", visto el 2026-10-14).
+const ESTADOS = Object.keys({ publicada: 1, cerrada: 1, desierta: 1, cancelada: 1, proveedor_seleccionado: 1 } satisfies Record<Exclude<EstadoCompraAgil, "oc_emitida">, 1>);
 const rut = (x: string | null) => x?.replace(/[.\s]/g, "").toUpperCase();
 
 function iso(x: Date | string | undefined, campo: string): string | undefined {
   if (x === undefined) return undefined;
   try {
-    return (typeof x === "string" ? desdeHoraSantiago(x) : x).toISOString(); // RangeError si es inválida
+    // La API lee el filtro como hora de pared de Santiago aunque lleve Z (igual que las fechas que devuelve).
+    return `${isoSantiago(typeof x === "string" ? desdeHoraSantiago(x) : x).slice(0, 19)}Z`; // RangeError si es inválida
   } catch {
     throw fallo(`${campo}: fecha inválida (${String(x)})`);
   }
@@ -63,6 +66,10 @@ function params(f: FiltrosCompraAgil, numero: number) {
   if (f.region?.some((r) => !Number.isInteger(r) || r < 1 || r > 16)) throw fallo("`region` va de 1 a 16");
   for (const e of f.estado ?? []) exigirUno(e, ESTADOS, "estado");
   if (f.id !== undefined) exigirCodigo(f.id, "`id`");
+  // Sin ninguno de estos la API responde 500 ERROR_INTERNO (visto el 2026-10-14). `rutOrganismo` no cuenta: es local.
+  const filtros = [f.estado?.length, f.region?.length, f.publicadoDesde, f.publicadoHasta, f.cambioDesde, f.cambioHasta, f.ttlCambioMs, f.q, f.id];
+  if (!filtros.some((x) => x !== undefined && x !== 0 && x !== ""))
+    throw fallo("la API exige al menos un filtro: estado, region, publicadoDesde/Hasta, cambioDesde/Hasta, ttlCambioMs, q o id");
   return {
     estado: f.estado,
     region: f.region,
@@ -101,7 +108,7 @@ export class CompraAgilApi {
   }
 
   /** Recorre todas las páginas; cuesta `totalPaginas` consultas. */
-  async *listar(filtros: FiltrosCompraAgil = {}, { signal }: Cancelable = {}): AsyncGenerator<CompraAgil, void, undefined> {
+  async *listar(filtros: FiltrosCompraAgil, { signal }: Cancelable = {}): AsyncGenerator<CompraAgil, void, undefined> {
     for (let n = 1; ; n++) {
       const p = await this.pagina(filtros, n, { signal });
       yield* p.items;

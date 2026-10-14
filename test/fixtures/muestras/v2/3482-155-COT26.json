@@ -1,0 +1,87 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "success": "OK",
+  "trace": null,
+  "payload": {
+    "codigo": "3482-155-COT26",
+    "nombre": "ADQUISICIÓN DE EQUIPAMIENTO PARA EL FUNCIONAMIENTO DE LA COMISIÓN EDUCACIÓN FÍSICA DEL PERSONAL DE PLANTA DE ESTA UNIDAD REGIMENTARIA.",
+    "descripcion": "SOLICITA COTIZAR EQUIPAMIENTO PARA EL FUNCIONAMIENTO DE LA COMISIÓN EDUCACIÓN FÍSICA DEL PERSONAL DE PLANTA DE ESTA UNIDAD REGIMENTARIA. NO INCLUIR VALOR POR ENVÍO.",
+    "estado": {
+      "id_estado": 5,
+      "codigo": "cancelada",
+      "glosa": "Cancelada"
+    },
+    "convocatoria": {
+      "estado_convocatoria": 1,
+      "descripcion": "Primer llamado",
+      "fecha_cierre_primer_llamado": "2026-10-16 10:00",
+      "fecha_cierre_segundo_llamado": "2026-10-18 08:08"
+    },
+    "fechas": {
+      "fecha_publicacion": "2026-10-14 11:51",
+      "fecha_cierre": "2026-10-16 10:00",
+      "fecha_ultimo_cambio": "2026-10-14 11:55",
+      "fecha_cancelacion": "2026-10-14 11:52"
+    },
+    "entrega": {
+      "direccion_entrega": "AVENIDA VICENTE MÉNDEZ N.º 146",
+      "plazo_entrega_dias": 5
+    },
+    "documentos": [],
+    "presupuesto": {
+      "tipo_presupuesto": "Disponible",
+      "moneda": "CLP",
+      "presupuesto_estimado": 350000,
+      "monto_disponible": 350000,
+      "monto_disponible_clp": 350000,
+      "valor_cambio_moneda": null,
+      "fecha_cambio_moneda": null
+    },
+    "id_orden_compra": null,
+    "institucion": {
+      "organismo_comprador": "Ejercito de Chile",
+      "rut": "61.962.200-6",
+      "unidad_compra": "Regimiento N° 9 \"Chillán\"",
+      "region": 16,
+      "nombre_region": "Región del Ñuble"
+    },
+    "productos_solicitados": [
+      {
+        "codigo_producto": 40101604,
+        "nombre": "Ventiladores",
+        "descripcion": "VENTILADOR INDUSTRIAL DE PIE, DE 30\" DE ALTA POTENCIA. ",
+        "cantidad": 5,
+        "unidad_medida": "EA"
+      },
+      {
+        "codigo_producto": 39111521,
+        "nombre": "Plafones",
+        "descripcion": "PANEL PLAFÓN REDONDO SOBREPUESTO LED 18W.",
+        "cantidad": 1,
+        "unidad_medida": "EA"
+      },
+      {
+        "codigo_producto": 30181513,
+        "nombre": "Tapas de inodoro",
+        "descripcion": "TAPA DE WC ASIENTO UNIVERSAL REDONDO PLÁSTICO.",
+        "cantidad": 2,
+        "unidad_medida": "EA"
+      }
+    ],
+    "proveedores_cotizando": [],
+    "resumen": {
+      "multa_sancion": 1,
+      "total_ofertas_recibidas": 0,
+      "total_demandas": 0
+    },
+    "motivos": {
+      "motivo_cancelacion": "A SOLICITUD DEL REQUIRENTE.",
+      "motivo_desierta": null
+    },
+    "flags": {
+      "considera_requisitos_medioambientales": false,
+      "considera_requisitos_impacto_social_economico": false
+    }
+  },
+  "errors": null
+}

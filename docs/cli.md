@@ -73,7 +73,7 @@ npx mercadopublico cuota
 
 - **Datos personales:** se ocultan en toda salida que sea un proceso, salvo `--incluir-personales`.
 - **Formato:** tabla si la salida es una terminal y JSON si no (por ejemplo, con `| jq`). La tabla y el CSV de procesos muestran tipo, código, nombre, estado, organismo, región, publicación, cierre y monto.
-- **Fechas:** `--dia`, `--desde` y `--hasta` van en `AAAA-MM-DD`. En `compra-agil`, `--desde` es la fecha de publicación y acepta ISO. `--organismo` y `--proveedor` sin `--dia` usan hoy.
+- **Fechas:** `--dia`, `--desde` y `--hasta` van en `AAAA-MM-DD`. En `compra-agil`, `--desde` es la fecha de publicación y acepta ISO; sin `--region`, `--estado`, `--q` ni `--desde` lista lo publicado hoy (la API no acepta un listado sin filtros). `--organismo` y `--proveedor` sin `--dia` usan hoy.
 - **Cuota:** la CLI guarda las consultas del día en `~/.mercadopublico/cuota.json` (o en `$MERCADOPUBLICO_HOME`) y la retoma en la siguiente llamada. `cuota` la muestra sin gastar nada. Al terminar, cada proceso suma lo que gastó a lo que diga el archivo en ese momento, así que dos CLI a la vez (o la CLI y `npm run contrato`) no se pisan la cuenta.
 - **sync:** imprime el plan y el avance en stderr y el resultado en stdout. La línea del plan muestra las consultas previstas, las ya gastadas, el margen por reintentos y lo que queda hoy:
 

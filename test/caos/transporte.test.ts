@@ -138,7 +138,7 @@ describe("cuota agotada", () => {
   ])("%s → cuota_agotada, sin reintentar", async (_, ruta, falla) => {
     srv.fallar(ruta, falla);
     const { mp, de } = cliente(srv);
-    const p = ruta === "lic" ? mp.licitaciones.delDia("2026-10-01") : mp.compraAgil.pagina({}, 1);
+    const p = ruta === "lic" ? mp.licitaciones.delDia("2026-10-01") : mp.compraAgil.pagina({ ttlCambioMs: 60_000 }, 1);
     await expect(p).rejects.toMatchObject({ tipo: "cuota_agotada" });
     expect(srv.de(ruta)).toHaveLength(1);
     expect(de("reintento")).toEqual([]);
@@ -167,14 +167,14 @@ describe("circuito de la v2 ante success ERROR con HTTP 500", () => {
     srv.fallar("v2", { status: 500, cuerpo: error }, { status: 500, cuerpo: { codigo: "ERROR_INTERNO", mensaje: "Servicio no disponible…" } });
     srv.fallar("v2det", { status: 500, cuerpo: error });
     const { mp, de, eventos } = cliente(srv, { reintentos: 0, circuito: { umbral: 3, enfriamientoMs: 200 } });
-    await expect(mp.compraAgil.pagina({}, 1)).rejects.toMatchObject({ tipo: "servidor", message: "Servicio no disponible" });
+    await expect(mp.compraAgil.pagina({ ttlCambioMs: 60_000 }, 1)).rejects.toMatchObject({ tipo: "servidor", message: "Servicio no disponible" });
     await expect(mp.compraAgil.detalle("3000-1-COT26")).rejects.toMatchObject({ tipo: "servidor" });
     expect(mp.salud().v2).toMatchObject({ estado: "cerrado", fallas: 2 });
-    await expect(mp.compraAgil.pagina({}, 1)).rejects.toMatchObject({ tipo: "servidor" });
+    await expect(mp.compraAgil.pagina({ ttlCambioMs: 60_000 }, 1)).rejects.toMatchObject({ tipo: "servidor" });
     expect(mp.salud().v2).toMatchObject({ estado: "abierto", fallas: 3 });
 
     // Falla rápido = sin tocar el servidor (se cuenta abajo), no un tiempo: con carga cualquier umbral en ms es frágil.
-    await expect(mp.compraAgil.pagina({}, 1)).rejects.toMatchObject({ tipo: "circuito_abierto" });
+    await expect(mp.compraAgil.pagina({ ttlCambioMs: 60_000 }, 1)).rejects.toMatchObject({ tipo: "circuito_abierto" });
     await expect(mp.compraAgil.detalle("3000-1-COT26")).rejects.toMatchObject({ tipo: "circuito_abierto" });
     expect(srv.de("v2").length + srv.de("v2det").length).toBe(3);
     expect(mp.cuota.usadas).toBe(3);
@@ -183,7 +183,7 @@ describe("circuito de la v2 ante success ERROR con HTTP 500", () => {
 
     await new Promise((r) => setTimeout(r, 210));
     srv.fallar("v2", { demoraMs: 50 });
-    const sonda = mp.compraAgil.pagina({}, 1);
+    const sonda = mp.compraAgil.pagina({ ttlCambioMs: 60_000 }, 1);
     await srv.llegada("v2", 3);
     expect(mp.salud().v2.estado).toBe("semiabierto");
     expect((await sonda).totalResultados).toBe(3);
@@ -205,7 +205,7 @@ describe("concurrencia", () => {
       tareas.push(mp.licitaciones.porCodigo(`1000-${(i % 6) + 1}-LE26`));
       tareas.push(mp.ordenes.delDia("2026-10-01"));
       tareas.push(mp.compraAgil.detalle(`3000-${(i % 3) + 1}-COT26`));
-      tareas.push(mp.compraAgil.pagina({}, 1));
+      tareas.push(mp.compraAgil.pagina({ ttlCambioMs: 60_000 }, 1));
     }
     const r = await Promise.allSettled(tareas);
     expect(r.filter((x) => x.status === "rejected")).toEqual([]);

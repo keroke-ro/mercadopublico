@@ -1,22 +1,22 @@
 {
   "_fixture": "grabado de la API real el 2026-10-14",
-  "Cantidad": 964,
-  "FechaCreacion": "2026-10-14T01:10:44.4841697Z",
+  "Cantidad": 18399,
+  "FechaCreacion": "2026-10-14T14:49:58.2346108Z",
   "Version": "v1",
   "Listado": [
     {
-      "Codigo": "1002772-9905-AG26",
-      "Nombre": "APOSITO CARBON ACTIVO CON PLATA 10 X 10 CM (CENABAST),ID:1002772-2662-COT26,(AG,TRANSV,2204005003,APG)",
+      "Codigo": "1002-473-CM26",
+      "Nombre": "Orden de Compra: 1002-473-CM26",
       "CodigoEstado": 6
     },
     {
-      "Codigo": "1049-1577-SE26",
-      "Nombre": "OC ERP 57581 SERVICIO DE LIMPIEZA Y MANTENCIÓN VALPARAISO Y SAN ANTONIO ",
-      "CodigoEstado": 6
+      "Codigo": "1002584-446-SE25",
+      "Nombre": "APRUEBA CONTRATO “SERVICIO DE MARCAJE Y CONTROL DE ASISTENCIA PARA LA DIRECCIÓN DE EDUCACIÓN PÚBLICA”, PROVENIENTE DE LA LICITACIÓN PÚBLICA ID N° 1002584-10-LE25.",
+      "CodigoEstado": 12
     },
     {
-      "Codigo": "1057429-1907-SE26",
-      "Nombre": "PRE ELABORADOS (F) (ENTREGA PARCIALIZADA)",
+      "Codigo": "1002588-227-SE26",
+      "Nombre": "Servicio de guardias de seguridad; Oficina Central",
       "CodigoEstado": 12
     }
   ]

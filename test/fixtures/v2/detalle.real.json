@@ -1,0 +1,86 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "success": "OK",
+  "trace": null,
+  "payload": {
+    "codigo": "845-57-COT26",
+    "nombre": "Adquisición 2 Bombas Centrífuga de 1.5 HP",
+    "descripcion": "Debido a la fallas o fugas de algunas bombas elevadoras de sistemas de hidropack en jardines clásicos de la ciudad de Iquique y Alto Hospicio. Se requiere realizar cambios para asegurar la operatividad de la atención en caso de corte de suministro de agua potable. VER ESPECIFICACIONES EN DOCUMENTACIÓN ADJUNTA. EL MONTO MÁXIMO DISPONIBLE INCLUYE IVA. SE ADJUNTA FORMATO PARA COTIZAR.",
+    "estado": {
+      "id_estado": 2,
+      "codigo": "publicada",
+      "glosa": "Publicada"
+    },
+    "convocatoria": {
+      "estado_convocatoria": 1,
+      "descripcion": "Primer llamado",
+      "fecha_cierre_primer_llamado": "2026-10-15 12:00",
+      "fecha_cierre_segundo_llamado": null
+    },
+    "fechas": {
+      "fecha_publicacion": "2026-10-14 11:44",
+      "fecha_cierre": "2026-10-15 12:00",
+      "fecha_ultimo_cambio": "2026-10-14 11:45",
+      "fecha_cancelacion": null
+    },
+    "entrega": {
+      "direccion_entrega": "Bernardino Guerra 2129",
+      "plazo_entrega_dias": 7
+    },
+    "documentos": [
+      {
+        "id": 1988802,
+        "nombre": "Cotización Compra Ágil - Adquisición Bombas Centrífuga de 1.5 HP.xlsx"
+      },
+      {
+        "id": 1988803,
+        "nombre": "Anexos_N°2_Adquisición Bombas Centrífuga de 1.5 HP.pdf"
+      },
+      {
+        "id": 1988804,
+        "nombre": "Bases Técnicas - Adquisición Bombas Centrífuga de 1.5 HP.pdf"
+      }
+    ],
+    "presupuesto": {
+      "tipo_presupuesto": "Disponible",
+      "moneda": "CLP",
+      "presupuesto_estimado": 1000000,
+      "monto_disponible": 1000000,
+      "monto_disponible_clp": 1000000,
+      "valor_cambio_moneda": null,
+      "fecha_cambio_moneda": null
+    },
+    "id_orden_compra": null,
+    "institucion": {
+      "organismo_comprador": "JUNTA NACIONAL DE JARDINES         INFANTILES",
+      "rut": "70.072.600-2",
+      "unidad_compra": "Junji - I Región - Iquique",
+      "region": 1,
+      "nombre_region": "Región de Tarapacá  "
+    },
+    "productos_solicitados": [
+      {
+        "codigo_producto": 40151503,
+        "nombre": "Bombas centrífugas",
+        "descripcion": "Características del producto, y estándares mínimos: Potencia: 1 1/2 HP, excluyente. Modelo: Pedrollo CPM 170M, excluyente. Diámetro de entrada: debe ser superior a 1 pulgada. Diámetro de salida: debe ser de 1 pulgada o superior. Caudal mínimo: 160 Litros/minuto o superior. Voltaje: 220 – 230. Su estructura debe ser de metal. VER DETALLE EN DOCUMENTACION ADJUNTA",
+        "cantidad": 2,
+        "unidad_medida": "EA"
+      }
+    ],
+    "proveedores_cotizando": [],
+    "resumen": {
+      "multa_sancion": 0,
+      "total_ofertas_recibidas": 1,
+      "total_demandas": 0
+    },
+    "motivos": {
+      "motivo_cancelacion": null,
+      "motivo_desierta": null
+    },
+    "flags": {
+      "considera_requisitos_medioambientales": false,
+      "considera_requisitos_impacto_social_economico": false
+    }
+  },
+  "errors": null
+}

@@ -52,9 +52,10 @@ describe("CompraAgilApi.listar", () => {
     expect(Object.fromEntries(url.searchParams)).toEqual({
       estado: "publicada,cerrada",
       region: "13,5",
-      cambio_desde: "2026-01-19T00:00:00.000Z",
-      cambio_hasta: "2026-01-20T00:00:00.000Z",
-      publicado_desde: "2026-01-01T03:00:00.000Z",
+      // Hora de pared de Santiago con Z: así la lee la API.
+      cambio_desde: "2026-01-18T21:00:00Z",
+      cambio_hasta: "2026-01-19T21:00:00Z",
+      publicado_desde: "2026-01-01T00:00:00Z",
       q: "papel",
       ordenar_por: "FechaPublicacion",
       tamano_pagina: "50",
@@ -72,7 +73,7 @@ describe("CompraAgilApi.listar", () => {
 
   it("pagina() expone el costo del listado completo", async () => {
     const { ca } = api(res("listado-p1"));
-    const p = await ca.pagina({ tamanoPagina: 15 }, 1);
+    const p = await ca.pagina({ region: [13], tamanoPagina: 15 }, 1);
     expect(p).toMatchObject({ pagina: 1, totalPaginas: 2, totalResultados: 3 });
     expect(p.items).toHaveLength(2);
   });
@@ -90,7 +91,9 @@ describe("CompraAgilApi.listar", () => {
     ["tamaño > 50", { tamanoPagina: 51 }],
     ["tamaño < 10 (verificado en la API real)", { tamanoPagina: 9 }],
     ["región 17", { region: [17] }],
+    ["estado oc_emitida (la API lo rechaza)", { estado: ["oc_emitida" as "publicada"] }],
     ["fecha inválida", { publicadoDesde: "ayer" }],
+    ["sin filtros de la API (responde 500)", { rutOrganismo: "61608000-5", tamanoPagina: 20, estado: [] }],
   ])("rechaza %s antes de consultar", async (_, filtros) => {
     const { ca, t, pedidos } = api(res("listado-p1"));
     const err = await todos(ca.listar(filtros)).catch((e: unknown) => e);
@@ -102,7 +105,7 @@ describe("CompraAgilApi.listar", () => {
 
   it("el NOK de la API sale como error tipado", async () => {
     const { ca } = api(res("error-nok", 429));
-    await expect(ca.pagina({}, 1)).rejects.toMatchObject({ tipo: "cuota_agotada", codigo: "429" });
+    await expect(ca.pagina({ ttlCambioMs: 60_000 }, 1)).rejects.toMatchObject({ tipo: "cuota_agotada", codigo: "429" });
   });
 });
 
@@ -124,13 +127,13 @@ describe("CompraAgilApi.detalle", () => {
       comprador: { nombreOrganismo: "Servicio de Salud de Ejemplo", rutUnidad: "61.608.000-5", region: 13 },
       monto: { valor: 500000, moneda: "CLP", clp: 500000, fechaValor: "2026-04-01" },
     });
-    // Z → hora de Santiago; el 5 de abril de 2026 termina el horario de verano.
+    // La Z de la v2 es falsa: es hora de Santiago. El 5 de abril de 2026 termina el horario de verano.
     expect(d.fechas).toEqual({
       creacion: null,
-      publicacion: "2026-04-01T09:00:00-03:00",
-      cierre: "2026-04-03T09:00:00-03:00",
+      publicacion: "2026-04-01T12:00:00-03:00",
+      cierre: "2026-04-03T12:00:00-03:00",
       adjudicacion: null,
-      ultimoCambio: "2026-04-06T11:30:00-04:00",
+      ultimoCambio: "2026-04-06T15:30:00-04:00",
     });
     expect(d.items.map((i) => [i.codigoProducto, i.cantidad, i.unidad])).toEqual([
       [47131800, 10, "EA"],

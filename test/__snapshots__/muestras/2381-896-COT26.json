@@ -1,0 +1,48 @@
+{
+  "tipo": "compra_agil",
+  "codigo": "2381-896-COT26",
+  "nombre": "SERVICIO DE COFFEE BREAK PARA CAPACITACIÓN MHGAP DEL CESFAM ROSARIO",
+  "descripcion": "SERVICIO DE COFFEE BREAK PARA CAPACITACIÓN MHGAP DEL CESFAM ROSARIO",
+  "estado": "desierta",
+  "estadoGlosa": "Desierta",
+  "comprador": {
+    "codigoOrganismo": null,
+    "nombreOrganismo": "I MUNICIPALIDAD DE COPIAPO",
+    "rutUnidad": "69.030.200-4",
+    "codigoUnidad": null,
+    "nombreUnidad": "DEPARTAMENTO DE ADQUISICIONES DASM",
+    "region": 3,
+    "comuna": null
+  },
+  "fechas": {
+    "creacion": null,
+    "publicacion": "2026-10-13T10:35:00-03:00",
+    "cierre": "2026-10-14T11:00:00-03:00",
+    "adjudicacion": null,
+    "ultimoCambio": "2026-10-14T11:50:00-03:00"
+  },
+  "monto": {
+    "valor": 250000,
+    "moneda": "CLP",
+    "clp": 250000,
+    "fechaValor": "2026-10-13",
+    "fuente": "identidad"
+  },
+  "items": [
+    {
+      "codigoProducto": 90101601,
+      "nombre": "Banquetes",
+      "descripcion": "SERVICIO DE COFFEE BREAK PARA 15 PERSONAS, PARA EL DÍA 15 DE OCTUBRE, PARA CAPACITACIÓN MHGAP DEL CESFAM ROSARIO. DEBE SER SALUDABLE, BAJO EN AZÚCAR, BAJO EN GRASAS E INCLUIR TÉ, CAFÉ, AGUA, JUGOS, PRODUCTOS DULCES Y SALADOS SALUDABLES Y FRUTAS. DEBE ADJUNTAR COTIZACIÓN FORMAL PARA CONSIDERAR LA OFERTA.",
+      "cantidad": 1,
+      "unidad": "EA",
+      "precioUnitario": null,
+      "total": null,
+      "proveedor": null
+    }
+  ],
+  "oferentes": 0,
+  "personales": null,
+  "origen": "v2",
+  "ordenCompra": null,
+  "cotizaciones": []
+}

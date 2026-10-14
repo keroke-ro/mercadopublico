@@ -1,7 +1,7 @@
 {
   "_fixture": "grabado de la API real el 2026-10-14",
   "Cantidad": 1,
-  "FechaCreacion": "2026-10-14T01:10:37.7966825Z",
+  "FechaCreacion": "2026-10-14T14:49:51.6701424Z",
   "Version": "v1",
   "Listado": [
     {
@@ -25,7 +25,7 @@
         "NombreUsuario": "[oculto]",
         "CargoUsuario": "[oculto]"
       },
-      "DiasCierreLicitacion": "3",
+      "DiasCierreLicitacion": "2",
       "Informada": 0,
       "CodigoTipo": 1,
       "Tipo": "LE",

@@ -1,0 +1,183 @@
+{
+  "_fixture": "grabado de la API real el 2026-10-14",
+  "success": "OK",
+  "trace": null,
+  "payload": {
+    "items": [
+      {
+        "codigo": "845-57-COT26",
+        "nombre": "Adquisición 2 Bombas Centrífuga de 1.5 HP",
+        "estado": {
+          "id_estado": 2,
+          "codigo": "publicada",
+          "glosa": "Publicada"
+        },
+        "convocatoria": {
+          "estado_convocatoria": 1,
+          "descripcion": "Primer llamado"
+        },
+        "documentos": [
+          {
+            "id": 1988802,
+            "nombre": "Cotización Compra Ágil - Adquisición Bombas Centrífuga de 1.5 HP.xlsx"
+          },
+          {
+            "id": 1988803,
+            "nombre": "Anexos_N°2_Adquisición Bombas Centrífuga de 1.5 HP.pdf"
+          },
+          {
+            "id": 1988804,
+            "nombre": "Bases Técnicas - Adquisición Bombas Centrífuga de 1.5 HP.pdf"
+          }
+        ],
+        "fechas": {
+          "fecha_publicacion": "2026-10-14 11:44",
+          "fecha_cierre": "2026-10-15 12:00",
+          "fecha_ultimo_cambio": "2026-10-14T11:45:00.463Z",
+          "fecha_cierre_primer_llamado": "2026-10-15T12:00:00Z",
+          "fecha_cierre_segundo_llamado": null
+        },
+        "montos": {
+          "moneda": "CLP",
+          "monto_disponible": 1000000,
+          "monto_disponible_clp": 1000000
+        },
+        "institucion": {
+          "organismo_comprador": "JUNTA NACIONAL DE JARDINES         INFANTILES",
+          "rut": "70.072.600-2",
+          "unidad_compra": "Junji - I Región - Iquique",
+          "region": 1,
+          "nombre_region": "Región de Tarapacá  "
+        },
+        "resumen": {
+          "total_ofertas_recibidas": 0
+        },
+        "motivos": {
+          "motivo_cancelacion": null,
+          "motivo_desierta": null,
+          "motivo_seleccion": null
+        },
+        "links": {
+          "detalle": "/v2/compra-agil/845-57-COT26"
+        }
+      },
+      {
+        "codigo": "1233600-82-COT26",
+        "nombre": "ADQ. INSUMOS CLINICOS PARA CENTROS DE SALUD",
+        "estado": {
+          "id_estado": 2,
+          "codigo": "publicada",
+          "glosa": "Publicada"
+        },
+        "convocatoria": {
+          "estado_convocatoria": 1,
+          "descripcion": "Primer llamado"
+        },
+        "documentos": [
+          {
+            "id": 1988808,
+            "nombre": "REX N°489 de 28-10-25- Aprueba Procedimiento Sancionatorio C.A..pdf"
+          },
+          {
+            "id": 1988809,
+            "nombre": "ANEXO COMPRA INSUMOS CLINICOS.pdf"
+          }
+        ],
+        "fechas": {
+          "fecha_publicacion": "2026-10-14 11:44",
+          "fecha_cierre": "2026-10-19 08:30",
+          "fecha_ultimo_cambio": "2026-10-14T11:45:00.463Z",
+          "fecha_cierre_primer_llamado": "2026-10-19T08:30:00Z",
+          "fecha_cierre_segundo_llamado": "2026-10-24T05:15:16.453Z"
+        },
+        "montos": {
+          "moneda": "CLP",
+          "monto_disponible": 3850000,
+          "monto_disponible_clp": 3850000
+        },
+        "institucion": {
+          "organismo_comprador": "CORP MUNICIPAL DE RENCA",
+          "rut": "70.931.100-K",
+          "unidad_compra": "CORP MUNICIPAL DE RENCA",
+          "region": 13,
+          "nombre_region": "Región Metropolitana de Santiago"
+        },
+        "resumen": {
+          "total_ofertas_recibidas": 0
+        },
+        "motivos": {
+          "motivo_cancelacion": null,
+          "motivo_desierta": null,
+          "motivo_seleccion": null
+        },
+        "links": {
+          "detalle": "/v2/compra-agil/1233600-82-COT26"
+        }
+      },
+      {
+        "codigo": "1513-139-COT26",
+        "nombre": "COCINA GAS 4 PLATOS  DE ACUERDO A ESPECIFICACIONES CONTENIDAS EN ANEXO N°2 (SE SOLICITA LLENAR DE FORMA OBLIGATORIA ANEXOS N°1 Y N°2 DE LO CONTRARIO NO SERA CONSIDERADA LA OFERTA)",
+        "estado": {
+          "id_estado": 2,
+          "codigo": "publicada",
+          "glosa": "Publicada"
+        },
+        "convocatoria": {
+          "estado_convocatoria": 1,
+          "descripcion": "Primer llamado"
+        },
+        "documentos": [
+          {
+            "id": 1988844,
+            "nombre": "ANEXO 1 CONTENIDOS DE LA COTIZACIÓN.docx"
+          },
+          {
+            "id": 1988845,
+            "nombre": "ANEXO 2 CONTENIDOS DE LA COTIZACIÓN  (1).docx"
+          },
+          {
+            "id": 1988846,
+            "nombre": "TERMINOS DE REFERENCIAL.docx"
+          }
+        ],
+        "fechas": {
+          "fecha_publicacion": "2026-10-14 11:44",
+          "fecha_cierre": "2026-10-15 11:45",
+          "fecha_ultimo_cambio": "2026-10-14T11:45:00.463Z",
+          "fecha_cierre_primer_llamado": "2026-10-15T11:45:00Z",
+          "fecha_cierre_segundo_llamado": "2026-10-16T11:45:18.497Z"
+        },
+        "montos": {
+          "moneda": "CLP",
+          "monto_disponible": 300000,
+          "monto_disponible_clp": 300000
+        },
+        "institucion": {
+          "organismo_comprador": "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CAUQUENES",
+          "rut": "60.511.140-8",
+          "unidad_compra": "DELEGACION PRESIDENCIAL PROVINCIAL DE CAUQUENES",
+          "region": 7,
+          "nombre_region": "Región del Maule "
+        },
+        "resumen": {
+          "total_ofertas_recibidas": 0
+        },
+        "motivos": {
+          "motivo_cancelacion": null,
+          "motivo_desierta": null,
+          "motivo_seleccion": null
+        },
+        "links": {
+          "detalle": "/v2/compra-agil/1513-139-COT26"
+        }
+      }
+    ],
+    "paginacion": {
+      "total_paginas": 384,
+      "numero_pagina": 1,
+      "tamano_pagina": 10,
+      "total_resultados": 3836
+    }
+  },
+  "errors": null
+}

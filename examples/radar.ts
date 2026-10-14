@@ -31,8 +31,9 @@ for (const o of priorizar(detalles, perfil)) {
 
 // Precios de lo que ya cerró: cotizaciones de compras con proveedor elegido.
 const cerradas: CompraAgil[] = [];
-const pasadas = await mp.compraAgil.pagina({ region: [13], estado: ["proveedor_seleccionado", "oc_emitida"], q: "papel" }, 1);
-for (const ca of pasadas.items.slice(0, 10)) {
+// El filtro `estado: ["proveedor_seleccionado"]` de la API no devuelve nada (2026-10-14): se filtra con lo que trae el listado.
+const pasadas = await mp.compraAgil.pagina({ region: [13], q: "papel" }, 1);
+for (const ca of pasadas.items.filter((c) => c.estado === "proveedor_seleccionado").slice(0, 10)) {
   const d = await mp.compraAgil.detalle(ca.codigo);
   if (d) cerradas.push(d);
 }
