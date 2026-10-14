@@ -156,8 +156,8 @@ export class Transporte {
   }
 }
 
-// ponytail: base y header de la v2 según la Guía Compra Ágil v2; ajustar si la guía cambia.
-export const BASE_V2 = "https://api.mercadopublico.cl/v2";
+// Según la Guía API Compra Ágil v2 v3.0 (mayo 2026), ver docs/api-notes.md §3.
+export const BASE_V2 = "https://api2.mercadopublico.cl/v2";
 export const HEADER_TICKET_V2 = "ticket";
 
 function armarUrl(base: string, ruta: string, params: Params): string {
@@ -169,7 +169,7 @@ function armarUrl(base: string, ruta: string, params: Params): string {
   return url.toString();
 }
 
-/** Mensaje de error de cualquiera de los dos formatos: v1 {Codigo, Mensaje} o v2 {success:false, errors}. */
+/** Mensaje de error de cualquiera de los dos formatos: v1 {Codigo, Mensaje} o v2 {success:"NOK", errors:[{codigo, mensaje}]}. */
 function clasificar(status: number, cuerpo: unknown, api: "v1" | "v2"): MercadoPublicoError | undefined {
   const c = (cuerpo ?? {}) as Record<string, unknown>;
   let codigo: number | string | undefined;
@@ -177,16 +177,17 @@ function clasificar(status: number, cuerpo: unknown, api: "v1" | "v2"): MercadoP
   if (api === "v1" && "Codigo" in c && !("Listado" in c)) {
     codigo = c.Codigo as number | string;
     mensaje = String(c.Mensaje ?? "");
-  } else if (api === "v2" && c.success === false) {
-    const errs = Array.isArray(c.errors) ? c.errors : [c.errors];
-    mensaje = errs.map((e) => (typeof e === "string" ? e : JSON.stringify(e))).join("; ");
+  } else if (api === "v2" && (c.success === "NOK" || c.success === false)) {
+    const errs = (Array.isArray(c.errors) ? c.errors : [c.errors]) as ({ codigo?: string; mensaje?: string } | string | null)[];
+    codigo = typeof errs[0] === "object" ? errs[0]?.codigo : undefined;
+    mensaje = errs.map((e) => (typeof e === "object" && e ? (e.mensaje ?? JSON.stringify(e)) : String(e))).join("; ");
   }
   if (status < 400 && mensaje === undefined) return undefined;
 
   const texto = `${mensaje ?? ""}`.toLowerCase();
   let tipo: TipoError;
   if (Number(codigo) === 10500 || texto.includes("simult")) tipo = "simultaneas";
-  else if (status === 429 || texto.includes("cuota") || texto.includes("límite") || texto.includes("limite")) tipo = "cuota_agotada";
+  else if (status === 429 || Number(codigo) === 429 || texto.includes("cuota") || texto.includes("límite") || texto.includes("limite")) tipo = "cuota_agotada";
   else if (status === 401 || status === 403 || texto.includes("ticket")) tipo = "ticket_invalido";
   else if (status === 404) tipo = "no_encontrado";
   else if (status >= 500) tipo = "servidor";

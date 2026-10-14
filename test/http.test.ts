@@ -75,16 +75,18 @@ describe("Transporte", () => {
       ticket: "T",
       fetch: async (_, init) => {
         headers = new Headers(init?.headers);
-        return json({ success: true, payload: { items: [1] }, errors: null });
+        return json({ success: "OK", trace: null, payload: { items: [1] }, errors: null });
       },
     });
     await expect(t.v2("compra-agil", { region: [13, 5] })).resolves.toEqual({ items: [1] });
     expect(headers?.get("ticket")).toBe("T");
   });
 
-  it("v2 con success:false es error", async () => {
-    const { t } = transporte([json({ success: false, payload: null, errors: ["parámetro inválido"] }, 400)]);
-    await expect(t.v2("x")).rejects.toMatchObject({ tipo: "parametros" });
+  it("v2 con success NOK es error tipado", async () => {
+    const { t } = transporte([json({ success: "NOK", payload: null, errors: [{ codigo: "400", mensaje: "parámetro inválido", detalle: null }] }, 400)]);
+    await expect(t.v2("x")).rejects.toMatchObject({ tipo: "parametros", message: "parámetro inválido" });
+    const { t: t2 } = transporte([json({ success: "NOK", payload: null, errors: [{ codigo: "429", mensaje: "Too many requests" }] }, 429)]);
+    await expect(t2.v2("x")).rejects.toMatchObject({ tipo: "cuota_agotada" });
   });
 });
 
