@@ -2,7 +2,7 @@
 //   npm run build && MP_TICKET=… node --experimental-strip-types scripts/smoke.ts
 // Presupuesto: ≤ 30 consultas (limiteDiario las corta). Imprime un resumen markdown. Sale con 1 solo si algo
 // se rompió de verdad; la v2 caída, la red o los reintentos agotados quedan como "degradado".
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -85,7 +85,8 @@ await paso("v2 Compra Ágil página 1", async () => {
 });
 
 await paso(`sync de órdenes del ${domingo} (sin detalle) a storeArchivo`, async () => {
-  const store = await storeArchivo(join(mkdtempSync(join(tmpdir(), "mp-smoke-")), "store.json"));
+  const dir = mkdtempSync(join(tmpdir(), "mp-smoke-"));
+  const store = await storeArchivo(join(dir, "store.json"));
   const plan = await mp.sync.planificar({ desde: domingo, hasta: domingo, fuentes: ["ordenes"], detalle: false, store });
   const r = await mp.sync.ejecutar(plan);
   let guardados = 0;
@@ -93,6 +94,7 @@ await paso(`sync de órdenes del ${domingo} (sin detalle) a storeArchivo`, async
   await store.cerrar?.();
   afirmar(guardados === r.nuevos + r.actualizados, `guardó ${guardados} pero informó ${r.nuevos + r.actualizados}`);
   afirmar((await store.cursor("ordenes")) === domingo, "el cursor no avanzó");
+  rmSync(dir, { recursive: true, force: true });
   if (r.errores.length) return { aviso: `${r.errores.length} errores: ${r.errores[0]!.error}` };
   return `${r.nuevos} nuevos, ${r.consultas} consultas`;
 });

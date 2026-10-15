@@ -3,6 +3,7 @@ import { configDefaults, defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     exclude: [...configDefaults.exclude, ".stryker-tmp*/**"],
+    globalSetup: ["test/temporales.ts"],
     coverage: {
       provider: "v8",
       include: ["src/**"],
