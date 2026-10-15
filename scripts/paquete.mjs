@@ -2,7 +2,7 @@
 // Node ESM, Node CJS, los subpaths /radar y /mcp, el bin, Bun y Deno (si están) y un entorno tipo edge sin globales
 // de Node (node:vm, solo APIs web). Uso: npm run paquete. Sale con 1 al primer fallo.
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -102,7 +102,9 @@ console.log(JSON.stringify([Object.keys(mp).filter((k) => k !== "__esModule").so
 
   const dist = join(proy, "node_modules/mercadopublico/dist");
   correr(process.execPath, ["--experimental-vm-modules", "--no-warnings", fileURLToPath(import.meta.url), "--borde", dist], { stdio: "inherit" });
-  console.log(`\nPaquete ok (${tgz}).`);
+  // Si algo falla antes, la carpeta queda para revisar qué se empaquetó.
+  rmSync(tmp, { recursive: true, force: true });
+  console.log(`\nPaquete ok (${tgz.slice(tmp.length + 1)}).`);
 }
 
 /**

@@ -15,6 +15,19 @@ SDK en TypeScript para la [API de Mercado Público](https://www.chilecompra.cl/a
 ## Instalación
 
 ```sh
+npx mercadopublico
+```
+
+Abre un instalador en la terminal. Eliges qué quieres y lo deja configurado:
+
+- **Tu ticket:** lo prueba con una consulta y lo guarda en `~/.mercadopublico/config.json` (solo tu usuario puede leerlo), así la CLI y el MCP ya no piden `MP_TICKET`.
+- **MCP:** lo agrega a Claude Code, Codex, Cursor o Claude Desktop, los que encuentre instalados.
+- **Radar:** arma tu perfil (rubros, regiones y montos) y baja los últimos días para tu primera agenda.
+- **SDK:** lo instala en el proyecto con tu gestor de paquetes (npm, pnpm, yarn o bun).
+
+Lo puedes volver a correr cuando quieras con `npx mercadopublico init`. Si solo quieres la librería:
+
+```sh
 npm install mercadopublico
 ```
 
@@ -128,7 +141,7 @@ Salida en tabla si es una terminal y JSON si no; `--formato json|csv|tabla` para
 - «Analiza la licitación 1509-5-L114: requisitos, plazos y riesgos.»
 - «¿Quién le gana a quién en Compra Ágil de artículos de aseo en la Región Metropolitana?»
 
-Configurarlo toma dos pasos.
+**Lo más rápido:** corre `npx mercadopublico` en la terminal, elige «MCP para mis agentes» y listo. Si prefieres hacerlo a mano, son dos pasos.
 
 **1. Consigue tu ticket.** Se pide gratis con Clave Única en [chilecompra.cl/api](https://www.chilecompra.cl/api/) y llega por correo. Tiene la forma `XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX`. En los ejemplos de abajo, reemplaza `TU-TICKET` por el tuyo.
 

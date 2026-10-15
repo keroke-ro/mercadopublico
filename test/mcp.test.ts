@@ -9,7 +9,7 @@ import { MercadoPublico, storeArchivo, storeMemoria, type CompraAgil, type Proce
 import { diaSantiago, sumarDias } from "../src/fecha.js";
 import { crearServidorMcp } from "../src/mcp.js";
 import { urlOcds } from "../src/ocds.js";
-import { competidores, precioSugerido, proximasCompras, rangoDePrecio } from "../src/radar/index.js";
+import { competidores, precioSugerido, proximasCompras, rangoDePrecio, type Perfil } from "../src/radar/index.js";
 
 const fixture = (r: string) => readFileSync(new URL(`./fixtures/${r}.json`, import.meta.url), "utf8");
 const VACIO = '{"Cantidad":0,"Listado":[]}';
@@ -32,10 +32,10 @@ function api({ sinLicitacion = [] as string[], gate }: { sinLicitacion?: string[
   return { f, urls };
 }
 
-function servidor(op: { tope?: number; rutaStore?: string; store?: Store; abrirStore?: () => Promise<Store>; sinLicitacion?: string[]; gate?: Promise<unknown>; ocds?: typeof fetch } = {}) {
+function servidor(op: { tope?: number; rutaStore?: string; perfil?: Perfil; store?: Store; abrirStore?: () => Promise<Store>; sinLicitacion?: string[]; gate?: Promise<unknown>; ocds?: typeof fetch } = {}) {
   const { f, urls } = api(op);
   const mp = new MercadoPublico({ ticket: "T", fetch: f, conversor: false, intervaloMs: 0 });
-  const s = crearServidorMcp({ mp, fetch: op.ocds, rutaStore: op.rutaStore, tope: op.tope, version: "9.9.9", abrirStore: op.abrirStore ?? (op.store && (async () => op.store!)) });
+  const s = crearServidorMcp({ mp, fetch: op.ocds, rutaStore: op.rutaStore, perfil: op.perfil, tope: op.tope, version: "9.9.9", abrirStore: op.abrirStore ?? (op.store && (async () => op.store!)) });
   let n = 0;
   const rpc = (method: string, params?: object) => s.manejar({ jsonrpc: "2.0", id: ++n, method, params }) as Promise<any>;
   const llamar = async (name: string, args: object = {}) => (await rpc("tools/call", { name, arguments: args })).result;
@@ -351,6 +351,18 @@ describe("radar", () => {
     expect(d.conteo).toMatchObject({ abiertas: 3, agenda: 2 });
     expect(d.costo.consultas).toBe(0);
     expect(r.content[0].text).not.toContain("secreto");
+  });
+
+  it("con el perfil que guardó init, radar no exige `perfil`; el que se pasa manda", async () => {
+    const store = storeMemoria();
+    await store.guardar([abierta("1-1-L126", 13), abierta("3-3-L126", 5)]);
+    const { llamar, rpc } = servidor({ store, perfil: { pesos: { region: 1 }, regiones: [5] } });
+    const radar = (await rpc("tools/list")).result.tools.find((t: any) => t.name === "radar");
+    expect(radar.inputSchema.required).toEqual([]);
+    expect(datos(await llamar("radar")).decisiones[0].codigo).toBe("3-3-L126");
+    expect(datos(await llamar("radar", { perfil: { pesos: { region: 1 }, regiones: [13] } })).decisiones[0].codigo).toBe("1-1-L126");
+    const sin = (await servidor({ store }).rpc("tools/list")).result.tools.find((t: any) => t.name === "radar");
+    expect(sin.inputSchema.required).toEqual(["perfil"]);
   });
 
   it("store vacío o perfil inválido son isError", async () => {

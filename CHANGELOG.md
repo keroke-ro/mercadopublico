@@ -1,5 +1,15 @@
 # mercadopublico
 
+## 0.3.0
+
+### Minor Changes
+
+- 411e2d1: `npx mercadopublico` (o `mercadopublico init`) abre un instalador en la terminal: elige qué instalar (ticket, MCP en Claude Code, Codex, Cursor y Claude Desktop, perfil del radar con un primer sync, SDK en el proyecto) y lo deja configurado. El ticket, el store y el perfil quedan en `~/.mercadopublico/config.json` y la CLI y el MCP los usan cuando no hay `MP_TICKET`, `MP_STORE` ni `--perfil`. `radar` del MCP ya no exige `perfil` si hay uno guardado.
+
+### Patch Changes
+
+- Los tests ya no dejan carpetas temporales: todas van a una carpeta por corrida que se borra al final (antes se acumulaban miles de `mp-reanudar-*`). `npm run paquete` y `npm run smoke` también borran las suyas.
+
 ## 0.2.0
 
 ### Minor Changes
