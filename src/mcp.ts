@@ -44,6 +44,8 @@ interface Ctx {
   abrirStore?: () => Promise<Store>;
   /** Ruta del store, solo para armar los mensajes que mandan a la terminal. */
   rutaStore?: string;
+  /** Perfil del radar por defecto (el que guardó `mercadopublico init`). */
+  perfil?: Perfil;
   fetch?: typeof fetch;
   /** Una sola apertura del store a la vez (`storeArchivo` toma un lock: dos handles a la vez se estorban). */
   exclusivo<T>(f: () => Promise<T>): Promise<T>;
@@ -531,7 +533,7 @@ const HERRAMIENTAS: Herramienta[] = [
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
     requiereStore: true,
     async ejecutar(a, c) {
-      const perfil = a.perfil as Perfil | undefined;
+      const perfil = (a.perfil ?? c.perfil) as Perfil | undefined;
       if (!perfil || typeof perfil !== "object" || Array.isArray(perfil) || !perfil.pesos || typeof perfil.pesos !== "object") throw new ErrorUso("`perfil` debe ser un objeto con `pesos`");
       const dec = a.decisiones;
       if (dec !== undefined && (!Array.isArray(dec) || dec.some((d) => !d || typeof d !== "object" || typeof d.codigo !== "string" || (d.decision !== "postular" && d.decision !== "descartar"))))
@@ -935,11 +937,14 @@ async function correrOcds(c: Ctx, j: Trabajo, p: ParamsOcds): Promise<Salida> {
 // --- servidor ---
 
 /** `rutaStore` solo se usa en los mensajes que mandan a la terminal; sin ella no se menciona. `cerrar` aborta el trabajo en curso y espera a que suelte el store. */
-export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Promise<Store>; rutaStore?: string; fetch?: typeof fetch; tope?: number; version?: string }): { manejar(msg: unknown): Promise<object | null>; cerrar(): Promise<void> } {
+export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Promise<Store>; rutaStore?: string; perfil?: Perfil; fetch?: typeof fetch; tope?: number; version?: string }): { manejar(msg: unknown): Promise<object | null>; cerrar(): Promise<void> } {
   const { mp, abrirStore } = op;
   const limite = op.tope ?? 1000;
   const info = { name: "mercadopublico", version: op.version ?? "0.0.0-desconocida" };
-  const herramientas = HERRAMIENTAS.filter((h) => !h.requiereStore || abrirStore);
+  const herramientas = HERRAMIENTAS.filter((h) => !h.requiereStore || abrirStore).map((h) =>
+    // Con un perfil guardado, `radar` no lo exige: el agente puede llamarla sin argumentos.
+    h.name === "radar" && op.perfil ? { ...h, description: `${h.description} Si no pasas \`perfil\`, usa el que guardó \`mercadopublico init\`.`, inputSchema: { ...h.inputSchema, required: [] } } : h,
+  );
   // radar-diario usa `radar`, que necesita store.
   const prompts = PROMPTS.filter((p) => p.name !== "radar-diario" || abrirStore);
 
@@ -986,7 +991,7 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
     );
     return j;
   };
-  const ctx: Ctx = { mp, abrirStore, rutaStore: op.rutaStore, exclusivo, fetch: op.fetch, cacheado, topeAgente, trabajo: () => trabajo, storeTrabajo: () => (enCurso(trabajo) ? trabajo.store : undefined), lanzar };
+  const ctx: Ctx = { mp, abrirStore, rutaStore: op.rutaStore, perfil: op.perfil, exclusivo, fetch: op.fetch, cacheado, topeAgente, trabajo: () => trabajo, storeTrabajo: () => (enCurso(trabajo) ? trabajo.store : undefined), lanzar };
 
   // Las herramientas que consultan la API van de a una: así el delta de `mp.cuota.usadas` es de esa llamada y no de otra.
   const enCola = enFila();

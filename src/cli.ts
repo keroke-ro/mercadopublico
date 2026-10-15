@@ -26,6 +26,7 @@ import {
   type CuotaArchivo,
   type Proceso,
 } from "./index.js";
+import { instalar, leerConfig } from "./instalar.js";
 import { crearServidorMcp } from "./mcp.js";
 import { manejadorHttp } from "./mcp-http.js";
 import { pesos, resumenRadar, type DecisionEquipo, type Perfil, type ResumenRadar } from "./radar/index.js";
@@ -49,6 +50,7 @@ export interface IO {
 const AYUDA = `Uso: mercadopublico <comando> [opciones]
 
 Comandos:
+  init                                Instalador: ticket, MCP en tus agentes, radar y SDK (también sin comando, en una terminal)
   licitacion <codigo>                 Detalle de una licitación
   licitaciones                        Activas, o filtradas con --dia --estado --organismo --proveedor
   oc <codigo>                         Detalle de una orden de compra
@@ -60,6 +62,7 @@ Comandos:
   sync --desde AAAA-MM-DD             Actualiza un store local [--hasta] [--fuentes licitaciones,ordenes,compra_agil] [--store ./mp.json (o MP_STORE)] [--plan]
   radar --perfil perfil.json          Qué postular primero, a qué precio y qué viene, desde el store; no pide ticket
                                       [--store ./mp.json (o MP_STORE)] [--decisiones decisiones.json] [--max N (10)]
+                                      Sin --perfil ni --store usa los que guardó init
   cuota                               Consultas usadas hoy desde esta máquina
   mcp                                 Servidor MCP por stdio para agentes (Claude, Cursor…); usa MP_TICKET, MP_STORE y MP_MCP_TOPE (tope diario, 1000)
                                       --http [--puerto 8787] [--host 127.0.0.1]: por HTTP, para claude.ai y ChatGPT detrás de HTTPS;
@@ -67,7 +70,7 @@ Comandos:
 
 Opciones:
   --formato json|csv|tabla            Por defecto tabla en terminal y json si no
-  --ticket T                          Por defecto la variable MP_TICKET
+  --ticket T                          Por defecto la variable MP_TICKET o el que guardó init
   --incluir-personales                No ocultar datos personales de funcionarios
   --sin-conversion                    No convertir montos a pesos
   -h, --ayuda
@@ -308,6 +311,13 @@ export async function main(argv: string[], io: IO): Promise<number> {
     const [comando, arg, ...sobra] = positionals;
     if (o.ayuda) return io.stdout.write(AYUDA), 0;
     if (!comando) throw new ErrorUso("Falta el comando");
+    // Vacía cuenta como no definida, igual que en mcp.
+    const home = io.env.MERCADOPUBLICO_HOME || join(homedir(), ".mercadopublico");
+    if (comando === "init") {
+      if (arg) throw new ErrorUso(`Sobran argumentos: ${[arg, ...sobra].join(" ")}`);
+      return await instalar({ home, env: io.env, version: VERSION });
+    }
+    const config = await leerConfig(home);
     if (sobra.length) throw new ErrorUso(`Sobran argumentos: ${sobra.join(" ")}`);
     const formato = o.formato ?? (io.stdout.isTTY ? "tabla" : "json");
     uno(formato, ["json", "csv", "tabla"], "formato");
@@ -348,10 +358,11 @@ export async function main(argv: string[], io: IO): Promise<number> {
     }
 
     if (comando === "radar") {
-      if (!o.perfil) throw new ErrorUso("radar necesita --perfil perfil.json");
-      const perfil = await leerJson<Perfil>(o.perfil, "--perfil");
+      const rutaPerfil = o.perfil ?? config.perfil;
+      if (!rutaPerfil) throw new ErrorUso("radar necesita --perfil perfil.json (o armar uno con `mercadopublico init`)");
+      const perfil = await leerJson<Perfil>(rutaPerfil, "--perfil");
       const decisiones = o.decisiones ? await leerJson<DecisionEquipo[]>(o.decisiones, "--decisiones") : undefined;
-      const ruta = o.store ?? (io.env.MP_STORE || "./mp.json");
+      const ruta = o.store ?? (io.env.MP_STORE || config.store || "./mp.json");
       const store = await storeArchivo(ruta);
       const todos: Proceso[] = [];
       try {
@@ -366,11 +377,11 @@ export async function main(argv: string[], io: IO): Promise<number> {
       return io.stdout.write(informe(r, ruta, entero(o.max, 10, "max"))), 0;
     }
 
-    cuota = await cuotaArchivo(join(io.env.MERCADOPUBLICO_HOME ?? join(homedir(), ".mercadopublico"), "cuota.json"));
+    cuota = await cuotaArchivo(join(home, "cuota.json"));
     if (comando === "cuota") return salir(new Cuota(undefined, cuota.estado).toJSON());
 
-    const ticket = o.ticket ?? io.env.MP_TICKET;
-    if (!ticket) throw new ErrorUso("Falta el ticket: usa --ticket o la variable de entorno MP_TICKET");
+    const ticket = o.ticket ?? (io.env.MP_TICKET || config.ticket);
+    if (!ticket) throw new ErrorUso("Falta el ticket: corre `npx mercadopublico init`, o usa --ticket o la variable de entorno MP_TICKET");
     const f = io.fetch;
     mp = new MercadoPublico({
       ticket,
@@ -419,9 +430,11 @@ export async function main(argv: string[], io: IO): Promise<number> {
         const tope = Number(io.env.MP_MCP_TOPE || 1000);
         if (!Number.isInteger(tope) || tope < 1) throw new ErrorUso("MP_MCP_TOPE debe ser un entero positivo");
         // El directorio de trabajo de un cliente MCP es incierto (Claude Desktop): por defecto el store vive junto a la cuota.
-        const ruta = io.env.MP_STORE || join(io.env.MERCADOPUBLICO_HOME || join(homedir(), ".mercadopublico"), "mp.json");
+        const ruta = io.env.MP_STORE || config.store || join(home, "mp.json");
+        // Un perfil guardado que no se puede leer no impide arrancar: radar lo pedirá como argumento.
+        const perfil = config.perfil ? await leerJson<Perfil>(config.perfil, "perfil").catch((e: Error) => void io.stderr.write(`mercadopublico: ${e.message}\n`)) : undefined;
         // La ruta solo va en los mensajes por stdio: por --http llegaría a clientes remotos.
-        const servidor = crearServidorMcp({ mp, abrirStore: () => storeArchivo(ruta), rutaStore: o.http ? undefined : ruta, fetch: io.fetch, tope, version: VERSION });
+        const servidor = crearServidorMcp({ mp, abrirStore: () => storeArchivo(ruta), rutaStore: o.http ? undefined : ruta, perfil: perfil ?? undefined, fetch: io.fetch, tope, version: VERSION });
         if (!o.http) {
           if (o.puerto || o.host || o["sin-clave"]) throw new ErrorUso("--puerto, --host y --sin-clave son de --http");
           await servirStdio(servidor, process.stdin, io.stdout);
@@ -450,7 +463,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
         return salir(await mp.empresas.buscarComprador());
       case "sync": {
         if (!o.desde) throw new ErrorUso("sync necesita --desde AAAA-MM-DD");
-        const ruta = o.store ?? (io.env.MP_STORE || "./mp.json");
+        const ruta = o.store ?? (io.env.MP_STORE || config.store || "./mp.json");
         const fuentes = lista(o.fuentes)?.map((x) => uno<FuenteSync>(x, ["licitaciones", "ordenes", "compra_agil"], "fuentes")!);
         const store = await storeArchivo(ruta);
         // Ctrl-C cancela ordenado: se guarda lo hecho y la cuota; un segundo Ctrl-C mata como siempre.
@@ -510,5 +523,8 @@ if (directo) {
   try {
     process.loadEnvFile();
   } catch {}
-  process.exitCode = await main(process.argv.slice(2), { stdout: process.stdout, stderr: process.stderr, env: process.env });
+  // Sin comando en una terminal abre el instalador; en un pipe o en CI sigue siendo un error de uso.
+  const argv = process.argv.slice(2);
+  const interactivo = !argv.length && process.stdin.isTTY && process.stdout.isTTY;
+  process.exitCode = await main(interactivo ? ["init"] : argv, { stdout: process.stdout, stderr: process.stderr, env: process.env });
 }

@@ -81,6 +81,7 @@
     "@anthropic-ai/mcpb": "^2.1.2",
     "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^3.0.3",
+    "@clack/prompts": "^1.8.1",
     "@stryker-mutator/core": "^10.0.0",
     "@stryker-mutator/vitest-runner": "^10.0.0",
     "@types/node": "^20.19.0",

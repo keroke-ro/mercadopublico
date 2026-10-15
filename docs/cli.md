@@ -10,6 +10,7 @@ npx mercadopublico --ayuda
 Uso: mercadopublico <comando> [opciones]
 
 Comandos:
+  init                                Instalador: ticket, MCP en tus agentes, radar y SDK (también sin comando, en una terminal)
   licitacion <codigo>                 Detalle de una licitación
   licitaciones                        Activas, o filtradas con --dia --estado --organismo --proveedor
   oc <codigo>                         Detalle de una orden de compra
@@ -21,11 +22,15 @@ Comandos:
   sync --desde AAAA-MM-DD             Actualiza un store local [--hasta] [--fuentes licitaciones,ordenes,compra_agil] [--store ./mp.json (o MP_STORE)] [--plan]
   radar --perfil perfil.json          Qué postular primero, a qué precio y qué viene, desde el store; no pide ticket
                                       [--store ./mp.json (o MP_STORE)] [--decisiones decisiones.json] [--max N (10)]
+                                      Sin --perfil ni --store usa los que guardó init
   cuota                               Consultas usadas hoy desde esta máquina
+  mcp                                 Servidor MCP por stdio para agentes (Claude, Cursor…); usa MP_TICKET, MP_STORE y MP_MCP_TOPE (tope diario, 1000)
+                                      --http [--puerto 8787] [--host 127.0.0.1]: por HTTP, para claude.ai y ChatGPT detrás de HTTPS;
+                                      exige MP_MCP_CLAVE (URL /mcp/<clave> o Bearer), o --sin-clave solo en localhost
 
 Opciones:
   --formato json|csv|tabla            Por defecto tabla en terminal y json si no
-  --ticket T                          Por defecto la variable MP_TICKET
+  --ticket T                          Por defecto la variable MP_TICKET o el que guardó init
   --incluir-personales                No ocultar datos personales de funcionarios
   --sin-conversion                    No convertir montos a pesos
   -h, --ayuda

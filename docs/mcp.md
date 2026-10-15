@@ -16,6 +16,8 @@ Reglas de diseño:
 
 Necesitas Node 20 o superior y un ticket ([chilecompra.cl/api](https://www.chilecompra.cl/api/)). Todos los clientes de abajo lanzan `npx -y mercadopublico mcp` por stdio.
 
+**Con el instalador:** `npx mercadopublico` (o `npx mercadopublico init`) guarda el ticket en `~/.mercadopublico/config.json` y configura Claude Code, Codex, Cursor y Claude Desktop sin `MP_TICKET` en cada cliente: el servidor lo lee de ahí. Si además armas el perfil del radar, `radar` lo usa cuando el agente no pasa `perfil`. En Cursor y Claude Desktop apunta al `npx` que está junto a tu `node` y le pasa ese `PATH`, porque las apps abiertas desde el Dock no ven el `PATH` de la terminal (nvm, Homebrew); antes de editar su JSON deja un respaldo `.bak`. Lo de abajo es para hacerlo a mano.
+
 ### Claude Code
 
 ```sh
@@ -121,14 +123,14 @@ Solo los clientes de Claude (Claude Code, Claude Desktop, claude.ai) los muestra
 
 Con `sync`, `ocds_importar` y las herramientas de análisis, el servidor lee y escribe un store local en un archivo JSON, con un lock (`<archivo>.lock`) para que dos procesos no lo escriban a la vez. Por defecto es `~/.mercadopublico/mp.json`, junto a la cuota (`cuota.json`). No depende del directorio de trabajo del cliente, que en Claude Desktop es impredecible.
 
-La CLI (`sync`, `radar`) respeta `MP_STORE`, pero sin ella usa `./mp.json`, que no es este archivo. Para llenar desde una terminal el store que lee el servidor, pasa la misma ruta: `MP_STORE=~/.mercadopublico/mp.json npx mercadopublico sync --desde AAAA-MM-DD`. Los mensajes del servidor (store vacío, `sync` que no cabe) traen ese comando con la ruta real y mencionan primero la herramienta `sync`. Las lecturas del store van de a una (y mientras corre un trabajo leen por su mismo handle), así que varias llamadas en paralelo no se estorban; si el archivo lo tiene otro proceso, la herramienta responde un error corto (`No se pudo abrir el store local`), sin rutas ni datos del lock.
+La CLI (`sync`, `radar`) respeta `MP_STORE`, y si no está usa el store de `config.json` (el instalador deja ahí `~/.mercadopublico/mp.json`). Sin ninguno de los dos usa `./mp.json`, que no es este archivo. Para llenar desde una terminal el store que lee el servidor, pasa la misma ruta: `MP_STORE=~/.mercadopublico/mp.json npx mercadopublico sync --desde AAAA-MM-DD`. Los mensajes del servidor (store vacío, `sync` que no cabe) traen ese comando con la ruta real y mencionan primero la herramienta `sync`. Las lecturas del store van de a una (y mientras corre un trabajo leen por su mismo handle), así que varias llamadas en paralelo no se estorban; si el archivo lo tiene otro proceso, la herramienta responde un error corto (`No se pudo abrir el store local`), sin rutas ni datos del lock.
 
 | Variable | Por defecto | |
 |---|---|---|
-| `MP_TICKET` | (obligatoria) | Ticket de la API |
-| `MP_STORE` | `~/.mercadopublico/mp.json` | Archivo del store (la CLI `sync` y `radar` también lo leen; sin él usan `./mp.json`) |
+| `MP_TICKET` | el de `config.json` | Ticket de la API; obligatorio si no lo guardó el instalador |
+| `MP_STORE` | el de `config.json`, o `~/.mercadopublico/mp.json` | Archivo del store (la CLI `sync` y `radar` también lo leen; sin él ni `config.json` usan `./mp.json`) |
 | `MP_MCP_TOPE` | `1000` | Consultas diarias máximas del agente; entero positivo |
-| `MERCADOPUBLICO_HOME` | `~/.mercadopublico` | Carpeta de `cuota.json` y del store por defecto |
+| `MERCADOPUBLICO_HOME` | `~/.mercadopublico` | Carpeta de `config.json`, `cuota.json` y del store por defecto |
 | `MP_MCP_CLAVE` | (ninguna) | Clave de acceso de `--http` (ver [más abajo](#remoto-y-autohospedado)) |
 
 Una variable vacía cuenta como no definida (Claude Desktop manda `""` por las opciones que dejas en blanco).
@@ -206,7 +208,7 @@ Soporta MCP 2025-03-26, 2025-06-18, 2025-11-25 y 2026-07-28: responde `initializ
 
 | Síntoma | Causa y salida |
 |---|---|
-| `Falta el ticket: usa --ticket o la variable de entorno MP_TICKET` | El cliente no pasó `MP_TICKET`. Agrégalo en `env` o en la configuración de la extensión. |
+| `Falta el ticket: corre npx mercadopublico init…` | No hay ticket en `config.json` y el cliente no pasó `MP_TICKET`. Corre `npx mercadopublico init`, o agrégalo en `env` o en la configuración de la extensión. |
 | `No se pudo abrir el store local` | Un `npx mercadopublico sync` (u otro servidor MCP) tiene el store (`<archivo>.lock`). Espera a que termine, o usa otro `MP_STORE`. Si no hay nada corriendo, borra el `.lock` junto al archivo. |
 | `Se alcanzó el tope diario del agente` | Llegó a `MP_MCP_TOPE`. Súbelo y reinicia el servidor, o sigue desde la terminal con `npx mercadopublico …`. Reiniciar también lo pone en cero. |
 | `Ya hay un trabajo en curso` | Consulta `trabajo_estado`, o detenlo con `trabajo_cancelar`. |
