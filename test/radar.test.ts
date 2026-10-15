@@ -197,10 +197,25 @@ describe("incumbente", () => {
 
   it("1 − cuota del proveedor ajeno que más gana en el organismo y la familia", () => {
     const h = [oc("a", "1-9"), oc("b", "1-9"), oc("c", "1-9"), oc("d", "2-7")];
-    expect(inc(h)).toMatchObject({ valor: 0.25, razon: expect.stringContaining("1-9 se llevó 3 de 4") });
+    expect(inc(h)).toMatchObject({ valor: 0.25, razon: expect.stringContaining("Un proveedor persona natural se llevó 3 de 4") });
     // Si el que más gana eres tú, cuenta el siguiente.
     expect(inc(h, "1.9")).toMatchObject({ valor: 0.75, razon: expect.stringContaining("Tú, 3") });
     expect(inc([oc("a", "1-9"), oc("b", "1-9"), oc("c", "1-9")], "1-9").valor).toBe(1);
+  });
+
+  it("no nombra a una persona natural ni cae a su RUT; una empresa sí se nombra", () => {
+    const natural = (codigo: string) => ({ ...oc(codigo, "12.345.678-5"), proveedor: { rut: "12.345.678-5", nombre: "Juan Pérez Soto", codigo: null } });
+    const sinNombre = (codigo: string) => ({ ...oc(codigo, "12.345.678-5"), proveedor: { rut: "12.345.678-5", nombre: null, codigo: null } });
+    for (const mk of [natural, sinNombre]) {
+      const razon = inc([mk("a"), mk("b"), mk("c")]).razon;
+      expect(razon).toBe("Un proveedor persona natural se llevó 3 de 3 adjudicaciones previas de estas familias en este organismo.");
+      expect(razon).not.toMatch(/Juan|12345678|12\.345/);
+    }
+    const empresa = (codigo: string) => ({ ...oc(codigo, "76.000.000-0"), proveedor: { rut: "76.000.000-0", nombre: "Empresa SpA", codigo: null } });
+    expect(inc([empresa("a"), empresa("b"), empresa("c")]).razon).toContain("Empresa SpA se llevó 3 de 3");
+    // Una empresa sin nombre ni código tampoco cae a su RUT.
+    const anonima = (codigo: string) => ({ ...oc(codigo, "76.000.000-0"), proveedor: { rut: "76.000.000-0", nombre: null, codigo: null } });
+    expect(inc([anonima("a"), anonima("b"), anonima("c")]).razon).toMatch(/^Un proveedor se llevó 3 de 3/);
   });
 
   it("neutro sin historial, con pocas victorias o en otro organismo o familia", () => {
@@ -325,6 +340,19 @@ describe("competidores", () => {
     ]);
     expect(r.competidores[1]!.tasa).toBe(0.5);
     expect(competidores([])).toMatchObject({ hhi: null, lectura: "Sin adjudicaciones registradas." });
+  });
+});
+
+describe("competidores: lectura sin nombrar personas naturales", () => {
+  const ganador = (rut: string, nombre: string) => (codigo: string) => ({ ...oc(codigo, rut), proveedor: { rut, nombre, codigo: null } });
+
+  it("la lectura de un mercado concentrado no trae el nombre de una persona natural; una empresa sí, y tú también", () => {
+    const natural = ganador("12.345.678-5", "Juan Pérez Soto");
+    const lectura = competidores([natural("a"), natural("b"), natural("c")]).lectura;
+    expect(lectura).toBe("Concentrado: un proveedor persona natural y pocos más se llevan casi todo.");
+    const empresa = ganador("76.000.000-0", "Empresa SpA");
+    expect(competidores([empresa("a"), empresa("b")]).lectura).toContain("Empresa SpA");
+    expect(competidores([natural("a"), natural("b")], { rut: "12345678-5" }).lectura).toContain("Juan Pérez Soto");
   });
 });
 

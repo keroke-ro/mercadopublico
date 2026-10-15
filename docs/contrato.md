@@ -1,6 +1,6 @@
 # Contrato nocturno
 
-[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
+[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [MCP](mcp.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 La API de Mercado Público cambia sin avisar. Todas las noches, el workflow [`contrato`](https://github.com/keroke-ro/mercadopublico/actions/workflows/contrato.yml) llama a la API real con pocas consultas y compara la forma de las respuestas con los fixtures de `test/fixtures`. Si algo cambió, abre un issue y el badge del README se pone rojo.
 

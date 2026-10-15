@@ -1,6 +1,7 @@
 // Fija los nombres exportados en runtime: agregar o quitar una exportación pública obliga a tocar esta lista.
 import { expect, test } from "vitest";
 import * as raiz from "../../src/index.js";
+import * as mcp from "../../src/mcp-http.js";
 import * as radar from "../../src/radar/index.js";
 
 test("exportaciones de mercadopublico", () => {
@@ -41,5 +42,9 @@ test("exportaciones de mercadopublico", () => {
 });
 
 test("exportaciones de mercadopublico/radar", () => {
-  expect(Object.keys(radar).sort()).toEqual(["AJUSTES", "MUESTRA_MINIMA", "calibrar", "competidores", "decidir", "precioSugerido", "priorizar", "proximasCompras", "rangoDePrecio"]);
+  expect(Object.keys(radar).sort()).toEqual(["AJUSTES", "MUESTRA_MINIMA", "calibrar", "competidores", "decidir", "pesos", "precioSugerido", "priorizar", "proximasCompras", "rangoDePrecio", "resumenRadar"]);
+});
+
+test("exportaciones de mercadopublico/mcp", () => {
+  expect(Object.keys(mcp).sort()).toEqual(["crearServidorMcp", "manejadorHttp"]);
 });

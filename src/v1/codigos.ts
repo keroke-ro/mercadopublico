@@ -1,6 +1,7 @@
 // Tablas de códigos de la API v1 (docs/api-notes.md §2). Son abiertas: un código desconocido da null, nunca error.
 // Las contradicciones de la documentación se resuelven aquí y solo aquí; cada una tiene su test en test/codigos.test.ts.
 // Fuentes: [W] chilecompra.cl/api, [PL]/[PO] diccionarios PDF de licitaciones y OC, [OCDS] datos reales.
+import type { Proceso } from "../modelo.js";
 import { str } from "../util.js";
 
 /** Glosa de un código en una tabla; null si el código no está o viene vacío. */
@@ -115,8 +116,37 @@ export const TIPO_LICITACION = {
  * El sufijo no siempre es el tipo: "1469-227-R126" es L1 y los "-R226" son LE o LP, así que R1/R2 dan null.
  */
 export function tipoDesdeCodigo(codigo: unknown): string | null {
-  const t = /^\d+-\d+-([A-Z]+\d?)\d{2}$/.exec(str(codigo) ?? "")?.[1] ?? null;
+  const t = sufijo(codigo);
   return t === null || /^R\d$/.test(t) ? null : t;
+}
+
+/** Sufijo del código sin los dos dígitos del año ("1509-5-L114" → "L1", "1057539-228-COT26" → "COT"); null si no es un código. */
+function sufijo(codigo: unknown): string | null {
+  return /^\d+-\d+-([A-Z]+\d?)\d{2}$/.exec(str(codigo) ?? "")?.[1] ?? null;
+}
+
+// SE está en TIPO_OC y en TIPO_LICITACION, pero las cuatro muestras reales con SE son orden_compra (test/codigos.test.ts).
+const SUFIJO_OC_EN_LICITACION = new Set(["SE"]);
+
+/**
+ * Familia del proceso desde su código ("1509-5-L114" → "licitacion", "1057539-228-COT26" → "compra_agil"); null si no es un código.
+ * ponytail: los sufijos ambiguos (CA, R1, D1…) caen en licitación; si el proceso no aparece ahí, el caller prueba orden_compra.
+ */
+export function familiaDesdeCodigo(codigo: string): Proceso["tipo"] | null {
+  const s = sufijo(codigo);
+  if (s === null) return null;
+  if (s === "COT" || s === "FTD") return "compra_agil";
+  const esOC = Object.values(TIPO_OC).some(([abrev]) => abrev === s);
+  if (SUFIJO_OC_EN_LICITACION.has(s) || (esOC && !Object.hasOwn(TIPO_LICITACION, s))) return "orden_compra";
+  return "licitacion";
+}
+
+/** URL pública de la ficha del proceso, para citar fuentes; null si no hay URL confirmada. */
+export function urlPublica(tipo: Proceso["tipo"], codigo: string): string | null {
+  if (tipo === "licitacion") return `https://www.mercadopublico.cl/Procurement/Modules/RFB/DetailsAcquisition.aspx?idlicitacion=${encodeURIComponent(codigo)}`;
+  if (tipo === "orden_compra") return `https://www.mercadopublico.cl/PurchaseOrder/Modules/PO/DetailsPurchaseOrder.aspx?codigoOC=${encodeURIComponent(codigo)}`;
+  // La URL pública de Compra Ágil todavía no está confirmada.
+  return null;
 }
 
 // Corrección: [PL] dice 2=Privada, pero la API real manda 3 para las privadas (CO, I2, B2, E2). Se aceptan ambos.

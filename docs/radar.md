@@ -1,6 +1,6 @@
 # Radar
 
-[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
+[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [MCP](mcp.md) · [OCDS](ocds.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 `mercadopublico/radar` es la capa de decisión de KeroKero sobre los datos públicos de Mercado Público. Responde lo que se pregunta cada mañana un equipo que le vende al Estado:
 

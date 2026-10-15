@@ -1,6 +1,6 @@
 # Sync
 
-[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
+[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [CLI](cli.md) · [MCP](mcp.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 `mp.sync` mantiene al día una base local de licitaciones, órdenes de compra y Compra Ágil sin reventar la cuota. Se hace en dos pasos: `planificar` dice cuánto va a costar y `ejecutar` lo hace.
 

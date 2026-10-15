@@ -19,6 +19,7 @@ const activas = await mp.licitaciones.activas(); // 1 consulta
 - [Modelo](modelo.md): `Proceso`, `Monto`, fechas y conversores.
 - [Sync](sync.md): plan, costo en consultas, cursores y stores.
 - [CLI](cli.md): `npx mercadopublico …`
+- [MCP](mcp.md): `npx mercadopublico mcp`, el servidor para agentes (Claude, Codex, Cursor, ChatGPT).
 - [OCDS](ocds.md): el histórico de datos abiertos, en streaming.
 - [Radar](radar.md): qué postular primero, a qué precio, contra quién y qué viene.
 - [Resiliencia](resiliencia.md): qué hace el SDK cuando la API falla, y cómo verlo con eventos y `mp.salud()`.

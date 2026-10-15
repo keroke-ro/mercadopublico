@@ -1,6 +1,6 @@
 # Testing
 
-[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md)
+[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [MCP](mcp.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md)
 
 Casi todo se prueba sin llamar a la API: con fixtures, un `fetch` falso y un reloj inyectado. Solo tres cosas gastan consultas reales: el contrato nocturno, el smoke semanal y la grabación del corpus. Las tres comparten la cuota diaria de 10.000 del ticket con todo lo demás que hagas con él.
 

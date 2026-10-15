@@ -3,6 +3,7 @@ import { MercadoPublicoError } from "./errores.js";
 import type { Aviso } from "./eventos.js";
 import { normalizarFecha } from "./fecha.js";
 import type { Comprador, Item, Licitacion, OrdenCompra, Proceso, Proveedor } from "./modelo.js";
+import { esPersonaNatural } from "./personales.js";
 import { avisador, entero, exigir, monto, num, revisar, str, type Avisar, type Esquema } from "./util.js";
 import { ESTADO_LICITACION, ESTADO_OC, TIPO_LICITACION, estado, glosa, regionCodigo, tipoDesdeCodigo } from "./v1/codigos.js";
 
@@ -306,8 +307,7 @@ function proceso(r: Obj, avisar?: (a: Aviso) => void): Proceso {
   ];
   for (const [ruta, s] of refs) {
     const p = parte(s.id);
-    const n = parseInt(rut(p)?.replace(/\./g, "") ?? "", 10);
-    const persona = n > 0 && n < 50_000_000;
+    const persona = esPersonaNatural(rut(p));
     const [empresa, sucursal] = (str(s.name) ?? str(p?.name) ?? "").split(" | ");
     if (!persona && !(sucursal && sucursal !== empresa)) continue;
     anotar(`${ruta}.name`, s.name);

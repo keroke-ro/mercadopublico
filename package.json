@@ -1,6 +1,6 @@
 {
   "name": "mercadopublico",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "SDK TypeScript para la API de Mercado Público (ChileCompra): v1, Compra Ágil v2 y OCDS en un solo modelo, con control de cuota.",
   "keywords": [
     "mercadopublico",
@@ -16,6 +16,7 @@
     "url": "git+https://github.com/keroke-ro/mercadopublico.git"
   },
   "license": "PolyForm-Noncommercial-1.0.0",
+  "mcpName": "io.github.keroke-ro/mercadopublico",
   "author": "KeroKero (https://www.kerokero.cl)",
   "type": "module",
   "engines": {
@@ -28,6 +29,9 @@
     "*": {
       "radar": [
         "./dist/radar.d.ts"
+      ],
+      "mcp": [
+        "./dist/mcp.d.ts"
       ]
     }
   },
@@ -39,6 +43,10 @@
     "./radar": {
       "import": "./dist/radar.js",
       "require": "./dist/radar.cjs"
+    },
+    "./mcp": {
+      "import": "./dist/mcp.js",
+      "require": "./dist/mcp.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -60,6 +68,7 @@
     "cobertura": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "paquete": "node scripts/paquete.mjs",
+    "mcpb": "npm run build && node scripts/mcpb.mjs",
     "mutacion": "stryker run",
     "smoke": "node --experimental-strip-types scripts/smoke.ts",
     "contrato": "node --experimental-strip-types scripts/contrato.ts",
@@ -69,6 +78,7 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "@anthropic-ai/mcpb": "^2.1.2",
     "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^3.0.3",
     "@stryker-mutator/core": "^10.0.0",

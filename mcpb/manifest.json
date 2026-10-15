@@ -1,0 +1,43 @@
+{
+  "manifest_version": "0.4",
+  "name": "mercadopublico",
+  "display_name": "Mercado Público",
+  "description": "Consulta licitaciones y Compra Ágil de Mercado Público desde Claude.",
+  "author": { "name": "KeroKero", "url": "https://www.kerokero.cl" },
+  "keywords": ["mercadopublico", "chilecompra", "licitaciones", "compras-publicas"],
+  "server": {
+    "type": "node",
+    "entry_point": "server/cli.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/cli.js", "mcp"],
+      "env": {
+        "MP_TICKET": "${user_config.ticket}",
+        "MP_STORE": "${user_config.store}",
+        "MP_MCP_TOPE": "${user_config.tope}"
+      }
+    }
+  },
+  "user_config": {
+    "ticket": {
+      "type": "string",
+      "title": "Ticket de la API",
+      "description": "Ticket de la API de ChileCompra. Solicítalo en chilecompra.cl/api.",
+      "sensitive": true,
+      "required": true
+    },
+    "store": {
+      "type": "string",
+      "title": "Archivo del store local",
+      "description": "Ruta absoluta del archivo JSON donde se guarda el store local (opcional). Vacío: ~/.mercadopublico/mp.json. Para llenarlo desde una terminal con `npx mercadopublico sync`, usa la misma ruta en la variable MP_STORE.",
+      "required": false
+    },
+    "tope": {
+      "type": "number",
+      "title": "Tope diario de consultas",
+      "description": "Máximo de consultas diarias que puede hacer el agente (opcional). Por defecto 1000.",
+      "required": false,
+      "min": 1
+    }
+  }
+}

@@ -87,6 +87,20 @@ describe("cli", () => {
     expect(readFileSync(store, "utf8")).not.toContain("T-SECRETO");
   });
 
+  it("sync usa MP_STORE cuando no hay --store, y --store manda sobre MP_STORE", async () => {
+    const vacio = JSON.stringify({ Cantidad: 0, Listado: [] });
+    const args = ["sync", "--desde", "2026-06-01", "--hasta", "2026-06-01", "--fuentes", "licitaciones", "--sin-conversion"];
+    const deEnv = join(temporal(), "env.json");
+    const r = await correr(args, { env: { MP_TICKET: "T", MP_STORE: deEnv }, cuerpo: vacio });
+    expect(r.codigo).toBe(0);
+    expect(JSON.parse(readFileSync(deEnv, "utf8")).cursores).toEqual({ licitaciones: "2026-06-01" });
+    const dir = temporal();
+    const [flag, ignorado] = [join(dir, "flag.json"), join(dir, "ignorado.json")];
+    expect((await correr([...args, "--store", flag], { env: { MP_TICKET: "T", MP_STORE: ignorado }, cuerpo: vacio })).codigo).toBe(0);
+    expect(existsSync(flag)).toBe(true);
+    expect(existsSync(ignorado)).toBe(false);
+  });
+
   it("sin ticket: error claro", async () => {
     const { codigo, err } = await correr(["licitaciones"], { env: {} });
     expect(codigo).toBe(2);
@@ -142,6 +156,16 @@ describe("cli radar", () => {
     const datos = JSON.parse(json.out);
     expect(datos.decisiones.map((d: { codigo: string; accion: string }) => [d.codigo, d.accion])).toEqual([["A", "postular"], ["B", "revisar"], ["C", "descartar"]]);
     expect(json.out).not.toContain("Funcionaria");
+  });
+
+  it("usa MP_STORE cuando no hay --store (el mismo store que lee el MCP); --store manda", async () => {
+    const r = await correr(["radar", "--perfil", perfil, "--formato", "json"], { env: { MP_STORE: store } });
+    expect(r.codigo).toBe(0);
+    expect(JSON.parse(r.out).procesos).toBe(3);
+    const flag = await correr(["radar", "--perfil", perfil, "--store", store, "--formato", "json"], { env: { MP_STORE: join(dir, "no-existe.json") } });
+    expect(flag.codigo).toBe(0);
+    const vacio = await correr(["radar", "--perfil", perfil], { env: { MP_STORE: join(dir, "no-existe.json") } });
+    expect(vacio.err).toContain(join(dir, "no-existe.json")); // el mensaje dice qué store miró
   });
 
   it("errores de uso: sin perfil, perfil que no es JSON, store vacío", async () => {
