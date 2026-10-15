@@ -120,17 +120,108 @@ npx mercadopublico cuota
 
 Salida en tabla si es una terminal y JSON si no; `--formato json|csv|tabla` para elegir. Referencia completa en [docs/cli.md](docs/cli.md).
 
-## MCP
+## MCP: úsalo desde Claude, ChatGPT, Codex o Cursor
 
-`npx mercadopublico mcp` levanta un servidor [MCP](https://modelcontextprotocol.io) para que un agente (Claude, Codex, Cursor) busque licitaciones, órdenes de compra y Compra Ágil, traiga el detalle con su URL pública y analice quién gana y a qué precio. Usa la misma cola, cuota en disco y conversión de montos que la CLI. Cada resultado informa su `costo` en consultas, el agente tiene un tope diario (`MP_MCP_TOPE`, 1000 por defecto), los datos personales van siempre ocultos y `raw` no se manda.
+`mercadopublico mcp` conecta tu asistente de IA con Mercado Público. Le preguntas en español y él busca, lee las fichas y analiza:
 
-Lo largo (`sync`, `ocds_importar`) corre como trabajo en segundo plano. Para claude.ai y ChatGPT hay `mcp --http` detrás de HTTPS, y Claude Desktop tiene una extensión `.mcpb` en cada release. En Claude Code:
+- «¿Qué licitaciones de computadores cierran esta semana?»
+- «Analiza la licitación 1509-5-L114: requisitos, plazos y riesgos.»
+- «¿Quién le gana a quién en Compra Ágil de artículos de aseo en la Región Metropolitana?»
+
+Configurarlo toma dos pasos.
+
+**1. Consigue tu ticket.** Se pide gratis con Clave Única en [chilecompra.cl/api](https://www.chilecompra.cl/api/) y llega por correo. Tiene la forma `XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX`. En los ejemplos de abajo, reemplaza `TU-TICKET` por el tuyo.
+
+**2. Agrégalo a tu asistente.** Elige el tuyo:
+
+<details>
+<summary><b>Claude Desktop</b> (la app de Claude para Mac o Windows, sin programar)</summary>
+
+1. Descarga `mercadopublico.mcpb` del [último release](https://github.com/keroke-ro/mercadopublico/releases/latest).
+2. Ábrelo con doble clic: Claude Desktop muestra la extensión y te pide el ticket.
+3. Pega tu ticket y confirma la instalación.
+
+No necesitas instalar nada más. Para probar, abre un chat nuevo y pregunta: «¿Qué licitaciones de papel hay abiertas?».
+
+</details>
+
+<details>
+<summary><b>Claude Code</b></summary>
+
+Necesitas [Node 20](https://nodejs.org) o superior.
 
 ```sh
-claude mcp add mercadopublico -e MP_TICKET=tu-ticket -- npx -y mercadopublico mcp
+claude mcp add mercadopublico -e MP_TICKET=TU-TICKET -- npx -y mercadopublico mcp
 ```
 
-Herramientas, prompts, instalación en cada cliente y despliegue remoto en [docs/mcp.md](docs/mcp.md).
+Revisa que quedó conectado con `claude mcp list`, o con `/mcp` dentro de Claude Code.
+
+</details>
+
+<details>
+<summary><b>Codex</b> (OpenAI: CLI, extensión del editor y app)</summary>
+
+Necesitas [Node 20](https://nodejs.org) o superior.
+
+```sh
+codex mcp add mercadopublico --env MP_TICKET=TU-TICKET -- npx -y mercadopublico mcp
+```
+
+O agrega esto a `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.mercadopublico]
+command = "npx"
+args = ["-y", "mercadopublico", "mcp"]
+env = { MP_TICKET = "TU-TICKET" }
+```
+
+</details>
+
+<details>
+<summary><b>Cursor</b> (y otros editores que leen <code>mcpServers</code>)</summary>
+
+Necesitas [Node 20](https://nodejs.org) o superior. En `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "mercadopublico": {
+      "command": "npx",
+      "args": ["-y", "mercadopublico", "mcp"],
+      "env": { "MP_TICKET": "TU-TICKET" }
+    }
+  }
+}
+```
+
+El mismo bloque sirve para Claude Desktop sin la extensión, en `claude_desktop_config.json` (en Claude Desktop: Settings → Developer → Edit Config; reinícialo después).
+
+</details>
+
+<details>
+<summary><b>ChatGPT y claude.ai</b> (web y celular)</summary>
+
+Estos dos solo se conectan a servidores en internet, así que necesitas levantar uno. Requiere algo de terminal:
+
+```sh
+export MP_TICKET=TU-TICKET
+export MP_MCP_CLAVE=$(openssl rand -hex 24)   # tu clave secreta; guárdala
+npx mercadopublico mcp --http --puerto 8787
+```
+
+Publícalo con HTTPS, por ejemplo con `cloudflared tunnel --url http://localhost:8787`, y agrega como conector la URL `https://<tu-dominio>/mcp/<MP_MCP_CLAVE>`:
+
+- **claude.ai:** Settings → Connectors → Add custom connector.
+- **ChatGPT:** Settings → Apps & Connectors → Advanced → activa Developer mode y crea el conector, sin autenticación (la clave ya va en la URL).
+
+La URL con la clave es una contraseña: no la compartas. Para un servidor permanente (Cloudflare Workers, un VPS), mira [docs/mcp.md](docs/mcp.md#remoto-y-autohospedado).
+
+</details>
+
+**Qué cuidar.** Cada respuesta dice cuántas consultas gastó, y el asistente tiene un tope de 1.000 al día (de las 10.000 del ticket) para que no se coma tu cuota; cámbialo con `MP_MCP_TOPE`. Los datos personales de funcionarios siempre van ocultos. Lo que tarda (bajar días completos con `sync` o el historial con `ocds_importar`) corre en segundo plano, y el asistente te va contando cómo avanza.
+
+Todas las herramientas, los prompts y las variables de entorno en [docs/mcp.md](docs/mcp.md).
 
 ## Documentación
 
