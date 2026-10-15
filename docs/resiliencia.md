@@ -1,6 +1,6 @@
 # Resiliencia
 
-[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Testing](testing.md)
+[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [CLI](cli.md) · [MCP](mcp.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Testing](testing.md)
 
 La API de Mercado Público falla seguido y de formas raras: rechaza con 10500 consultas que van de a una, se cae con 500 y a veces responde HTML. Esta página dice qué hace el SDK en cada caso y cómo te enteras desde tu código.
 

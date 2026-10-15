@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { MercadoPublico, desdeOcds, ocultarPersonales } from "../src/index.js";
-import { OCULTO } from "../src/personales.js";
+import { OCULTO, esPersonaNatural } from "../src/personales.js";
 
 const fixture = readFileSync(new URL("./fixtures/v1/licitacion-detalle.json", import.meta.url), "utf8");
 
@@ -51,5 +51,12 @@ describe("texto libre", () => {
     expect(taparTextoLibre(t)).toBe("CONTACTO BODEGA: Fulana:  [oculto], [oculto] / [oculto] / [oculto]");
     const seguro = "ID:1002772-2662-COT26,(AG,TRANSV,2204005003,APG) monto 1200000 el 2026-10-14 RUT 61.608.205-1";
     expect(taparTextoLibre(seguro)).toBe(seguro);
+  });
+});
+
+describe("esPersonaNatural", () => {
+  it("RUT bajo 50 millones, con o sin puntos y guion; sin RUT no se puede saber", () => {
+    for (const r of ["12.345.678-5", "123456785", "5000000-1", "49999999-K", "1-9"]) expect(esPersonaNatural(r), r).toBe(true);
+    for (const r of ["76.000.000-0", "760000000", "50.000.000-0", "", null, undefined, "abc"]) expect(esPersonaNatural(r), String(r)).toBe(false);
   });
 });

@@ -7,7 +7,7 @@ import { ocultarPersonales, type CompraAgil, type MercadoPublico, type Proceso, 
 import { MUESTRA_MINIMA, competidores, precioSugerido, proximasCompras, rangoDePrecio, resumenRadar, pesos, type Perfil } from "./radar/index.js";
 import { leerOcds, urlOcds } from "./ocds.js";
 import { PROMPTS, obtenerPrompt } from "./mcp-prompts.js";
-import { OCULTO } from "./personales.js";
+import { OCULTO, esPersonaNatural } from "./personales.js";
 import { ESTADOS_FILTRO_LICITACION, ESTADO_FILTRO_OC, REGION, familiaDesdeCodigo, urlPublica } from "./v1/codigos.js";
 import type { FuenteSync } from "./sync.js";
 import type { EstadoCompraAgil } from "./v2/parse.js";
@@ -42,7 +42,11 @@ class ErrorUso extends Error {}
 interface Ctx {
   mp: MercadoPublico;
   abrirStore?: () => Promise<Store>;
+  /** Ruta del store, solo para armar los mensajes que mandan a la terminal. */
+  rutaStore?: string;
   fetch?: typeof fetch;
+  /** Una sola apertura del store a la vez (`storeArchivo` toma un lock: dos handles a la vez se estorban). */
+  exclusivo<T>(f: () => Promise<T>): Promise<T>;
   /** ponytail: caché por proceso, sin LRU; las claves son pocas (activas, compradores y los detalles pedidos). */
   cacheado<T>(clave: string, ttlMs: number, f: () => Promise<T>): Promise<T>;
   topeAgente(): { limite: number; usadas: number };
@@ -74,6 +78,16 @@ interface Trabajo {
 }
 /** Cómo terminó un trabajo. */
 type Salida = Pick<Trabajo, "estado"> & Partial<Pick<Trabajo, "mensaje" | "resultado">>;
+
+/** Ejecuta de a una las funciones que recibe, en orden de llegada; que una falle no frena a las demás. */
+const enFila = () => {
+  let cola: Promise<unknown> = Promise.resolve();
+  return <T>(f: () => Promise<T>): Promise<T> => {
+    const r = cola.then(f);
+    cola = r.catch(() => {});
+    return r;
+  };
+};
 
 const enCurso = (t: Trabajo | undefined): t is Trabajo => t?.estado === "planificando" || t?.estado === "ejecutando";
 const vista = ({ abort: _a, store: _s, listo: _l, ...t }: Trabajo) => t;
@@ -126,11 +140,8 @@ function rubros(a: Args): (string | number)[] | undefined {
   return v as (string | number)[];
 }
 
-/** Persona natural: RUT bajo 50 millones (el mismo criterio del parser OCDS). Sin RUT no se puede saber y se deja. */
-function sinPersona(p: Proveedor): Proveedor {
-  const n = parseInt((p.rut ?? "").replace(/[^0-9kK]/g, "").slice(0, -1), 10);
-  return n > 0 && n < 50_000_000 ? { rut: OCULTO, nombre: OCULTO, codigo: p.codigo } : p;
-}
+/** Una persona natural sale oculta (mismo criterio que el parser OCDS y el radar). Sin RUT no se puede saber y se deja. */
+const sinPersona = (p: Proveedor): Proveedor => (esPersonaNatural(p.rut) ? { rut: OCULTO, nombre: OCULTO, codigo: p.codigo } : p);
 
 /** Las funciones del radar lanzan RangeError con mensajes que el agente puede corregir. */
 function delRadar<T>(f: () => T): T {
@@ -192,19 +203,39 @@ async function historial(c: Ctx): Promise<Proceso[]> {
     for await (const p of s.todos()) r.push(p);
     return r;
   });
-  if (!todos.length) throw new ErrorUso("el store está vacío: trae datos con `ocds_importar` (licitaciones y órdenes de compra) o corre `npx mercadopublico sync --desde AAAA-MM-DD` (Compra Ágil y lo reciente)");
+  if (!todos.length)
+    throw new ErrorUso(`el store está vacío: trae datos con la herramienta \`ocds_importar\` (licitaciones y órdenes de compra) o \`sync\` (Compra Ágil y lo reciente); o, en una terminal, \`${enTerminal(c)}\``);
   return todos;
+}
+
+/** El comando de terminal que llena el mismo store que lee este servidor (sin la ruta si no se conoce). */
+function enTerminal(c: Ctx): string {
+  const r = c.rutaStore;
+  return `${r ? `MP_STORE=${/\s/.test(r) ? JSON.stringify(r) : r} ` : ""}npx mercadopublico sync --desde AAAA-MM-DD`;
+}
+
+/** Abre el store; si falla, un mensaje corto: el original trae rutas, pid y host del lock. */
+async function abrir(c: Ctx): Promise<Store> {
+  try {
+    return await c.abrirStore!();
+  } catch {
+    throw new ErrorUso("No se pudo abrir el store local (¿lo usa otro proceso?). Espera a que termine e inténtalo de nuevo.");
+  }
 }
 
 async function enStore<T>(c: Ctx, f: (s: Store) => Promise<T>): Promise<T> {
   const t = c.storeTrabajo();
   if (t) return f(t); // el trabajo en curso tiene el lock: se lee por su handle y no se cierra
-  const s = await c.abrirStore!();
-  try {
-    return await f(s);
-  } finally {
-    await s.cerrar?.();
-  }
+  return c.exclusivo(async () => {
+    const t = c.storeTrabajo(); // un trabajo pudo tomar el store mientras esperaba su turno
+    if (t) return f(t);
+    const s = await abrir(c);
+    try {
+      return await f(s);
+    } finally {
+      await s.cerrar?.();
+    }
+  });
 }
 
 // --- resumen legible de un proceso ---
@@ -486,7 +517,7 @@ const HERRAMIENTAS: Herramienta[] = [
     name: "radar",
     title: "Radar de oportunidades",
     description:
-      "Qué postular primero, a qué precio y qué viene, a partir del store local sincronizado (`npx mercadopublico sync`) y el perfil de la empresa. Cuesta 0 consultas. " +
+      "Qué postular primero, a qué precio y qué viene, a partir del store local, que se llena con la herramienta `sync`, y el perfil de la empresa. Cuesta 0 consultas. " +
       "`perfil` es un objeto con `pesos` y, opcionalmente, rubros, regiones, montoMin, montoMax, costos (ver docs/radar.md).",
     inputSchema: {
       type: "object",
@@ -502,10 +533,12 @@ const HERRAMIENTAS: Herramienta[] = [
     async ejecutar(a, c) {
       const perfil = a.perfil as Perfil | undefined;
       if (!perfil || typeof perfil !== "object" || Array.isArray(perfil) || !perfil.pesos || typeof perfil.pesos !== "object") throw new ErrorUso("`perfil` debe ser un objeto con `pesos`");
-      if (a.decisiones !== undefined && !Array.isArray(a.decisiones)) throw new ErrorUso("`decisiones` debe ser una lista");
+      const dec = a.decisiones;
+      if (dec !== undefined && (!Array.isArray(dec) || dec.some((d) => !d || typeof d !== "object" || typeof d.codigo !== "string" || (d.decision !== "postular" && d.decision !== "descartar"))))
+        throw new ErrorUso("`decisiones` es una lista de { codigo: texto, decision: postular | descartar }");
       const max = entero(a, "max", 10, 100);
       const todos = await historial(c);
-      const r = resumenRadar(todos, perfil, { decisiones: a.decisiones as never });
+      const r = delRadar(() => resumenRadar(todos, perfil, { decisiones: dec }));
       const agenda = r.decisiones.filter((d) => d.turno !== null);
       const conteo = {
         abiertas: r.decisiones.length,
@@ -612,7 +645,7 @@ const HERRAMIENTAS: Herramienta[] = [
       "Baja al store local lo ocurrido entre `desde` y `hasta` (licitaciones, órdenes de compra y Compra Ágil) para `search` y `radar`. Es un trabajo en segundo plano: responde al tiro con estado planificando " +
       "y sigue solo (la API va a ~1 consulta por segundo, un día de datos toma minutos). Consulta el avance con `trabajo_estado`; `trabajo_cancelar` lo detiene guardando lo hecho. " +
       "Gasta consultas de la cuota: `maxConsultas` es el máximo que se permite gastar (planificación incluida); si el listado o el plan lo pasan, se niega o se detiene sin ejecutar. " +
-      "Solo un trabajo a la vez. Repetirlo con el mismo `desde` retoma desde donde quedó. Para rangos grandes usa `npx mercadopublico sync` en una terminal.",
+      "Solo un trabajo a la vez. Repetirlo con el mismo `desde` retoma desde donde quedó. Para rangos grandes, en una terminal: `npx mercadopublico sync --desde AAAA-MM-DD` con `MP_STORE` apuntando al mismo store (el error de store vacío trae el comando exacto).",
     inputSchema: {
       type: "object",
       properties: {
@@ -634,35 +667,36 @@ const HERRAMIENTAS: Herramienta[] = [
       const f = a.fuentes ?? FUENTES;
       if (!Array.isArray(f) || !f.length || f.some((x) => !FUENTES.includes(x))) throw new ErrorUso(`\`fuentes\` es una lista con ${FUENTES.join(", ")}`);
       const fuentes = [...new Set(f as FuenteSync[])];
-      libre(c);
-
-      const store = await c.abrirStore!();
-      let lanzado = false;
-      try {
-        // Lo que cuestan solo los listados, sin pedir nada: un día por fuente v1 desde su cursor, más 1 de Compra Ágil (como Sync.planificar).
-        const dias: Record<string, number> = {};
-        for (const x of fuentes) {
-          if (x === "compra_agil") continue;
-          const cur = await store.cursor(x);
-          let n = 0;
-          for (let d = cur && cur >= desde ? sumarDias(cur, 1) : desde; d <= hasta; d = sumarDias(d, 1)) n++;
-          dias[x] = n;
+      return c.exclusivo(async () => {
+        libre(c); // dentro del turno: otro lanzamiento pudo ganarle mientras esperaba
+        const store = await abrir(c);
+        let lanzado = false;
+        try {
+          // Lo que cuestan solo los listados, sin pedir nada: un día por fuente v1 desde su cursor, más 1 de Compra Ágil (como Sync.planificar).
+          const dias: Record<string, number> = {};
+          for (const x of fuentes) {
+            if (x === "compra_agil") continue;
+            const cur = await store.cursor(x);
+            let n = 0;
+            for (let d = cur && cur >= desde ? sumarDias(cur, 1) : desde; d <= hasta; d = sumarDias(d, 1)) n++;
+            dias[x] = n;
+          }
+          const listado = Object.values(dias).reduce((s, n) => s + n, 0) + (fuentes.includes("compra_agil") ? 1 : 0);
+          const tope = c.topeAgente();
+          const permitido = Math.min(maxConsultas, tope.limite - tope.usadas, c.mp.cuota.restante);
+          if (listado > permitido)
+            throw new ErrorUso(
+              `Solo listar ${desde} a ${hasta} cuesta ${listado} consultas (${dias.licitaciones ?? 0} días de licitaciones + ${dias.ordenes ?? 0} de órdenes + ${fuentes.includes("compra_agil") ? 1 : 0} de Compra Ágil) ` +
+                `y hay ${permitido} disponibles (maxConsultas ${maxConsultas}, tope del agente ${tope.limite - tope.usadas}, ticket ${c.mp.cuota.restante}). ` +
+                `Prueba un rango más corto o, en una terminal, \`${enTerminal(c)}\`.`,
+            );
+          const t = c.lanzar({ tipo: "sync", parametros: { desde, hasta, fuentes, maxConsultas }, store }, (j) => correrSync(c, j, { desde, hasta, fuentes, maxConsultas }));
+          lanzado = true;
+          return { trabajo: vista(t) };
+        } finally {
+          if (!lanzado) await store.cerrar?.();
         }
-        const listado = Object.values(dias).reduce((s, n) => s + n, 0) + (fuentes.includes("compra_agil") ? 1 : 0);
-        const tope = c.topeAgente();
-        const permitido = Math.min(maxConsultas, tope.limite - tope.usadas, c.mp.cuota.restante);
-        if (listado > permitido)
-          throw new ErrorUso(
-            `Solo listar ${desde} a ${hasta} cuesta ${listado} consultas (${dias.licitaciones ?? 0} días de licitaciones + ${dias.ordenes ?? 0} de órdenes + ${fuentes.includes("compra_agil") ? 1 : 0} de Compra Ágil) ` +
-              `y hay ${permitido} disponibles (maxConsultas ${maxConsultas}, tope del agente ${tope.limite - tope.usadas}, ticket ${c.mp.cuota.restante}). ` +
-              "Prueba un rango más corto o corre `npx mercadopublico sync` en una terminal.",
-          );
-        const t = c.lanzar({ tipo: "sync", parametros: { desde, hasta, fuentes, maxConsultas }, store }, (j) => correrSync(c, j, { desde, hasta, fuentes, maxConsultas }));
-        lanzado = true;
-        return { trabajo: vista(t) };
-      } finally {
-        if (!lanzado) await store.cerrar?.();
-      }
+      });
     },
   },
   {
@@ -702,18 +736,19 @@ const HERRAMIENTAS: Herramienta[] = [
       if (comprador && !p.comprador!.length) throw new ErrorUso("`comprador` necesita al menos una palabra de 2 letras o más");
       if (rubro && !/^\d{1,8}$/.test(rubro)) throw new ErrorUso("`rubro` es un prefijo de código UNSPSC: solo dígitos (hasta 8)");
       if (p.desde && p.hasta && p.desde > p.hasta) throw new ErrorUso("`desde` no puede ser posterior a `hasta`");
-      libre(c);
-
-      const store = await c.abrirStore!();
-      let lanzado = false;
-      try {
-        const parametros = Object.fromEntries(Object.entries({ anio, q, comprador, rubro, desde: p.desde, hasta: p.hasta, max: p.max }).filter(([, v]) => v !== undefined));
-        const t = c.lanzar({ tipo: "ocds", parametros, store }, (j) => correrOcds(c, j, p));
-        lanzado = true;
-        return { trabajo: vista(t) };
-      } finally {
-        if (!lanzado) await store.cerrar?.();
-      }
+      return c.exclusivo(async () => {
+        libre(c); // dentro del turno: otro lanzamiento pudo ganarle mientras esperaba
+        const store = await abrir(c);
+        let lanzado = false;
+        try {
+          const parametros = Object.fromEntries(Object.entries({ anio, q, comprador, rubro, desde: p.desde, hasta: p.hasta, max: p.max }).filter(([, v]) => v !== undefined));
+          const t = c.lanzar({ tipo: "ocds", parametros, store }, (j) => correrOcds(c, j, p));
+          lanzado = true;
+          return { trabajo: vista(t) };
+        } finally {
+          if (!lanzado) await store.cerrar?.();
+        }
+      });
     },
   },
   {
@@ -738,17 +773,37 @@ const HERRAMIENTAS: Herramienta[] = [
     async ejecutar(_, c) {
       const t = c.trabajo();
       if (!enCurso(t)) throw new ErrorUso("No hay ningún trabajo en curso");
-      t.abort.abort();
-      // Corta la consulta en vuelo; si algo se cuelga, no se espera más de 5 s y queda cancelándose (ver `trabajo_estado`).
-      let fin: ReturnType<typeof setTimeout>;
-      await Promise.race([t.listo, new Promise((r) => (fin = setTimeout(r, 5000)))]);
-      clearTimeout(fin!);
+      await detener(t);
       return { trabajo: vista(t) };
     },
   },
 ];
 
 // --- trabajos ---
+
+/** Aborta el trabajo y espera a que suelte el store. Corta la consulta en vuelo; si algo se cuelga, no espera más de 5 s (queda cancelándose, ver `trabajo_estado`). */
+async function detener(t: Trabajo): Promise<void> {
+  t.abort.abort();
+  let fin: ReturnType<typeof setTimeout>;
+  await Promise.race([t.listo, new Promise((r) => (fin = setTimeout(r, 5000)))]);
+  clearTimeout(fin!);
+}
+
+/**
+ * Consultas gastadas desde la lectura anterior. La cuota se reinicia a medianoche de Santiago: si cambió el día (o `usadas`
+ * bajó), lo de hoy es todo lo que marca ahora. ponytail: lo gastado antes de medianoche en esa misma ventana no se ve; la ventana es una llamada o un paso del sync.
+ */
+function medidor(mp: MercadoPublico): () => number {
+  let dia = mp.cuota.toJSON().dia;
+  let ultimo = mp.cuota.usadas;
+  return () => {
+    const hoy = mp.cuota.toJSON().dia;
+    const usadas = mp.cuota.usadas;
+    const delta = hoy !== dia || usadas < ultimo ? usadas : usadas - ultimo;
+    [dia, ultimo] = [hoy, usadas];
+    return delta;
+  };
+}
 
 /** Un solo trabajo a la vez, de cualquier tipo. */
 function libre(c: Ctx) {
@@ -769,11 +824,12 @@ function diaArg(a: Args, k: string, obligatorio = false) {
 /** El cuerpo del trabajo `sync`: planifica, revisa que el plan quepa y ejecuta. Nunca corre dentro de `enCola`. */
 async function correrSync(c: Ctx, j: Trabajo, p: { desde: string; hasta: string; fuentes: FuenteSync[]; maxConsultas: number }): Promise<Salida> {
   const { mp } = c;
-  const inicio = mp.cuota.usadas;
-  const gastadas = () => Math.max(0, mp.cuota.usadas - inicio);
+  const medir = medidor(mp);
+  let gastadas = 0; // acumulado por pasos: `mp.cuota.usadas` vuelve a 0 a medianoche
   const topes = () => {
     const t = c.topeAgente();
-    return { maxConsultas: p.maxConsultas - gastadas(), agente: t.limite - t.usadas, ticket: mp.cuota.restante };
+    gastadas += medir();
+    return { maxConsultas: p.maxConsultas - gastadas, agente: t.limite - t.usadas, ticket: mp.cuota.restante };
   };
   const { signal } = j.abort;
 
@@ -787,7 +843,7 @@ async function correrSync(c: Ctx, j: Trabajo, p: { desde: string; hasta: string;
       estado: "detenido",
       mensaje:
         `El plan necesita unas ${falta} consultas más (incluye ${margenReintentos ?? 0} de margen para reintentos) y quedan ${t.maxConsultas} de maxConsultas, ${t.agente} del tope del agente y ${t.ticket} del ticket. ` +
-        "No se ejecutó nada. Acorta el rango, sube maxConsultas o corre `npx mercadopublico sync` en una terminal.",
+        `No se ejecutó nada. Acorta el rango, sube maxConsultas o, en una terminal, \`${enTerminal(c)}\`.`,
     };
 
   let razon: string | undefined;
@@ -878,10 +934,11 @@ async function correrOcds(c: Ctx, j: Trabajo, p: ParamsOcds): Promise<Salida> {
 
 // --- servidor ---
 
-export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Promise<Store>; fetch?: typeof fetch; tope?: number; version?: string }): { manejar(msg: unknown): Promise<object | null> } {
+/** `rutaStore` solo se usa en los mensajes que mandan a la terminal; sin ella no se menciona. `cerrar` aborta el trabajo en curso y espera a que suelte el store. */
+export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Promise<Store>; rutaStore?: string; fetch?: typeof fetch; tope?: number; version?: string }): { manejar(msg: unknown): Promise<object | null>; cerrar(): Promise<void> } {
   const { mp, abrirStore } = op;
   const limite = op.tope ?? 1000;
-  const info = { name: "mercadopublico", version: op.version ?? "0.1.0" };
+  const info = { name: "mercadopublico", version: op.version ?? "0.0.0-desconocida" };
   const herramientas = HERRAMIENTAS.filter((h) => !h.requiereStore || abrirStore);
   // radar-diario usa `radar`, que necesita store.
   const prompts = PROMPTS.filter((p) => p.name !== "radar-diario" || abrirStore);
@@ -906,6 +963,7 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
     return { limite, usadas: Math.max(0, mp.cuota.usadas - gasto.base) };
   };
 
+  const exclusivo = enFila();
   let trabajo: Trabajo | undefined;
   const lanzar: Ctx["lanzar"] = (t, correr) => {
     const j: Trabajo = { ...t, estado: "planificando", inicio: new Date().toISOString(), abort: new AbortController(), listo: undefined! };
@@ -928,39 +986,32 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
     );
     return j;
   };
-  const ctx: Ctx = { mp, abrirStore, fetch: op.fetch, cacheado, topeAgente, trabajo: () => trabajo, storeTrabajo: () => (enCurso(trabajo) ? trabajo.store : undefined), lanzar };
+  const ctx: Ctx = { mp, abrirStore, rutaStore: op.rutaStore, exclusivo, fetch: op.fetch, cacheado, topeAgente, trabajo: () => trabajo, storeTrabajo: () => (enCurso(trabajo) ? trabajo.store : undefined), lanzar };
 
   // Las herramientas que consultan la API van de a una: así el delta de `mp.cuota.usadas` es de esa llamada y no de otra.
-  let cola: Promise<unknown> = Promise.resolve();
-  const enCola = <T>(f: () => Promise<T>): Promise<T> => {
-    const r = cola.then(f);
-    cola = r.catch(() => {});
-    return r;
-  };
+  const enCola = enFila();
 
   const completo = (r: Objeto) => ({ resultType: "complete", ...r, _meta: { [META_INFO]: info } });
-  const fallo = (m: string) => ({ content: [{ type: "text", text: m }], isError: true });
+  const fallo = (m: string, costo: Objeto) => ({ content: [{ type: "text", text: `${m} (costo: ${costo.consultas} consultas)` }], structuredContent: { costo }, isError: true });
 
   async function ejecutar(h: Herramienta, args: Args) {
     const abierta = h.annotations.openWorldHint && !h.sinCuota;
-    const antes = mp.cuota.usadas;
+    const medir = medidor(mp);
     const conTrabajo = enCurso(trabajo) && trabajo.tipo === "sync"; // sus consultas se mezclan con las de esta llamada en el delta
-    let datos: Objeto;
-    let consultas = 0;
+    let datos: Objeto | undefined;
+    let error: string | undefined;
     try {
       if (abierta && topeAgente().usadas >= limite)
         throw new ErrorUso(`Se alcanzó el tope diario del agente (${limite} consultas a la API). Para seguir, corre \`npx mercadopublico …\` en una terminal o sube MP_MCP_TOPE y reinicia el servidor.`);
       datos = await h.ejecutar(args, ctx);
     } catch (e) {
-      if (e instanceof ErrorUso || e instanceof MercadoPublicoError) return fallo(e.message);
-      throw e;
-    } finally {
-      // La cuota cuenta cada intento, también los que fallan. Si cambia el día a mitad de camino el delta puede salir negativo.
-      if (abierta) {
-        consultas = Math.max(0, mp.cuota.usadas - antes);
-      }
+      if (!(e instanceof ErrorUso || e instanceof MercadoPublicoError)) throw e;
+      error = e.message;
     }
-    const salida = { ...datos, costo: { consultas, restanteHoy: mp.cuota.restante, topeAgente: topeAgente(), ...(conTrabajo && abierta && { nota: "incluye consultas del trabajo en curso" }) } };
+    // La cuota cuenta cada intento, también los que fallan; el error también informa su costo.
+    const costo = { consultas: abierta ? medir() : 0, restanteHoy: mp.cuota.restante, topeAgente: topeAgente(), ...(conTrabajo && abierta && { nota: "incluye consultas del trabajo en curso" }) };
+    if (error !== undefined) return fallo(error, costo);
+    const salida = { ...datos, costo };
     return { content: [{ type: "text", text: JSON.stringify(salida) }], structuredContent: salida };
   }
 
@@ -1005,6 +1056,9 @@ export function crearServidorMcp(op: { mp: MercadoPublico; abrirStore?: () => Pr
   }
 
   return {
+    async cerrar() {
+      if (enCurso(trabajo)) await detener(trabajo);
+    },
     async manejar(msg) {
       const m = msg as { id?: string | number | null; method?: unknown; params?: unknown } | null;
       if (!m || typeof m !== "object" || Array.isArray(m) || typeof m.method !== "string")

@@ -1,6 +1,6 @@
 # CLI
 
-[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
+[Inicio](index.md) · [Guía](guia.md) · [Modelo](modelo.md) · [Sync](sync.md) · [MCP](mcp.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 ```sh
 npx mercadopublico --ayuda
@@ -18,9 +18,9 @@ Comandos:
   proveedor <rut>                     Código de empresa de un proveedor
   compradores                         Todos los organismos compradores
   ocds <archivo|url|año> [--max N]    Lee OCDS (.jsonl o .jsonl.gz); no pide ticket
-  sync --desde AAAA-MM-DD             Actualiza un store local [--hasta] [--fuentes licitaciones,ordenes,compra_agil] [--store ./mp.json] [--plan]
+  sync --desde AAAA-MM-DD             Actualiza un store local [--hasta] [--fuentes licitaciones,ordenes,compra_agil] [--store ./mp.json (o MP_STORE)] [--plan]
   radar --perfil perfil.json          Qué postular primero, a qué precio y qué viene, desde el store; no pide ticket
-                                      [--store ./mp.json] [--decisiones decisiones.json] [--max N (10)]
+                                      [--store ./mp.json (o MP_STORE)] [--decisiones decisiones.json] [--max N (10)]
   cuota                               Consultas usadas hoy desde esta máquina
 
 Opciones:
@@ -82,6 +82,7 @@ npx mercadopublico cuota
   ```
 
   Con `--plan` solo planifica, pero eso ya gasta los listados (ver [Sync](sync.md#lo-que-cuesta)).
+- **Store por defecto:** `sync` y `radar` usan `--store`, si no la variable `MP_STORE`, y si no `./mp.json`. El servidor MCP usa `MP_STORE` o, si no, `~/.mercadopublico/mp.json`: para llenar con la CLI el store que lee el MCP, corre `MP_STORE=<la misma ruta> npx mercadopublico sync --desde AAAA-MM-DD` (el MCP te la muestra en sus mensajes). Una variable vacía cuenta como no definida.
 - **sync y el store:** mientras corre, el store queda tomado con `<store>.lock`. Un segundo `sync` sobre el mismo archivo falla al tiro con un mensaje que lo dice; si no hay otro corriendo, borra el `.lock` (ver [Sync](sync.md#stores)).
 - **Ctrl-C en sync:** cancela ordenado, guarda lo hecho y la cuota, y sale con 130. La próxima vuelta sigue desde el cursor. Un segundo Ctrl-C mata el proceso como siempre.
 - **Salida:** código 0 si todo bien, 1 si falló la API, la cuota o el store, 2 si el comando está mal escrito y 130 si cancelaste un sync con Ctrl-C. `DEBUG=1` muestra el stack.

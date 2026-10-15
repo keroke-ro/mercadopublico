@@ -148,9 +148,19 @@ describe("servirHttp (adaptador node:http)", () => {
     expect([ok.status, (await ok.json() as any).id]).toEqual([200, 7]);
     expect((await fetch(`${base}/mcp/abc`)).status).toBe(405);
     expect((await fetch(`${base}/mcp/mala`, { method: "POST", body: "{}" })).status).toBe(401);
-    const grande = await fetch(`${base}/mcp/abc`, { method: "POST", body: "x".repeat(1_100_000) }).catch(() => null);
-    // Si el servidor cierra el socket antes de que termine de subir, fetch puede fallar en vez de ver el 413.
-    if (grande) expect(grande.status).toBe(413);
+    expect((await fetch(`${base}/mcp/abc`, { method: "POST", body: "x".repeat(1_100_000) })).status).toBe(413);
+  });
+
+  it("un cuerpo de 2 MB recibe 413 (no un reset), con Content-Length o en chunks, y el servidor sigue vivo", async () => {
+    const base = await levantar();
+    const trozos = () => new ReadableStream<Uint8Array>({ start(c) { for (let i = 0; i < 32; i++) c.enqueue(new Uint8Array(64 * 1024)); c.close(); } });
+    for (let i = 0; i < 5; i++) {
+      const conLargo = await fetch(`${base}/mcp/abc`, { method: "POST", body: "x".repeat(2_000_000) });
+      expect(conLargo.status).toBe(413);
+      const enChunks = await fetch(`${base}/mcp/abc`, { method: "POST", body: trozos(), duplex: "half" } as RequestInit);
+      expect(enChunks.status).toBe(413);
+    }
+    expect((await fetch(`${base}/mcp/abc`, { method: "POST", body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" }) })).status).toBe(200);
   });
 });
 
@@ -167,6 +177,12 @@ describe("cli mcp --http", () => {
       expect(r.err).toContain("MP_MCP_CLAVE");
     }
     expect((await correr(["mcp", "--http"], { MP_MCP_CLAVE: "" })).codigo).toBe(2);
+  });
+
+  it("MP_MCP_CLAVE de menos de 16 caracteres es error de uso", async () => {
+    const r = await correr(["mcp", "--http"], { MP_MCP_CLAVE: "corta-15-chars!" });
+    expect(r.codigo).toBe(2);
+    expect(r.err).toMatch(/MP_MCP_CLAVE.*16 caracteres/);
   });
 
   it("las opciones de --http sin --http son error de uso", async () => {

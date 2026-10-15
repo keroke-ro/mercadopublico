@@ -57,9 +57,9 @@ Comandos:
   proveedor <rut>                     Código de empresa de un proveedor
   compradores                         Todos los organismos compradores
   ocds <archivo|url|año> [--max N]    Lee OCDS (.jsonl o .jsonl.gz); no pide ticket
-  sync --desde AAAA-MM-DD             Actualiza un store local [--hasta] [--fuentes licitaciones,ordenes,compra_agil] [--store ./mp.json] [--plan]
+  sync --desde AAAA-MM-DD             Actualiza un store local [--hasta] [--fuentes licitaciones,ordenes,compra_agil] [--store ./mp.json (o MP_STORE)] [--plan]
   radar --perfil perfil.json          Qué postular primero, a qué precio y qué viene, desde el store; no pide ticket
-                                      [--store ./mp.json] [--decisiones decisiones.json] [--max N (10)]
+                                      [--store ./mp.json (o MP_STORE)] [--decisiones decisiones.json] [--max N (10)]
   cuota                               Consultas usadas hoy desde esta máquina
   mcp                                 Servidor MCP por stdio para agentes (Claude, Cursor…); usa MP_TICKET, MP_STORE y MP_MCP_TOPE (tope diario, 1000)
                                       --http [--puerto 8787] [--host 127.0.0.1]: por HTTP, para claude.ai y ChatGPT detrás de HTTPS;
@@ -235,7 +235,7 @@ function informe(r: ResumenRadar, ruta: string, max: number): string {
  * responden mientras una búsqueda espera su turno en la cola de la API. Termina cuando se cierra la entrada y ya se
  * escribieron todas las respuestas. Por `salida` solo sale JSON-RPC.
  */
-export async function servirStdio(servidor: { manejar(msg: unknown): Promise<object | null> }, entrada: NodeJS.ReadableStream, salida: Salida): Promise<void> {
+export async function servirStdio(servidor: { manejar(msg: unknown): Promise<object | null>; cerrar?(): Promise<void> }, entrada: NodeJS.ReadableStream, salida: Salida): Promise<void> {
   const enviar = (m: unknown) => salida.write(`${JSON.stringify(m)}\n`);
   const pendientes = new Set<Promise<void>>();
   for await (const linea of createInterface({ input: entrada, crlfDelay: Infinity })) {
@@ -254,22 +254,37 @@ export async function servirStdio(servidor: { manejar(msg: unknown): Promise<obj
     pendientes.add(p);
   }
   await Promise.all(pendientes);
+  await servidor.cerrar?.(); // un trabajo en segundo plano no sobrevive al cierre: se aborta y suelta el lock del store
 }
 
 const MAX_CUERPO = 1_000_000;
+const TOPE_DRENAJE = 16 * MAX_CUERPO;
 
-/** Adaptador `node:http` ↔ `Request`/`Response`: lee el cuerpo entero (máx. 1 MB, si no 413) y escribe la respuesta. */
+/**
+ * Adaptador `node:http` ↔ `Request`/`Response`: lee el cuerpo entero (máx. 1 MB, si no 413) y escribe la respuesta.
+ * Un cuerpo de más no se acumula pero se sigue leyendo (descartado) hasta el final y recién ahí se responde 413: si se cierra
+ * el socket con el cliente todavía subiendo, este recibe un reset en vez del 413. ponytail: con más de 16 MB (por Content-Length
+ * o ya leídos) se rechaza o se corta sin esperar; el cliente puede ver el reset.
+ */
 export function servirHttp(manejar: (req: Request) => Promise<Response>, puerto: number, host: string): Promise<Server> {
   const srv = createServer(async (req, res) => {
     try {
+      const rechazar = () => void res.writeHead(413, { connection: "close" }).end();
+      if (Number(req.headers["content-length"]) > TOPE_DRENAJE) return rechazar();
       const trozos: Buffer[] = [];
       let n = 0;
       const completo = await new Promise<boolean>((ok) => {
-        req.on("data", (t: Buffer) => (n += t.length) > MAX_CUERPO ? ok(false) : trozos.push(t));
+        req.on("data", (t: Buffer) => {
+          if ((n += t.length) <= MAX_CUERPO) return void trozos.push(t);
+          trozos.length = 0;
+          if (n > TOPE_DRENAJE) (rechazar(), req.destroy());
+        });
         req.on("end", () => ok(true));
         req.on("error", () => ok(false));
+        req.on("close", () => ok(false));
       });
-      if (!completo) return void res.writeHead(413, { connection: "close" }).end(() => req.destroy());
+      if (!completo) return; // conexión caída o cortada por pasarse del tope
+      if (n > MAX_CUERPO) return rechazar();
       const headers = new Headers();
       for (const [k, v] of Object.entries(req.headers)) if (v !== undefined) headers.set(k, Array.isArray(v) ? v.join(", ") : v);
       const hayCuerpo = req.method !== "GET" && req.method !== "HEAD";
@@ -336,7 +351,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
       if (!o.perfil) throw new ErrorUso("radar necesita --perfil perfil.json");
       const perfil = await leerJson<Perfil>(o.perfil, "--perfil");
       const decisiones = o.decisiones ? await leerJson<DecisionEquipo[]>(o.decisiones, "--decisiones") : undefined;
-      const ruta = o.store ?? "./mp.json";
+      const ruta = o.store ?? (io.env.MP_STORE || "./mp.json");
       const store = await storeArchivo(ruta);
       const todos: Proceso[] = [];
       try {
@@ -405,7 +420,8 @@ export async function main(argv: string[], io: IO): Promise<number> {
         if (!Number.isInteger(tope) || tope < 1) throw new ErrorUso("MP_MCP_TOPE debe ser un entero positivo");
         // El directorio de trabajo de un cliente MCP es incierto (Claude Desktop): por defecto el store vive junto a la cuota.
         const ruta = io.env.MP_STORE || join(io.env.MERCADOPUBLICO_HOME || join(homedir(), ".mercadopublico"), "mp.json");
-        const servidor = crearServidorMcp({ mp, abrirStore: () => storeArchivo(ruta), fetch: io.fetch, tope, version: VERSION });
+        // La ruta solo va en los mensajes por stdio: por --http llegaría a clientes remotos.
+        const servidor = crearServidorMcp({ mp, abrirStore: () => storeArchivo(ruta), rutaStore: o.http ? undefined : ruta, fetch: io.fetch, tope, version: VERSION });
         if (!o.http) {
           if (o.puerto || o.host || o["sin-clave"]) throw new ErrorUso("--puerto, --host y --sin-clave son de --http");
           await servirStdio(servidor, process.stdin, io.stdout);
@@ -414,13 +430,15 @@ export async function main(argv: string[], io: IO): Promise<number> {
         const clave = io.env.MP_MCP_CLAVE || undefined;
         const host = o.host ?? "127.0.0.1";
         const puerto = entero(o.puerto, 8787, "puerto");
+        if (clave && clave.length < 16) throw new ErrorUso("MP_MCP_CLAVE debe tener al menos 16 caracteres (p. ej. `openssl rand -hex 24`)");
         if (!clave && !(o["sin-clave"] && ["127.0.0.1", "localhost", "::1", "[::1]"].includes(host)))
           throw new ErrorUso("--http exige la variable MP_MCP_CLAVE (--sin-clave solo vale con --host 127.0.0.1, localhost o ::1)");
         const srv = await servirHttp(manejadorHttp(servidor, { clave }), puerto, host);
         // Sin la clave: la URL completa la arma quien la configuró.
         io.stderr.write(`MCP escuchando en http://${host.includes(":") && !host.startsWith("[") ? `[${host}]` : host}:${(srv.address() as { port: number }).port}/mcp${clave ? "/<MP_MCP_CLAVE>" : ""}\n`);
         await new Promise<void>((fin) => {
-          const parar = () => (srv.close(() => fin()), srv.closeAllConnections());
+          // Primero se corta a los clientes y después se aborta el trabajo en segundo plano, para soltar el lock del store.
+          const parar = () => (srv.close(), srv.closeAllConnections(), void servidor.cerrar().finally(fin));
           process.once("SIGINT", parar);
           process.once("SIGTERM", parar);
         });
@@ -432,7 +450,7 @@ export async function main(argv: string[], io: IO): Promise<number> {
         return salir(await mp.empresas.buscarComprador());
       case "sync": {
         if (!o.desde) throw new ErrorUso("sync necesita --desde AAAA-MM-DD");
-        const ruta = o.store ?? "./mp.json";
+        const ruta = o.store ?? (io.env.MP_STORE || "./mp.json");
         const fuentes = lista(o.fuentes)?.map((x) => uno<FuenteSync>(x, ["licitaciones", "ordenes", "compra_agil"], "fuentes")!);
         const store = await storeArchivo(ruta);
         // Ctrl-C cancela ordenado: se guarda lo hecho y la cuota; un segundo Ctrl-C mata como siempre.

@@ -1,6 +1,6 @@
 # Modelo
 
-[Inicio](index.md) · [Guía](guia.md) · [Sync](sync.md) · [CLI](cli.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
+[Inicio](index.md) · [Guía](guia.md) · [Sync](sync.md) · [CLI](cli.md) · [MCP](mcp.md) · [OCDS](ocds.md) · [Radar](radar.md) · [Contrato](contrato.md) · [Resiliencia](resiliencia.md) · [Testing](testing.md)
 
 v1, v2 y OCDS se traducen a un solo tipo, `Proceso`. Tu código mira `tipo` y no le importa de qué API vino el dato (eso queda en `origen`).
 

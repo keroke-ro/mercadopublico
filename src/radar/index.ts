@@ -12,6 +12,7 @@
  */
 import { diaSantiago, sumarDias } from "../fecha.js";
 import type { CompraAgil, Proceso, Proveedor } from "../modelo.js";
+import { esPersonaNatural } from "../personales.js";
 
 export type NombreFactor = "rubro" | "region" | "monto" | "diasAlCierre" | "competencia" | "incumbente";
 const FACTORES: readonly NombreFactor[] = ["rubro", "region", "monto", "diasAlCierre", "competencia", "incumbente"];
@@ -260,6 +261,11 @@ function indiceVictorias(historial: Proceso[], a: Ajustes): IndiceVictorias {
   return ix;
 }
 
+/** Nombre para mostrar en textos: una persona natural no se nombra, y sin nombre no se cae al RUT. `un`: "Un" o "un" según el lugar de la frase. */
+function nombreVisible(p: Proveedor, un: "Un" | "un"): string {
+  return esPersonaNatural(p.rut) ? `${un} proveedor persona natural` : (p.nombre ?? `${un} proveedor`);
+}
+
 function incumbente(p: Proceso, ix: IndiceVictorias | null, yo: string | null, a: Ajustes): Evaluado {
   if (!ix) return { valor: a.neutro, razon: "Sin historial de adjudicaciones; factor neutro." };
   const org = p.comprador?.codigoOrganismo;
@@ -272,7 +278,7 @@ function incumbente(p: Proceso, ix: IndiceVictorias | null, yo: string | null, a
     return { valor: a.neutro, razon: `Solo ${total} adjudicaci${total === 1 ? "ón" : "ones"} previa${total === 1 ? "" : "s"} de estas familias en este organismo; factor neutro.` };
   const cuenta = new Map<string, { nombre: string; n: number }>();
   for (const x of victorias.values()) {
-    const c = cuenta.get(x.clave) ?? { nombre: x.proveedor.nombre ?? x.clave, n: 0 };
+    const c = cuenta.get(x.clave) ?? { nombre: nombreVisible(x.proveedor, "Un"), n: 0 };
     c.n++;
     cuenta.set(x.clave, c);
   }
@@ -696,7 +702,7 @@ export function competidores(
           ? "Competido: nadie domina."
           : hhi <= 2500
             ? "Moderadamente concentrado."
-            : `Concentrado: ${lista[0]!.proveedor.nombre ?? "un proveedor"} y pocos más se llevan casi todo.`,
+            : `Concentrado: ${lista[0]!.eresTu ? (lista[0]!.proveedor.nombre ?? "tu empresa") : nombreVisible(lista[0]!.proveedor, "un")} y pocos más se llevan casi todo.`,
     competidores: lista,
     supuestos: [
       "Compra Ágil: participa quien cotizó y gana la cotización seleccionada. Licitaciones y OC: solo se ve a quien ganó.",

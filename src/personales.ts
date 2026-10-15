@@ -4,6 +4,15 @@ import type { Proceso } from "./modelo.js";
 
 export const OCULTO = "[oculto]";
 
+/**
+ * Persona natural: RUT bajo 50 millones (las personas jurídicas parten en 50 millones). Sin RUT no se puede saber y
+ * devuelve false. Es el criterio del parser OCDS, del radar y del MCP.
+ */
+export function esPersonaNatural(rut: string | null | undefined): boolean {
+  const n = parseInt((rut ?? "").replace(/[^0-9kK]/g, "").slice(0, -1), 10);
+  return n > 0 && n < 50_000_000;
+}
+
 // Los organismos escriben contactos en texto libre ("CONTACTO BODEGA: Nombre, 226126832, nombre@x.gob.cl").
 // ponytail: tapa correos y teléfonos chilenos de 9 dígitos (2… fijo, 9… móvil, con o sin +56); los nombres sueltos
 // en texto libre no se detectan.

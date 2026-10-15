@@ -29,7 +29,7 @@
     "store": {
       "type": "string",
       "title": "Archivo del store local",
-      "description": "Ruta absoluta del archivo JSON donde se guarda el store local (opcional). Vacío: ./mp.json.",
+      "description": "Ruta absoluta del archivo JSON donde se guarda el store local (opcional). Vacío: ~/.mercadopublico/mp.json. Para llenarlo desde una terminal con `npx mercadopublico sync`, usa la misma ruta en la variable MP_STORE.",
       "required": false
     },
     "tope": {

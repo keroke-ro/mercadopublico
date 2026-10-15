@@ -13,7 +13,7 @@
       "packageArguments": [{ "type": "positional", "value": "mcp" }],
       "environmentVariables": [
         { "name": "MP_TICKET", "description": "Ticket de la API de ChileCompra (chilecompra.cl/api)", "isRequired": true, "isSecret": true, "format": "string" },
-        { "name": "MP_STORE", "description": "Ruta del archivo del store local (por defecto ./mp.json)", "format": "filepath" },
+        { "name": "MP_STORE", "description": "Ruta del archivo del store local (por defecto ~/.mercadopublico/mp.json en el servidor MCP; la CLI sync y radar también la leen y, sin ella, usan ./mp.json)", "format": "filepath" },
         { "name": "MP_MCP_TOPE", "description": "Máximo de consultas diarias del agente (por defecto 1000)", "format": "number" }
       ]
     }

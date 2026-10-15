@@ -32,10 +32,10 @@ function api({ sinLicitacion = [] as string[], gate }: { sinLicitacion?: string[
   return { f, urls };
 }
 
-function servidor(op: { tope?: number; store?: Store; abrirStore?: () => Promise<Store>; sinLicitacion?: string[]; gate?: Promise<unknown>; ocds?: typeof fetch } = {}) {
+function servidor(op: { tope?: number; rutaStore?: string; store?: Store; abrirStore?: () => Promise<Store>; sinLicitacion?: string[]; gate?: Promise<unknown>; ocds?: typeof fetch } = {}) {
   const { f, urls } = api(op);
   const mp = new MercadoPublico({ ticket: "T", fetch: f, conversor: false, intervaloMs: 0 });
-  const s = crearServidorMcp({ mp, fetch: op.ocds, tope: op.tope, version: "9.9.9", abrirStore: op.abrirStore ?? (op.store && (async () => op.store!)) });
+  const s = crearServidorMcp({ mp, fetch: op.ocds, rutaStore: op.rutaStore, tope: op.tope, version: "9.9.9", abrirStore: op.abrirStore ?? (op.store && (async () => op.store!)) });
   let n = 0;
   const rpc = (method: string, params?: object) => s.manejar({ jsonrpc: "2.0", id: ++n, method, params }) as Promise<any>;
   const llamar = async (name: string, args: object = {}) => (await rpc("tools/call", { name, arguments: args })).result;
@@ -200,7 +200,8 @@ describe("search", () => {
     const roto = crearServidorMcp({ mp: new MercadoPublico({ ticket: "T", fetch: api().f, conversor: false, intervaloMs: 0 }), abrirStore: async () => Promise.reject(new Error("bloqueado por sync")) });
     const r = ((await roto.manejar({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "search", arguments: { query: "aseo", tipo: "licitacion" } } })) as any).result;
     expect(datos(r).results.map((x: any) => x.id)).toEqual(["6945-12-LE26"]);
-    expect(datos(r).notas.join(" ")).toContain("bloqueado por sync");
+    expect(datos(r).notas.join(" ")).toContain("No se pudo abrir el store local");
+    expect(datos(r).notas.join(" ")).not.toContain("bloqueado por sync"); // el mensaje original puede traer rutas, pid y host
   });
 
   it("sin store, tipo orden_compra explica cómo ver OC; query inválida es isError", async () => {
@@ -919,6 +920,195 @@ describe("historial OCDS y análisis local", () => {
   });
 });
 
+describe("robustez del servidor", () => {
+  const nulos = { creacion: null, publicacion: null, cierre: null, adjudicacion: null, ultimoCambio: null };
+  const ocStore = {
+    tipo: "orden_compra", codigo: "9-9-SE26", nombre: "OC insumos", descripcion: null, estado: "aceptada", estadoGlosa: null,
+    comprador: { codigoOrganismo: "7248", nombreOrganismo: "Org", rutUnidad: null, codigoUnidad: null, nombreUnidad: null, region: 13, comuna: null },
+    fechas: nulos, monto: null, items: [], oferentes: null, personales: null, origen: "v1", tipoOrden: null, proveedor: { rut: "76000000-0", nombre: "Empresa SpA", codigo: null }, procesoOrigen: null, raw: null,
+  } as unknown as Proceso;
+  const perfil = { pesos: { region: 1 } };
+  const conTmp = async (f: (ruta: string) => Promise<void>) => {
+    const dir = mkdtempSync(join(tmpdir(), "mp-mcp-"));
+    try {
+      await f(join(dir, "mp.json"));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  };
+  const esperar = async (f: () => boolean | Promise<boolean>) => {
+    for (let i = 0; i < 400; i++) {
+      if (await f()) return;
+      await new Promise((r) => setTimeout(r, 5));
+    }
+    throw new Error("se acabó la espera");
+  };
+  const DIA = { desde: "2026-06-12", hasta: "2026-06-12" };
+  const detalles = (urls: string[]) => urls.filter((u) => /codigo=|compra-agil\/./.test(u)).length;
+  const terminado = async (llamar: (n: string) => Promise<any>) => !["planificando", "ejecutando"].includes(datos(await llamar("trabajo_estado")).trabajo.estado);
+
+  it("radar, competidores y search en paralelo sobre un storeArchivo real no chocan por el lock", async () => {
+    await conTmp(async (ruta) => {
+      const previo = await storeArchivo(ruta);
+      await previo.guardar([ocStore]);
+      await previo.cerrar!();
+      const { llamar } = servidor({ abrirStore: () => storeArchivo(ruta) });
+      const rs = await Promise.all([llamar("radar", { perfil }), llamar("competidores"), llamar("search", { query: "insumos", tipo: "orden_compra" }), llamar("radar", { perfil }), llamar("proximas_compras")]);
+      for (const r of rs) expect(r.isError, r.content[0].text).toBeUndefined();
+      expect(datos(rs[2]!).notas).toEqual([]);
+      expect(datos(rs[2]!).results.map((x: any) => x.id)).toEqual(["9-9-SE26"]);
+      await (await storeArchivo(ruta)).cerrar!(); // y no quedó ningún lock
+    });
+  });
+
+  it("lecturas lanzadas junto con un sync: el sync arranca y las lecturas responden sin error de lock", async () => {
+    await conTmp(async (ruta) => {
+      const previo = await storeArchivo(ruta);
+      await previo.guardar([ocStore]);
+      await previo.cerrar!();
+      const { llamar } = servidor({ abrirStore: () => storeArchivo(ruta) });
+      const rs = await Promise.all([llamar("radar", { perfil }), llamar("sync", { ...DIA, maxConsultas: 100 }), llamar("search", { query: "insumos", tipo: "orden_compra" }), llamar("competidores")]);
+      for (const r of rs) expect(r.isError, r.content[0].text).toBeUndefined();
+      expect(datos(rs[2]!).notas).toEqual([]);
+      await esperar(() => terminado(llamar));
+      await (await storeArchivo(ruta)).cerrar!();
+    });
+  });
+
+  it("si el store no abre es isError con un mensaje corto, sin rutas, pid ni host, y no deja trabajo", async () => {
+    const abrirStore = () => Promise.reject(new Error("/home/ana/mp.json está en uso por otro proceso (/home/ana/mp.json.lock: pid 4242 host maquina-ana)"));
+    const { llamar } = servidor({ abrirStore });
+    for (const [n, a] of [["radar", { perfil }], ["competidores", {}], ["proximas_compras", {}], ["sync", { ...DIA, maxConsultas: 10 }], ["ocds_importar", { anio: 2026, q: "papel" }]] as const) {
+      const r = await llamar(n, a);
+      expect(r.isError, n).toBe(true);
+      expect(r.content[0].text, n).toContain("No se pudo abrir el store local");
+      expect(r.content[0].text, n).not.toMatch(/ana|pid|host|4242|\.lock/);
+    }
+    expect(datos(await llamar("trabajo_estado")).trabajo).toBeNull();
+  });
+
+  it("los mensajes de store vacío sugieren primero la herramienta y la terminal con la misma MP_STORE (sin ruta si no se conoce)", async () => {
+    const con = await servidor({ store: storeMemoria(), rutaStore: "/datos/mp.json" }).llamar("radar", { perfil });
+    expect(con.isError).toBe(true);
+    expect(con.content[0].text).toMatch(/herramienta `ocds_importar`.*`sync`.*`MP_STORE=\/datos\/mp\.json npx mercadopublico sync --desde AAAA-MM-DD`/s);
+    const sin = (await servidor({ store: storeMemoria() }).llamar("competidores")).content[0].text;
+    expect(sin).toContain("`npx mercadopublico sync --desde AAAA-MM-DD`");
+    expect(sin).not.toContain("MP_STORE=");
+    const espacios = (await servidor({ store: storeMemoria(), rutaStore: "/mi carpeta/mp.json" }).llamar("radar", { perfil })).content[0].text;
+    expect(espacios).toContain('MP_STORE="/mi carpeta/mp.json" npx');
+    // El precheck del sync también manda a la terminal con la misma ruta.
+    const caro = await servidor({ store: storeMemoria(), rutaStore: "/datos/mp.json" }).llamar("sync", { desde: "2026-01-01", hasta: "2026-06-12", maxConsultas: 5 });
+    expect(caro.content[0].text).toContain("MP_STORE=/datos/mp.json npx mercadopublico sync");
+    const { rpc } = servidor({ store: storeMemoria() });
+    const tools = (await rpc("tools/list")).result.tools;
+    expect(tools.find((t: any) => t.name === "radar").description).toContain("herramienta `sync`");
+    expect(tools.find((t: any) => t.name === "sync").description).toMatch(/MP_STORE/);
+  });
+
+  it("radar: perfil, pesos o decisiones inválidos son isError, no -32603", async () => {
+    const { rpc } = servidor({ store: await (async () => { const s = storeMemoria(); await s.guardar([ocStore]); return s; })() });
+    const llamar = (a: object) => rpc("tools/call", { name: "radar", arguments: a });
+    for (const a of [{ perfil: { pesos: {} } }, { perfil: { pesos: { rubro: "a" } } }, { perfil, decisiones: [null] }, { perfil, decisiones: [{ codigo: "x", decision: "quizas" }] }, { perfil, decisiones: [{ decision: "postular" }] }, { perfil, decisiones: "x" }]) {
+      const r = await llamar(a);
+      expect(r.error, JSON.stringify(a)).toBeUndefined();
+      expect(r.result.isError, JSON.stringify(a)).toBe(true);
+    }
+    expect((await llamar({ perfil, decisiones: [{ codigo: "9-9-SE26", decision: "postular" }] })).result.isError).toBeUndefined();
+  });
+
+  it("radar y competidores no filtran el nombre ni el RUT de una persona natural (en `porque` ni en `lectura`)", async () => {
+    const natural = (codigo: string) => ({ ...(ocStore as any), codigo, nombre: `OC ${codigo}`, proveedor: { rut: "12.345.678-5", nombre: "Juan Pérez Soto", codigo: null } }) as Proceso;
+    const abierta = { ...(ocStore as any), tipo: "licitacion", codigo: "1-1-L126", nombre: "Licitación abierta", estado: "publicada", tipoLicitacion: "L1", tipoLicitacionGlosa: null, proveedor: undefined, tipoOrden: undefined, procesoOrigen: undefined, fechas: { ...nulos, cierre: new Date(Date.now() + 5 * 86_400_000).toISOString() }, items: [{ codigoProducto: 43211507, nombre: null, descripcion: null, cantidad: 1, unidad: null, precioUnitario: null, total: null, proveedor: null }] } as Proceso;
+    const historia = ["a", "b", "c"].map((c) => ({ ...natural(c), items: [{ codigoProducto: 43211507, nombre: null, descripcion: null, cantidad: 1, unidad: null, precioUnitario: null, total: null, proveedor: null }] }) as Proceso);
+    const s = storeMemoria();
+    await s.guardar([abierta, ...historia]);
+    const { llamar } = servidor({ store: s });
+    const radar = await llamar("radar", { perfil: { pesos: { incumbente: 1 }, umbralRevisar: 0 } }); // umbralRevisar 0: aun con el incumbente dominando entra en la agenda
+    expect(radar.isError).toBeUndefined();
+    expect(radar.content[0].text).toContain("Un proveedor persona natural se llevó 3 de 3");
+    expect(radar.content[0].text).not.toMatch(/Juan|12\.?345\.?678/);
+    const comp = await llamar("competidores");
+    expect(datos(comp).lectura).toBe("Concentrado: un proveedor persona natural y pocos más se llevan casi todo.");
+    expect(comp.content[0].text).not.toMatch(/Juan|12\.?345\.?678/);
+  });
+
+  describe("costo", () => {
+    it("un error de herramienta también informa el costo (consultas gastadas) en structuredContent y en el texto", async () => {
+      const falla = (async () => new Response("", { status: 400 })) as typeof fetch;
+      const mp = new MercadoPublico({ ticket: "T", fetch: falla, conversor: false, intervaloMs: 0 });
+      const s = crearServidorMcp({ mp });
+      const r = ((await s.manejar({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "fetch", arguments: { id: "1509-5-LE26" } } })) as any).result;
+      expect(r.isError).toBe(true);
+      expect(r.structuredContent.costo.consultas).toBeGreaterThan(0);
+      expect(r.structuredContent.costo).toMatchObject({ restanteHoy: expect.any(Number), topeAgente: { limite: 1000 } });
+      expect(r.content[0].text).toMatch(new RegExp(`\\(costo: ${r.structuredContent.costo.consultas} consultas\\)$`));
+      // Un error de uso (sin consultar) informa 0.
+      const uso = await servidor().llamar("fetch", { id: "hola" });
+      expect(uso.structuredContent.costo.consultas).toBe(0);
+      expect(uso.content[0].text).toContain("(costo: 0 consultas)");
+    });
+
+    it("al cruzar la medianoche de Santiago el costo de la llamada no se pierde (usadas vuelve a 0)", async () => {
+      vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-14T23:59:59-03:00") });
+      try {
+        const { f } = api({ sinLicitacion: ["1509-5-L114"] }); // licitación que no existe: 2 consultas
+        let n = 0;
+        const cruza = (async (u: string | URL | Request, i?: RequestInit) => {
+          if (++n === 1) vi.setSystemTime(new Date("2026-10-15T00:00:05-03:00"));
+          return f(u, i);
+        }) as typeof fetch;
+        const mp = new MercadoPublico({ ticket: "T", fetch: cruza, conversor: false, intervaloMs: 0, cuota: { dia: "2026-10-14", usadas: 500 } });
+        const s = crearServidorMcp({ mp });
+        const r = ((await s.manejar({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "fetch", arguments: { id: "1509-5-L114" } } })) as any).result;
+        expect(r.structuredContent.costo.consultas).toBeGreaterThan(0); // antes: max(0, 1 - 500) = 0
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("maxConsultas del sync se sigue contando después de medianoche", async () => {
+      vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-14T23:59:00-03:00") });
+      try {
+        let abrir!: () => void;
+        const gate = new Promise<void>((r) => (abrir = r));
+        const { f, urls } = api({ gate });
+        const mp = new MercadoPublico({ ticket: "T", fetch: f, conversor: false, intervaloMs: 0, cuota: { dia: "2026-10-14", usadas: 900 } });
+        const s = crearServidorMcp({ mp, abrirStore: async () => store });
+        const store = storeMemoria();
+        const llamar = async (name: string, args: object = {}) => ((await s.manejar({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name, arguments: args } })) as any).result;
+        await llamar("sync", { ...DIA, maxConsultas: 20 });
+        await esperar(() => detalles(urls) > 1);
+        vi.setSystemTime(new Date("2026-10-15T00:01:00-03:00"));
+        mp.cuota.registrar(20); // otro consumidor ya gastó 20 en el día nuevo
+        abrir();
+        await esperar(() => terminado(llamar));
+        expect(datos(await llamar("trabajo_estado")).trabajo).toMatchObject({ estado: "detenido", mensaje: expect.stringContaining("se alcanzó maxConsultas (20)") });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
+  it("cerrar durante un sync lo aborta y deja el store reabrible; sin trabajo no hace nada", async () => {
+    await conTmp(async (ruta) => {
+      const { llamar, urls, s } = servidor({ abrirStore: () => storeArchivo(ruta), gate: new Promise(() => {}) }); // la compuerta no se abre: cerrar tiene que cortar la consulta en vuelo
+      await s.cerrar(); // sin trabajo
+      await llamar("sync", { ...DIA, maxConsultas: 100 });
+      await esperar(() => detalles(urls) > 1); // el job está a media ejecución, con el lock
+      await expect(storeArchivo(ruta)).rejects.toThrow(/en uso/);
+      await s.cerrar();
+      expect(datos(await llamar("trabajo_estado")).trabajo).toMatchObject({ estado: "cancelado" });
+      await (await storeArchivo(ruta)).cerrar!(); // el lock se soltó
+    });
+  });
+
+  it("sin `version` el serverInfo no inventa una", async () => {
+    const mp = new MercadoPublico({ ticket: "T", fetch: api().f, conversor: false, intervaloMs: 0 });
+    const r = ((await crearServidorMcp({ mp }).manejar({ jsonrpc: "2.0", id: 1, method: "initialize", params: {} })) as any).result;
+    expect(r.serverInfo.version).toBe("0.0.0-desconocida");
+  });
+});
+
 describe("servirStdio", () => {
   async function correr(lineas: string[], servidor: { manejar(m: unknown): Promise<object | null> }) {
     let out = "";
@@ -951,5 +1141,15 @@ describe("servirStdio", () => {
     const lento = { manejar: async (m: any) => (m.method === "lento" ? (await new Promise((r) => setTimeout(r, 30)), { id: m.id, result: "lento" }) : { id: m.id, result: "rapido" }) };
     const r = await correr([JSON.stringify({ id: 1, method: "lento" }), JSON.stringify({ id: 2, method: "ping" })], lento);
     expect(r.map((x) => x.id)).toEqual([2, 1]);
+  });
+
+  it("al terminar la entrada, y después de responder todo, cierra el servidor", async () => {
+    const orden: string[] = [];
+    const sv = {
+      manejar: async () => (await new Promise((r) => setTimeout(r, 20)), orden.push("respuesta"), { jsonrpc: "2.0", id: 1, result: {} }),
+      cerrar: async () => void orden.push("cerrar"),
+    };
+    await correr([JSON.stringify({ jsonrpc: "2.0", id: 1, method: "ping" })], sv);
+    expect(orden).toEqual(["respuesta", "cerrar"]);
   });
 });

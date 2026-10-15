@@ -122,11 +122,15 @@ Salida en tabla si es una terminal y JSON si no; `--formato json|csv|tabla` para
 
 ## MCP
 
-`npx mercadopublico mcp` levanta un servidor MCP por stdio para que un agente (Claude, Cursor, etc.) consulte la API. Tiene herramientas para licitaciones, órdenes de compra, Compra Ágil, proveedores, compradores, cuota y radar, y usa la misma cola, cuota en disco y conversión de montos que la CLI. Los datos personales se ocultan siempre, `raw` no se manda y las listas se recortan a `max` (50 por defecto). Por ejemplo, en Claude Code:
+`npx mercadopublico mcp` levanta un servidor [MCP](https://modelcontextprotocol.io) para que un agente (Claude, Codex, Cursor) busque licitaciones, órdenes de compra y Compra Ágil, traiga el detalle con su URL pública y analice quién gana y a qué precio. Usa la misma cola, cuota en disco y conversión de montos que la CLI. Cada resultado informa su `costo` en consultas, el agente tiene un tope diario (`MP_MCP_TOPE`, 1000 por defecto), los datos personales van siempre ocultos y `raw` no se manda.
+
+Lo largo (`sync`, `ocds_importar`) corre como trabajo en segundo plano. Para claude.ai y ChatGPT hay `mcp --http` detrás de HTTPS, y Claude Desktop tiene una extensión `.mcpb` en cada release. En Claude Code:
 
 ```sh
 claude mcp add mercadopublico -e MP_TICKET=tu-ticket -- npx -y mercadopublico mcp
 ```
+
+Herramientas, prompts, instalación en cada cliente y despliegue remoto en [docs/mcp.md](docs/mcp.md).
 
 ## Documentación
 
@@ -134,6 +138,7 @@ claude mcp add mercadopublico -e MP_TICKET=tu-ticket -- npx -y mercadopublico mc
 - [Modelo](docs/modelo.md): `Proceso`, `Monto`, fechas y conversores.
 - [Sync](docs/sync.md): plan, costo en consultas, cursores y stores.
 - [CLI](docs/cli.md)
+- [MCP](docs/mcp.md): el servidor para agentes: herramientas, instalación por cliente y modo remoto.
 - [OCDS](docs/ocds.md): el histórico de datos abiertos, en streaming.
 - [Radar](docs/radar.md): `mercadopublico/radar` y `mercadopublico radar`: qué postular primero, a qué precio, contra quién y qué viene.
 - [Resiliencia](docs/resiliencia.md): qué hace el SDK cuando la API falla, eventos y `mp.salud()`.
