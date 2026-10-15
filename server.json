@@ -3,12 +3,12 @@
   "name": "io.github.keroke-ro/mercadopublico",
   "description": "Consulta licitaciones y Compra Ágil de Mercado Público desde un agente MCP.",
   "repository": { "url": "https://github.com/keroke-ro/mercadopublico", "source": "github" },
-  "version": "0.1.0",
+  "version": "0.2.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "mercadopublico",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "transport": { "type": "stdio" },
       "packageArguments": [{ "type": "positional", "value": "mcp" }],
       "environmentVariables": [

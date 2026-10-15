@@ -1,6 +1,6 @@
 {
   "name": "mercadopublico",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "SDK TypeScript para la API de Mercado Público (ChileCompra): v1, Compra Ágil v2 y OCDS en un solo modelo, con control de cuota.",
   "keywords": [
     "mercadopublico",

@@ -137,7 +137,7 @@ Configurarlo toma dos pasos.
 <details>
 <summary><b>Claude Desktop</b> (la app de Claude para Mac o Windows, sin programar)</summary>
 
-1. Descarga `mercadopublico.mcpb` del [último release](https://github.com/keroke-ro/mercadopublico/releases/latest).
+1. Descarga [**mercadopublico.mcpb**](https://github.com/keroke-ro/mercadopublico/releases/latest/download/mercadopublico.mcpb) (del [último release](https://github.com/keroke-ro/mercadopublico/releases/latest)).
 2. Ábrelo con doble clic: Claude Desktop muestra la extensión y te pide el ticket.
 3. Pega tu ticket y confirma la instalación.
 

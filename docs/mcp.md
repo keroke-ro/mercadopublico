@@ -57,7 +57,7 @@ En `~/.cursor/mcp.json` (global) o `.cursor/mcp.json` (un proyecto):
 
 ### Claude Desktop
 
-La forma fácil es la extensión `mercadopublico.mcpb`, que se adjunta a cada [release en GitHub](https://github.com/keroke-ro/mercadopublico/releases). Haz doble clic en el archivo, Claude Desktop pide el ticket (y, si quieres, la ruta del store y el tope) y lo guarda él. No necesitas tener Node instalado.
+La forma fácil es la extensión [`mercadopublico.mcpb`](https://github.com/keroke-ro/mercadopublico/releases/latest/download/mercadopublico.mcpb), que se adjunta a cada [release en GitHub](https://github.com/keroke-ro/mercadopublico/releases). Haz doble clic en el archivo, Claude Desktop pide el ticket (y, si quieres, la ruta del store y el tope) y lo guarda él. No necesitas tener Node instalado.
 
 A mano, en `claude_desktop_config.json` (macOS: `~/Library/Application Support/Claude/`; Windows: `%APPDATA%\Claude\`), con el mismo bloque `mcpServers` de Cursor. Reinicia Claude Desktop después.
 
